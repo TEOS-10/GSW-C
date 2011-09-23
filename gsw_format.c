@@ -1,8 +1,8 @@
 /*
-**  $Id: gsw_format.c,v 995f2ea466c2 2011/09/23 22:40:45 fdelahoyde $
+**  $Id: gsw_format.c,v 168e7d639773 2011/09/23 23:20:45 fdelahoyde $
 **
-**  gsw_format -- format the TEOS-10 V3.0  salinity anomaly
-**  data into C for subsequent compilation.
+**  gsw_format -- format the TEOS-10 V3.0  global absolute salinity anomaly
+**  and absolute salinity anomaly ratio data into C for subsequent compilation.
 */
 
 #include <stdio.h>
