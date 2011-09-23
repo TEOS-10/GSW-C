@@ -1,10 +1,10 @@
 /*
-**  $Id: teos-10.h,v e3398b4e1644 2011/09/23 21:39:29 fdelahoyde $
+**  $Id$
 **
-**  TEOS-10 V3.0 definitions and prototypes.
+**  GSW TEOS-10 V3.0 definitions and prototypes.
 */
-#ifndef TEOS_10_H
-#define TEOS_10_H
+#ifndef GSWTEOS_10_H
+#define GSWTEOS_10_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,4 +72,4 @@ extern double gsw_t_freezing(double sa, double p, double saturation_fraction);
 extern double gsw_t_from_ct(double sa, double ct, double p);
 extern double gsw_xinterp1(double *x, double *y, int n, double x0);
 
-#endif /* TEOS_10_H */
+#endif /* GSWTEOS_10_H */
