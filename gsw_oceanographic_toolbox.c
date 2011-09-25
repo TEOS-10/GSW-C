@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 0fa6ed68e79e 2011/09/25 18:18:19 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v f99eb20a1c99 2011/09/25 23:07:38 fdelahoyde $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -1681,8 +1681,8 @@ function gsw_gibbs(ns,nt,np,sa,t,p)
 ! sa     : Absolute Salinity                               [g/kg]
 ! t      : temperature                                     [deg C]
 ! p      : sea pressure                                    [dbar]
-! 
-! gsw_gibbs  : specific Gibbs energy or its derivative
+! 								-1
+! gsw_gibbs  : specific Gibbs energy or its derivative	   [J kg  ]
 */
 double
 gsw_gibbs(int ns, int nt, int np, double sa, double t, double p)
@@ -2510,8 +2510,8 @@ function gsw_specvol_sso_0_p(p)
 !  "gsw_specvol(SA,CT,p)".
 !
 ! p      : sea pressure                                    [dbar]
-! 
-! gsw_specvol_sso_0_p : specvol(sso,0,p)
+! 							     3   -1
+! gsw_specvol_sso_0_p : specvol(sso,0,p)		   [m  kg  ]
 */
 double
 gsw_specvol_sso_0_p(double p)
