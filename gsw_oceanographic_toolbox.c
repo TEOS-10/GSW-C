@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v e3398b4e1644 2011/09/23 21:39:29 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 0fa6ed68e79e 2011/09/25 18:18:19 fdelahoyde $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -84,7 +84,7 @@
 !==========================================================================
 **
 */
-#include <teos-10.h>
+#include <gswteos-10.h>
 
 /*
 !--------------------------------------------------------------------------
@@ -111,7 +111,7 @@ gsw_sa_from_sp(double sp, double p, double lon, double lat)
 	double	saar, gsw_sa_baltic;
 
 	saar		= gsw_saar(p,lon,lat);
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
 	gsw_sa_baltic	= gsw_sa_from_sp_baltic(sp,lon,lat);
 	if (gsw_sa_baltic < 1e10)
@@ -139,7 +139,7 @@ gsw_sstar_from_sp(double sp, double p, double lon, double lat)
 	double	saar, sstar_baltic;
 
 	saar		= gsw_saar(p,lon,lat);
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
     /*
 	!In the Baltic Sea, Sstar = SA.
@@ -193,7 +193,7 @@ gsw_deltasa_from_sp(double sp, double p, double lon, double lat)
 
 	res	= gsw_sa_from_sp(sp,p,lon,lat) - gsw_sr_from_sp(sp);
 	if (res > 1e10)
-	    res	= 9e15;
+	    res	= GSW_INVALID_VALUE;
 	return (res);
 }
 
@@ -237,7 +237,7 @@ gsw_sp_from_sr(double sr)
 
 	res	= 0.995306702338459e0*sr;
 	if (res > 1e10)
-	    res	= 9e15;
+	    res	= GSW_INVALID_VALUE;
 	return (res);
 }
 
@@ -261,7 +261,7 @@ gsw_sp_from_sa(double sa, double p, double lon, double lat)
 	double	saar, gsw_sp_baltic;
 
 	saar	= gsw_saar(p,lon,lat);
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
 	gsw_sp_baltic	= gsw_sp_from_sa_baltic(sa,lon,lat);
 	if (gsw_sp_baltic < 1e10)
@@ -293,7 +293,7 @@ gsw_sstar_from_sa(double sa, double p, double lon, double lat)
 	! In the Baltic Sea, Sstar = sa, and note that gsw_saar returns zero
 	! for saar in the Baltic.
     */
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
 	return (sa*(1e0 - 0.35e0*saar)/(1e0 + saar));
 }
@@ -318,7 +318,7 @@ gsw_sa_from_sstar(double sstar, double p, double lon, double lat)
 	double	saar;
 
 	saar	= gsw_saar(p,lon,lat);
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
     /*
     **! In the Baltic Sea, Sstar = SA, and note that gsw_saar returns zero
@@ -347,7 +347,7 @@ gsw_sp_from_sstar(double sstar, double p, double lon, double lat)
 	double	saar, sp_baltic;
 
 	saar	= gsw_saar(p,lon,lat);
-	if (saar == 9e15)
+	if (saar == GSW_INVALID_VALUE)
 	    return (saar);
     /*
     **! In the Baltic Sea, SA = Sstar.
@@ -1254,7 +1254,7 @@ gsw_ct_freezing(double sa, double p, double saturation_fraction)
 
 	if (p > 10000e0  ||  sa > 120e0  ||
 	    (p+sa*71.428571428571402e0) > 13571.42857142857e0)
-	    ct_freezing	= 9e15;
+	    ct_freezing	= GSW_INVALID_VALUE;
 
 	return (ct_freezing);
 }
@@ -1283,7 +1283,7 @@ gsw_t_freezing(double sa, double p, double saturation_fraction)
 	t_freezing	= gsw_t_from_ct(sa,ct_freezing,p);
 
 	if (ct_freezing > 9e10)
-	    t_freezing	= 9e15;
+	    t_freezing	= GSW_INVALID_VALUE;
 
 	return (t_freezing);
 }
@@ -2261,7 +2261,7 @@ gsw_fdelta(double p, double lon, double lat)
 	saar	= gsw_saar(p,lon,lat);
 	sa	= ((1.0 + 0.35)*saar)/(1.0 - 0.35*saar);
 	if (saar > 1e10)
-	    sa	= 9e15;
+	    sa	= GSW_INVALID_VALUE;
 	else
 	    sa	= ((1.0 + 0.35)*saar)/(1.0 - 0.35*saar);
 	return (sa);
@@ -2299,9 +2299,9 @@ gsw_sa_from_sp_baltic(double sp, double lon, double lat)
 	    if (xx_left <= lon  && lon <= xx_right)
 		return_value	=((35.16504 - 0.087)/35.0)*sp + 0.087;
 	    else
-		return_value	= 9e15;
+		return_value	= GSW_INVALID_VALUE;
 	} else
-	    return_value	= 9e15;
+	    return_value	= GSW_INVALID_VALUE;
 
 	return (return_value);
 }
@@ -2338,9 +2338,9 @@ gsw_sp_from_sa_baltic(double sa, double lon, double lat)
 	    if (xx_left <= lon  && lon <= xx_right)
 		return_value	= (35.0/(35.16504 - 0.087))*(sa - 0.087);
 	    else
-		return_value	= 9e15;
+		return_value	= GSW_INVALID_VALUE;
 	} else
-	    return_value	= 9e15;
+	    return_value	= GSW_INVALID_VALUE;
 
 	return (return_value);
 }

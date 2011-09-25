@@ -1,9 +1,9 @@
 /*
-**  $Id: gsw_saar.c,v e3398b4e1644 2011/09/23 21:39:29 fdelahoyde $
+**  $Id: gsw_saar.c,v 0fa6ed68e79e 2011/09/25 18:18:19 fdelahoyde $
 **
 **  TEOS-10 V3.0
 */
-#include <teos-10.h>
+#include <gswteos-10.h>
 #include <gsw_saar_data.c>
 
 static double
@@ -46,7 +46,7 @@ gsw_saar(double p, double lon, double lat)
 	double	r1, s1, t1, saar_mean, ndepth_max, return_value;
 
 
-	return_value	 = 9e15;
+	return_value	 = GSW_INVALID_VALUE;
 
 	if (lat  <  -86e0  ||  lat  >  90e0)
 	    return (return_value);
@@ -122,7 +122,7 @@ gsw_saar(double p, double lon, double lat)
 	return_value	= sa_upper + t1*(sa_lower-sa_upper);
 
 	if (fabs(return_value) >= 1e10)
-	    return_value	= 9e15;
+	    return_value	= GSW_INVALID_VALUE;
 
 	return (return_value);
 }
@@ -154,7 +154,7 @@ gsw_delta_sa_ref(double p, double lon, double lat)
 	double	return_value, lon0_in, sa_upper, sa_lower;
 	double	r1, s1, t1, dsar_mean, ndepth_max;
 
-	return_value	= 9e15;
+	return_value	= GSW_INVALID_VALUE;
 
 	if (lat < -86.0  ||  lat  >  90.0)
 	    return (return_value);
@@ -232,7 +232,7 @@ gsw_delta_sa_ref(double p, double lon, double lat)
 	return_value	= sa_upper + t1*(sa_lower-sa_upper);
 
 	if (fabs(return_value) >= 1e10)
-	    return (9e15);
+	    return (GSW_INVALID_VALUE);
 
 	return (return_value);
 }

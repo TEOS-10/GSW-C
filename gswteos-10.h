@@ -1,5 +1,5 @@
 /*
-**  $Id$
+**  $Id: gswteos-10.h,v 0fa6ed68e79e 2011/09/25 18:18:19 fdelahoyde $
 **
 **  GSW TEOS-10 V3.0 definitions and prototypes.
 */
@@ -10,6 +10,8 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+
+#define	GSW_INVALID_VALUE	9e15
 
 /*
 **  Prototypes:

@@ -16,7 +16,7 @@ gsw_format.c			-- program to create gsw_saar_data.c
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
 gsw_saar.c			-- gsw_saar and gsw_delta_sa_ref (modified)
 gsw_saar_data.c			-- static global absolute salinity anomaly data
-teos-10.h			-- GSW function prototypes
+gswteos-10.h			-- GSW function prototypes
 
 2011-09-23
 
