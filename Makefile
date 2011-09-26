@@ -1,5 +1,5 @@
 #
-#  $Id: Makefile,v 0a0e1cf31823 2011/09/26 16:38:52 fdelahoyde $
+#  $Id: Makefile,v f21c0c1750c1 2011/09/26 16:47:38 fdelahoyde $
 #
                CFLAGS:=	-O
             CINCLUDES:=	-I.
@@ -15,7 +15,7 @@
 
 all:	$(Program)
 
-$(Program):	$$(Program)_SRCS)
+$(Program):	$($(Program)_SRCS)
 	gcc $(CFLAGS) $(CINCLUDES) -o $(Program) $($(Program)_SRCS) -lm
 
 library:	$(Library)
