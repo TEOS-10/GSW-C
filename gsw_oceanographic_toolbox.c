@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v f99eb20a1c99 2011/09/25 23:07:38 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 0932b7fe7c1e 2011/10/03 15:37:40 fdelahoyde $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -2276,7 +2276,7 @@ function gsw_sa_from_sp_baltic(sp,lon,lat)
 ! computed analytically from Practical Salinity
 !
 ! sp     : Practical Salinity                              [unitless]
-! lon   : longitude                                       [deg E]     
+! lon    : longitude                                       [deg E]     
 ! lat    : latitude                                        [deg N]
 ! p      : sea pressure                                    [dbar]
 !
