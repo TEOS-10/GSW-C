@@ -1,10 +1,10 @@
 /*
-**  $Id: gsw_check_functions.c,v 34fc982d47a0 2012/10/07 18:08:54 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 1cc44e077bc4 2012/10/07 18:25:41 fdelahoyde $
 */
 #include <gswteos-10.h>
 
 static void	report(char *what, double acceptable, double actual,
-			double expected,);
+			double expected);
 
 /*
 ** Acceptable differences from check values:
@@ -26,7 +26,7 @@ static void	report(char *what, double acceptable, double actual,
 #define sstar_from_sa_ca  1.300008989346679e-010
 #define sa_from_sstar_ca  1.300222152167407e-010
 #define sp_from_sstar_ca  1.297122409482654e-010
-#define t_from_CT_ca  6.000142604989378e-010
+#define t_from_ct_ca  6.000142604989378e-010
 #define pt_from_ct_ca  6.054037271496782e-010
 #define ct_from_pt_ca  6.261107188265669e-010
 #define pot_enthalpy_from_pt_ca  2.499356924090534e-006
@@ -211,7 +211,7 @@ main(int argc, char **argv)
 "\n"
 " These are the check values for the subset of functions that have been \n"
 " converted into C from the Gibbs SeaWater (GSW) Oceanographic Toolbox \n"
-" of TEOS-10 (version 3.0).\n\n"
+" of TEOS-10 (version 3.0).\n"
 	);
 	printf(
 "\nAbsolute Salinity, Preformed Salinity and Conservative Temperature:\n\n"
@@ -318,16 +318,16 @@ main(int argc, char **argv)
 		gsw_delta_sa_ref(p,lon,lat), 3.87660373016291727e-3);
 	report("gsw_fdelta", fdelta_ca,
 		gsw_fdelta(p,lon,lat), 1.49916256924158942e-004);
-	report("gsw_sa_from_sp_baltic", sa_from_sp_baltic_ca,
+	report("gsw_sa_from_sp_baltic", sa_from_sp_ca,
 		gsw_sa_from_sp_baltic(sp,long_bs,lat_bs) , 35.666154857142850e0);
-	report("gsw_sp_from_sa_baltic", sp_from_sa_baltic_ca,
+	report("gsw_sp_from_sa_baltic", sp_from_sa_ca,
 		gsw_sp_from_sa_baltic(sa,long_bs,lat_bs), 35.533769845749660e0);
 
 	if (gsw_error_flag)
-	    printf("Your installation of the Gibbs SeaWater (GSW) "
-		"Oceanographic Toolbox has errors !\n")
+	    printf("\nYour installation of the Gibbs SeaWater (GSW) "
+		"Oceanographic Toolbox has errors !\n");
 	else
-	    printf("Well done! The gsw_check_fuctions confirms that the\n"
+	    printf("\nWell done! The gsw_check_fuctions confirms that the\n"
 		"Gibbs SeaWater (GSW) Oceanographic Toolbox is "
 		"installed correctly.\n");
 
