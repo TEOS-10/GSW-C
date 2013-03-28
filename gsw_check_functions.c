@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v fe5d6cd53a06 2013/03/28 11:13:50 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 3400571413f0 2013/03/28 21:44:39 fdelahoyde $
 */
 #include <gswteos-10.h>
 
@@ -181,7 +181,7 @@ static void	report(char *what, double acceptable, double actual,
 #define z_from_depth_ca  2.287223921371151e-008
 #define z_from_p_ca  2.287223921371151e-008
 
-int	gsw_error_flag=0;
+int	gsw_error_flag=0, debug;
 
 /*
 **  Main
@@ -189,7 +189,7 @@ int	gsw_error_flag=0;
 int
 main(int argc, char **argv)
 {
-	double	sp, sa, sstar, sr, t, ct, pt, p, p_bs, p_ref ;
+	double	sp, sa, sstar, sr, t, ct, pt, p, p_bs, p_ref, c, rho;
 	double	lon, long_bs, lat, lat_bs, saturation_fraction;
 
 	sp	=  35.5e0;
@@ -202,11 +202,15 @@ main(int argc, char **argv)
 	p	= 300e0;
 	p_bs	= 50e0;
 	p_ref	= 100e0;
+	c	= 43.6e0;
 	lon	= 260e0;
 	long_bs	= 20e0;
 	lat	= 16e0;
 	lat_bs	= 60e0;
 	saturation_fraction	= 0.5e0;
+
+	if (argc==2 && !strcmp(argv[1],"-debug"))
+	    debug	= 1;
 
 	printf(
 "============================================================================\n"
@@ -292,6 +296,7 @@ main(int argc, char **argv)
 		gsw_enthalpy(sa,ct,p), 82761.872939932495e0 );
 	report("gsw_dynamic_enthalpy", dynamic_enthalpy_ca,
 		gsw_dynamic_enthalpy(sa,ct,p),  2924.5137975399025e0 );
+	rho	= gsw_rho(sa,ct,p);
 	report("gsw_sa_from_rho", rho_ca,
 		gsw_sa_from_rho(rho,ct,p), sa);
 	printf(
@@ -364,6 +369,9 @@ report(char *what, double acceptable, double actual, double expected)
 	else {
 	    printf("failed\n");
 	    gsw_error_flag	= 1;
+	    if (debug)
+		printf("actual=%g\texpected=%g\tdiff=%g\n",actual,expected,
+			diff);
 	}
 }
 

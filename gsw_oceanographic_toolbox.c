@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v fe5d6cd53a06 2013/03/28 11:13:50 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 3400571413f0 2013/03/28 21:44:39 fdelahoyde $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -123,9 +123,9 @@ function gsw_sp_from_c(c,t,p)
 ! p      : sea pressure                                     [dbar]
 !
 ! sp     : Practical Salinity                               [unitless]
-/*
+*/
 double
-gsw_sp_from_c(double c, double t; double p)
+gsw_sp_from_c(double c, double t, double p)
 {
 	double	a0 = 0.0080e0, a1 = -0.1692e0, a2 = 25.3851e0,
 		a3 = 14.0941e0, a4 = -7.0261e0, a5 = 2.7081e0,
@@ -138,7 +138,7 @@ gsw_sp_from_c(double c, double t; double p)
 		e3 = 3.989e-15, k  = 0.0162;
 
 	double	sp, t68, ft68, r, rt_lc, rp, rt, rtx,
-		hill_ratio, gsw_hill_ratio_at_sp2, x, sqrty, part1, part2,
+		hill_ratio, x, sqrty, part1, part2,
 		sp_hill_raw;
 
 	t68	= t*1.00024e0;
@@ -305,7 +305,7 @@ gsw_c_from_sp(double sp, double t, double p)
 		u20 = 8.285687652694768e-13, k = 0.0162e0;
 
 	double	t68, ft68, x, rtx, dsp_drtx, sqrty,
-		part1, part2, hill_ratio, gsw_hill_ratio_at_sp2, sp_est,
+		part1, part2, hill_ratio, sp_est,
 		rtx_old, rt, aa, bb, cc, dd, ee, ra,r, rt_lc, rtxm,
 		sp_hill_raw;
 
@@ -367,7 +367,7 @@ gsw_c_from_sp(double sp, double t, double p)
 	    part2	= 1e0 + sqrty*(1e0 + sqrty*(1e0 + sqrty));
 	    hill_ratio	= gsw_hill_ratio_at_sp2(t);
 	    dsp_drtx	= dsp_drtx
-			  + a0*800e0*Rtx*(1.5e0 + 2e0*x)/(part1*part1)
+			  + a0*800e0*rtx*(1.5e0 + 2e0*x)/(part1*part1)
 			  + b0*ft68*(10e0 + sqrty*(20e0 + 30e0*sqrty))/
 				(part2*part2);
 	    dsp_drtx	= hill_ratio*dsp_drtx;
@@ -1013,7 +1013,7 @@ gsw_z_from_p(double p, double lat)
 	a	= -0.5e0*gamma*b;
 	c	= gsw_enthalpy_sso_0_p(p);
 
-	return (-2e0*c/(b + sqrt(b*b - 4e0*a*c)));
+	return (2e0*c/(b + sqrt(b*b - 4e0*a*c)));
 }
 
 /*
@@ -1231,8 +1231,6 @@ gsw_alpha(double sa, double ct, double p)
 		+ p*(v43 + ct*(v44 + v45*ct + v46*sa)
 		+ p*(v47 + v48*ct)));
        
-	spec_vol		= v_hat_numerator/v_hat_denominator;
-
 	dvhatden_dct		= a01 + ct*(a02 + a03*ct)
 				+ sa*(a04 + a05*ct
 				+ sqrtsa*(a06 + ct*(a07 + a08*ct)))
@@ -1494,11 +1492,11 @@ function gsw_kappa(sa,ct,p)
 ! p      : sea pressure                                    [dbar]
 !
 ! gsw_kappa  :  isentropic compressibility (48 term equation)
-/*
+*/
 double
 gsw_kappa(double sa, double ct, double p)
 {
-	double	v01 =  9.998420897506056d2,   v02 =  2.839940833161907e0,
+	double	v01 =  9.998420897506056e2,   v02 =  2.839940833161907e0,
 		v03 = -3.147759265588511e-2,  v04 =  1.181805545074306e-3,
 		v05 = -6.698001071123802e0,   v06 = -2.986498947203215e-2,
 		v07 =  2.327859407479162e-4,  v08 = -3.988822378968490e-2,
@@ -1795,12 +1793,12 @@ gsw_sa_from_rho(double rho, double ct, double p)
 {
 	int	no_iter;
 
-	double	sa, v_lab, v_0, v_50, gsw_specvol, v_sa,
-		sa_old, delta_v, sa_mean, alpha, beta,;
+	double	sa, v_lab, v_0, v_50, v_sa,
+		sa_old, delta_v, sa_mean, alpha, beta;
 
 	v_lab	= 1e0/rho;
-	v_0	= gsw_specvol(0d0,ct,p);
-	v_50	= gsw_specvol(50d0,ct,p);
+	v_0	= gsw_specvol(0e0,ct,p);
+	v_50	= gsw_specvol(50e0,ct,p);
 
 	sa	= 50e0*(v_lab - v_0)/(v_50 - v_0);
 	if (sa < 0e0 || sa > 50e0)
@@ -1812,7 +1810,7 @@ gsw_sa_from_rho(double rho, double ct, double p)
 	    sa_old	= sa;
 	    delta_v	= gsw_specvol(sa_old,ct,p) - v_lab;
 	    sa		= sa_old - delta_v/v_sa;
-	    sa_mean	= 0.5d0*(sa + sa_old);
+	    sa_mean	= 0.5e0*(sa + sa_old);
 	    alpha	= gsw_alpha(sa_mean,ct,p);
 	    beta	= gsw_beta(sa_mean,ct,p);
 	    v_sa	= - beta/rho;
@@ -3168,7 +3166,7 @@ gsw_specvol_sso_0_p(double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_enthalpy_SSO_0_p(p)
+function gsw_enthalpy_sso_0_p(p)
 !==========================================================================
 
 !  This function calculates enthalpy at the Standard Ocean Salinity, SSO,
@@ -3179,15 +3177,15 @@ function gsw_enthalpy_SSO_0_p(p)
 !
 ! p      : sea pressure                                    [dbar]
 !
-! gsw_enthalpy_SSO_0_p : enthalpy(sso,0,p)
+! gsw_enthalpy_sso_0_p : enthalpy(sso,0,p)
 */
 double
-gsw_enthalpy_SSO_0_p(double p)
+gsw_enthalpy_sso_0_p(double p)
 {
 	double	v01 =  9.998420897506056e2, v05 = -6.698001071123802e0,
 		v08 = -3.988822378968490e-2, v12 = -2.233269627352527e-2,
 		v15 = -1.806789763745328e-4, v17 = -3.087032500374211e-7,
-		v20 =  1.550932729220080e-10, v21 =  1.0e0;,
+		v20 =  1.550932729220080e-10, v21 =  1.0e0,
 		v26 = -7.521448093615448e-3, v31 = -3.303308871386421e-5,
 		v36 =  5.419326551148740e-6, v37 = -2.742185394906099e-5,
 		v41 = -1.105097577149576e-7, v43 = -1.119011592875110e-10,
@@ -3222,9 +3220,9 @@ gsw_enthalpy_SSO_0_p(double p)
 
 	part	= (n*b2 - m*b1)/(b2*(b - a));
 
-	return (db2pa*(p*(a2 - 2d0*a3*b1/b2 + 0.5d0*a3*p)/b2 + 
-		(m/(2d0*b2))*log(1d0 + p*(2d0*b1 + b2*p)/b0) + 
-		part*log(1d0 + (b2*p*(b - a))/(a*(b + b2*p)))));
+	return (db2pa*(p*(a2 - 2e0*a3*b1/b2 + 0.5e0*a3*p)/b2 + 
+		(m/(2e0*b2))*log(1e0 + p*(2e0*b1 + b2*p)/b0) + 
+		part*log(1e0 + (b2*p*(b - a))/(a*(b + b2*p)))));
 
 }
 

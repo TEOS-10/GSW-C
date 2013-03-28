@@ -1,5 +1,5 @@
 /*
-**  $Id: gswteos-10.h,v fe5d6cd53a06 2013/03/28 11:13:50 fdelahoyde $
+**  $Id: gswteos-10.h,v 3400571413f0 2013/03/28 21:44:39 fdelahoyde $
 **
 **  GSW TEOS-10 V3.1 definitions and prototypes.
 */
@@ -26,6 +26,7 @@ extern void   gsw_add_barrier(double *input_data, double lon, double lat,
 			double dlat_grid, double *output_data);
 extern void   gsw_add_mean(double *data_in, double lon, double lat,
 			double *data_out);
+extern double gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p);
 extern double gsw_alpha(double sa, double ct, double p);
 extern double gsw_alpha_wrt_t_exact(double sa, double t, double p);
 extern double gsw_beta_const_t_exact(double sa, double t, double p);
@@ -38,8 +39,9 @@ extern double gsw_deltasa_atlas(double p, double lon, double lat);
 extern double gsw_deltasa_from_sp(double sp, double p, double lon, double lat);
 extern double gsw_dynamic_enthalpy(double sa, double ct, double p);
 extern double gsw_enthalpy(double sa, double ct, double p);
-extern double gsw_enthalpy_SSO_0_p(double p);
+extern double gsw_enthalpy_sso_0_p(double p);
 extern double gsw_enthalpy_t_exact(double sa, double t, double p);
+extern double gsw_entropy_from_t(double sa, double t, double p);
 extern double gsw_entropy_part(double sa, double t, double p);
 extern double gsw_entropy_part_zerop(double sa, double pt0);
 extern double gsw_fdelta(double p, double lon, double lat);
@@ -71,7 +73,7 @@ extern double gsw_specvol_anom(double sa, double ct, double p);
 extern double gsw_specvol(double sa, double ct, double p);
 extern double gsw_specvol_sso_0_p(double p);
 extern double gsw_specvol_t_exact(double sa, double t, double p);
-extern double gsw_sp_from_c(double c, double t; double p);
+extern double gsw_sp_from_c(double c, double t, double p);
 extern double gsw_sp_from_sa_baltic(double sa, double lon, double lat);
 extern double gsw_sp_from_sa(double sa, double p, double lon, double lat);
 extern double gsw_sp_from_sr(double sr);
@@ -82,6 +84,7 @@ extern double gsw_sstar_from_sp(double sp, double p, double lon, double lat);
 extern double gsw_t_freezing(double sa, double p, double saturation_fraction);
 extern double gsw_t_from_ct(double sa, double ct, double p);
 extern double gsw_xinterp1(double *x, double *y, int n, double x0);
+extern double gsw_z_from_p(double p, double lat);
 
 #ifdef __cplusplus
 }
