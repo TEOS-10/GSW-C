@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_saar.c,v 0fa6ed68e79e 2011/09/25 18:18:19 fdelahoyde $
+**  $Id: gsw_saar.c,v fe5d6cd53a06 2013/03/28 11:13:50 fdelahoyde $
 **
 **  TEOS-10 V3.0
 */
@@ -129,19 +129,19 @@ gsw_saar(double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_delta_sa_ref(p,lon,lat)
+function gsw_deltasa_atlas(p,lon,lat)
 !==========================================================================
 
-! Calculates the Absolute Salinity Anomaly reference value, delta_SA_ref.
+! Calculates the Absolute Salinity Anomaly atlas value, delta_SA_atlas.
 !
 ! p      : sea pressure                                    [dbar]
 ! lon   : longiture                                       [deg E]     
 ! lat    : latitude                                        [deg N]
 !
-! gsw_delta_sa_ref : Absolute Salinity Anomaly reference value    [g/kg]
+! gsw_deltasa_atlas : Absolute Salinity Anomaly atlas value    [g/kg]
 */
 double
-gsw_delta_sa_ref(double p, double lon, double lat)
+gsw_deltasa_atlas(double p, double lon, double lat)
 {
 	int	nx=gsw_nx, ny=gsw_ny, nz=gsw_nz;
 

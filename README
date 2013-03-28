@@ -32,7 +32,10 @@ supplied header file:
 
 #include <gswteos-10.h>
 
-2011-09-23
+ChangeLog:
+
+2012-10-07:	gsw-3.0.1 New gsw_check_functions.c based on revised f90.
+2011-09-23:	gsw-3.0 Initial creation.
 
 Frank Delahoyde <fdelahoyde@ucsd.edu>
 Shipboard Technical Support, Computing Resources <sts-cr@ucsd.edu>
