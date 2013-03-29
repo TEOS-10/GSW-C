@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v 3400571413f0 2013/03/28 21:44:39 fdelahoyde $
+**  $Id: gsw_check_functions.c,v e5714569b040 2013/03/29 03:44:45 fdelahoyde $
 */
 #include <gswteos-10.h>
 
@@ -266,7 +266,7 @@ main(int argc, char **argv)
 	report("gsw_pt_from_t", pt_from_t_ca,
 		gsw_pt_from_t(sa,t,p,p_ref), 14.969381237883740e0);
 	report("gsw_z_from_p", z_from_p_ca,
-		gsw_z_from_p(p,lat), 2.980161553316402e2);
+		gsw_z_from_p(p,lat), -2.980161553316402e2);
 	report("gsw_entropy_from_t", entropy_from_t_ca,
 		gsw_entropy_from_t(sa,t,p), 212.30166821093002e0);
 	report("gsw_adiabatic_lapse_rate_from_ct",

@@ -1,12 +1,14 @@
+$Id: README,v e5714569b040 2013/03/29 03:44:45 fdelahoyde $
+$Version: 3.01.0 $
+
 TEOS-10 V3.0 GSW Oceanographic Toolbox in C
 
-This is a translation of the original Fortran-90 source
-code into C. You should download the documentation from http://teos-10.org.
-The functions gsw_saar and gsw_delta_sa_ref
-have been modified from the original to not use an external
-data file for global absolute salinity anomaly and absolute
-salinity anomaly ratio data. The data are instead incorporated
-into static tables that are used directly.
+This is a translation of the original Fortran-90 source code into C.
+You should download the documentation from http://teos-10.org.
+The functions gsw_saar and gsw_deltasa_atlas have been modified from the
+original to not use an external data file for global absolute salinity
+anomaly and absolute salinity anomaly ratio data. The data are instead
+incorporated into static tables that are used directly.
 
 Manifest:
 
@@ -16,7 +18,7 @@ gsw_data_v3_0.dat.gz		-- global absolute salinity anomaly data
 gsw_format.c			-- program to create gsw_saar_data.c from
 				   gsw_data_v3_0.dat
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
-gsw_saar.c			-- gsw_saar and gsw_delta_sa_ref (modified)
+gsw_saar.c			-- gsw_saar and gsw_deltasa_atlas (modified)
 gsw_saar_data.c			-- static global absolute salinity anomaly data
 				   used by gsw_saar.c and created by gsw_format
 gswteos-10.h			-- GSW function prototypes
@@ -34,6 +36,7 @@ supplied header file:
 
 ChangeLog:
 
+2013-03-29	gsw-3.01.0
 2012-10-07:	gsw-3.0.1 New gsw_check_functions.c based on revised f90.
 2011-09-23:	gsw-3.0 Initial creation.
 

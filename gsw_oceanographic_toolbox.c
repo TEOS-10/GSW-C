@@ -1,5 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 3400571413f0 2013/03/28 21:44:39 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v e5714569b040 2013/03/29 03:44:45 fdelahoyde $
+**  $Version: 3.01.0 $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -43,6 +44,7 @@
 ! gsw_beta                - saline contraction coefficient at constant CT
 ! gsw_specvol             - specific volume
 ! gsw_specvol_anom        - specific volume anomaly
+! gsw_specvol_sso_0_p     : specvol_CT at (35.16504,0,p)
 ! gsw_sound_speed         - sound speed
 ! gsw_kappa               - isentropic compressibility
 ! gsw_internal_energy     - internal energy
@@ -1013,7 +1015,7 @@ gsw_z_from_p(double p, double lat)
 	a	= -0.5e0*gamma*b;
 	c	= gsw_enthalpy_sso_0_p(p);
 
-	return (2e0*c/(b + sqrt(b*b - 4e0*a*c)));
+	return (-2e0*c/(b + sqrt(b*b - 4e0*a*c)));
 }
 
 /*
