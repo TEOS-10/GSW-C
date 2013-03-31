@@ -1,9 +1,9 @@
-#  $Id: GNUmakefile,v 9b830acc4dff 2013/03/31 05:01:24 fdelahoyde $
+#  $Id: GNUmakefile,v e3e29ea3fb8e 2013/03/31 05:35:54 fdelahoyde $
 #  $Version: 3.01.0 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
 .PHONY: MAKEVERSION_ERROR
-.PHONY: all clean install uninstall distclean new-rpm new-release
+.PHONY: all clean install dist new-rpm new-release
 .PHONY: show-release getdocs
 
           STSPackage :=	libgswteos-10
@@ -79,6 +79,12 @@ install:	$(Library) $(Program)
 	ln -s $(Library).$(LibVersion) $(INSTALL_ROOT)$(DESTLIBDIR)/$(Library)
 	install -s $(Program) $(INSTALL_ROOT)$(DESTBINDIR)
 	install $(INCLUDES) $(INSTALL_ROOT)$(DESTINCDIR)
+
+dist:
+	rm -f gsw_c_v*;
+	ln -s . $(ZIPLINK)
+	zip -r $(ZIPLINK).zip $(addprefix $(ZIPLINK)/,$(ZIPFILES))
+	
 clean:
 	rm -f $(Program) $(Library) $(Library).$(LibVersion) $($(Library)_OBJS)
 
