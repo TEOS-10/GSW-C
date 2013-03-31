@@ -1,0 +1,90 @@
+#  $Id: libgswteos-10.spec.proto,v be9b097f6a58 2013/03/31 01:57:25 fdelahoyde $
+#  $Version: 3.01.0 $
+#  rpmbuild .spec file for siosts-*.rpm
+#
+%if "%{dist}" == ""
+%define dist .el5
+%endif
+Summary: Shipboard Data Acquisition and Processing Tools
+Name: siosts
+Version: @VERSION@
+Release: @RELEASE@%{dist}
+# This is the upstream tarball.
+Source: siosts-%{version}.tar.gz
+License: GPL
+Group: Applications/Engineering and Scientific
+URL: http://sts.ucsd.edu
+BuildRequires: gcc grep fileutils make gmt netcdf f2c
+BuildRequires: tcl tcl-devel tk tk-devel blt blt-devel postgresql-devel
+Requires: tcl tk tix blt gmt-extras gmt netcdf mbsystem f2c-libs
+Requires: postgresql-libs postgresql-tcl sts-setup
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+Prefix: /opt/siosts
+%define _prefix /opt/siosts
+Exclusiveos: linux
+ExclusiveArch: i386 x86_64
+%ifarch x86_64
+Provides: libsts.so()(64bit) libFsts.so()(64bit) libdigsl.so()(64bit) libnav.so()(64bit)
+%else
+Provides: libsts.so libFsts.so() libdigsl.so() libnav.so()
+%endif
+
+%description 
+siosts includes data-acquisition, processing and utility
+software for managing shipboard oceanographic instrumentation
+and data.
+
+%prep
+%setup -q
+
+%build
+
+%configure --prefix=%{_prefix} \
+	--with-x \
+	--with-tcl=/usr \
+	--with-netcdf=/opt/netcdf \
+	--with-gmt=/opt/gmt \
+	--with-seriallogger-user=sts-cr \
+	--enable-dependencychecking
+	
+make build
+
+%install
+rm -rf ${RPM_BUILD_ROOT}
+
+make INSTALL_ROOT=${RPM_BUILD_ROOT} install
+
+%clean 
+rm -rf ${RPM_BUILD_ROOT}
+
+%pre
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-,root,root)
+%dir %{_prefix}
+%dir %{_prefix}/sbin
+%{_prefix}/sbin/*
+%dir %{_libdir}
+%{_libdir}/*
+%dir %{_prefix}/man
+%{_prefix}/man/*
+%dir %{_includedir}
+%{_includedir}/*
+%dir %{_bindir}
+%{_bindir}/*
+%dir %{_prefix}/share
+%{_prefix}/share/*
+%doc ChangeLog
+%{_sysconfdir}/init.d/seriallogger
+
+%changelog
+* Sun Mar  4 2012 Frank Delahoyde <fdelahoyde@ucsd.edu> 0.9.3
+- See ChangeLog for details.
+
+* Mon Apr 19 2010 Frank Delahoyde <fdelahoyde@ucsd.edu> 0.5.0-1
+- Initial packaging.
+
