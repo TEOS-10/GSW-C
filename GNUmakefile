@@ -1,10 +1,10 @@
-#  $Id: GNUmakefile,v be9b097f6a58 2013/03/31 01:57:25 fdelahoyde $
+#  $Id: GNUmakefile,v 9b830acc4dff 2013/03/31 05:01:24 fdelahoyde $
 #  $Version: 3.01.0 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
 .PHONY: MAKEVERSION_ERROR
 .PHONY: all clean install uninstall distclean new-rpm new-release
-.PHONY: show-release
+.PHONY: show-release getdocs
 
           STSPackage :=	libgswteos-10
         _makeVersion :=	$(shell $(MAKE) -v -f /dev/null 2>&1 |\
@@ -18,13 +18,12 @@ MAKEVERSION_ERROR:
   endif
           STSVersion :=	$(shell if [ -d .hg ]; then \
 			hg tip --template "{latesttag}"; \
-			else basename `pwd` | sed -e"'s/$(STSPackage)-//"; fi)
+			else basename `pwd` | sed -e 's/$(STSPackage)-//'; fi)
 	  STSRelease := $(shell echo $(STSVersion)|sed -e 's/[^-]*-\?//')
   ifeq (,$(STSRelease))
           STSRelease := 1
   endif
 	  STSVersion :=	$(shell echo $(STSVersion)|sed -e 's/-.*//')
-#
                  ARCH:=	$(shell uname -m)
   ifeq (x86_64,$(ARCH))
            libdirname:=	lib64
@@ -35,7 +34,7 @@ MAKEVERSION_ERROR:
             CINCLUDES:=	-I.
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
-			awk -F. '{printf "%d.%d\n",$1,$2}')
+			awk -F . '{printf "%d.%d\n",$$1,$$2}')
               Program:=	gsw_check_functions
       $(Program)_SRCS:=	gsw_check_functions.c
       $(Program)_LIBS:=	-L. -lgswteos-10 -lm
@@ -51,12 +50,14 @@ MAKEVERSION_ERROR:
              TARFILES:=	README gsw_check_functions.c \
 			gsw_data_v3_0.dat.gz gsw_format.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
-			gsw_saar_data.c gswteos-10.h GNUmakefile
+			gsw_saar_data.c gswteos-10.h GNUmakefile \
+			html
              ZIPFILES:= README gsw_check_functions.c \
 			gsw_data_v3_0.dat.gz gsw_format.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h Makefile
-              ZIPLINK:=	gsw_c_v$(shell echo $(STSVersion)|sed -e 's/\.[^.]*$//')
+              ZIPLINK:=	gsw_c_v$(shell echo $(STSVersion) | \
+				sed -e 's/\.[^.]*$$//')
 
 all:	$(Library) $(Program)
 
@@ -71,6 +72,8 @@ $(Library):	$($(Library)_SRCS)
 	ln -s $(Library).$(LibVersion) $(Library)
 
 install:	$(Library) $(Program)
+	mkdir -p $(INSTALL_ROOT)$(DESTLIBDIR) $(INSTALL_ROOT)$(DESTBINDIR) \
+		$(INSTALL_ROOT)$(DESTINCDIR)
 	install $(Library).$(LibVersion) $(INSTALL_ROOT)$(DESTLIBDIR)
 	rm -f $(INSTALL_ROOT)$(DESTLIBDIR)/$(Library)
 	ln -s $(Library).$(LibVersion) $(INSTALL_ROOT)$(DESTLIBDIR)/$(Library)
@@ -98,8 +101,12 @@ new-rpm:	new-release
 		if [ -d /space/RPMBUILD/SOURCES ]; then \
 		    cp $(STSPackage)-$(STSVersion).tar.gz \
 			/space/RPMBUILD/SOURCES; \
-		    cp $(STSPackage)/$(STSPackage).spec /space/RPMBUILD/SPECS; \
+		    cp $(STSPackage).spec /space/RPMBUILD/SPECS; \
 		fi
 
 show-release:
 		@echo $(STSVersion)-$(STSRelease)
+
+getdocs:
+		@wget -k -np -p -m -nH --cut-dirs=2 \
+			http://teos-10.org/pubs/gsw/html/gsw_contents.html

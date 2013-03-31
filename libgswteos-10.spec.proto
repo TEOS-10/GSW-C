@@ -1,53 +1,41 @@
-#  $Id: libgswteos-10.spec.proto,v be9b097f6a58 2013/03/31 01:57:25 fdelahoyde $
+#  $Id: libgswteos-10.spec.proto,v 9b830acc4dff 2013/03/31 05:01:24 fdelahoyde $
 #  $Version: 3.01.0 $
-#  rpmbuild .spec file for siosts-*.rpm
+#  rpmbuild .spec file for libgswteos-10-*.rpm
 #
 %if "%{dist}" == ""
 %define dist .el5
 %endif
-Summary: Shipboard Data Acquisition and Processing Tools
-Name: siosts
+Summary: TEOS-10 GSW Oceanographic Toolbox
+Name: libgswteos-10
 Version: @VERSION@
 Release: @RELEASE@%{dist}
 # This is the upstream tarball.
-Source: siosts-%{version}.tar.gz
+Source: %{name}-%{version}.tar.gz
 License: GPL
 Group: Applications/Engineering and Scientific
 URL: http://sts.ucsd.edu
-BuildRequires: gcc grep fileutils make gmt netcdf f2c
-BuildRequires: tcl tcl-devel tk tk-devel blt blt-devel postgresql-devel
-Requires: tcl tk tix blt gmt-extras gmt netcdf mbsystem f2c-libs
-Requires: postgresql-libs postgresql-tcl sts-setup
+BuildRequires: gcc grep fileutils make
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-Prefix: /opt/siosts
-%define _prefix /opt/siosts
+Prefix: /usr
 Exclusiveos: linux
 ExclusiveArch: i386 x86_64
 %ifarch x86_64
-Provides: libsts.so()(64bit) libFsts.so()(64bit) libdigsl.so()(64bit) libnav.so()(64bit)
+Provides: libgswteos-10.so()(64bit) 
 %else
-Provides: libsts.so libFsts.so() libdigsl.so() libnav.so()
+Provides: libgswteos-10.so
 %endif
 
 %description 
-siosts includes data-acquisition, processing and utility
-software for managing shipboard oceanographic instrumentation
-and data.
+libgswteos-10 consists of a library of functions implimenting the Gibbs-
+Seawater Oceanographic Toolbox for the Thermodynamic Equation of
+Seawater 2010.
 
 %prep
 %setup -q
 
 %build
 
-%configure --prefix=%{_prefix} \
-	--with-x \
-	--with-tcl=/usr \
-	--with-netcdf=/opt/netcdf \
-	--with-gmt=/opt/gmt \
-	--with-seriallogger-user=sts-cr \
-	--enable-dependencychecking
-	
-make build
+make
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -65,26 +53,13 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%dir %{_prefix}
-%dir %{_prefix}/sbin
-%{_prefix}/sbin/*
-%dir %{_libdir}
 %{_libdir}/*
-%dir %{_prefix}/man
-%{_prefix}/man/*
-%dir %{_includedir}
 %{_includedir}/*
-%dir %{_bindir}
 %{_bindir}/*
-%dir %{_prefix}/share
-%{_prefix}/share/*
-%doc ChangeLog
-%{_sysconfdir}/init.d/seriallogger
+%doc README
+%doc html/*
 
 %changelog
-* Sun Mar  4 2012 Frank Delahoyde <fdelahoyde@ucsd.edu> 0.9.3
-- See ChangeLog for details.
-
-* Mon Apr 19 2010 Frank Delahoyde <fdelahoyde@ucsd.edu> 0.5.0-1
+* Sun Mar 31 2013 Frank Delahoyde <fdelahoyde@ucsd.edu> 3.1.0-1
 - Initial packaging.
 
