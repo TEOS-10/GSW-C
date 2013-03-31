@@ -1,4 +1,4 @@
-#  $Id: libgswteos-10.spec.proto,v 9b830acc4dff 2013/03/31 05:01:24 fdelahoyde $
+#  $Id: libgswteos-10.spec.proto,v 9a11f73db829 2013/03/31 05:27:38 fdelahoyde $
 #  $Version: 3.01.0 $
 #  rpmbuild .spec file for libgswteos-10-*.rpm
 #
@@ -57,7 +57,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/*
 %{_bindir}/*
 %doc README
-%doc html/*
+%doc html
 
 %changelog
 * Sun Mar 31 2013 Frank Delahoyde <fdelahoyde@ucsd.edu> 3.1.0-1

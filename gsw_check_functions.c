@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v e5714569b040 2013/03/29 03:44:45 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 9a11f73db829 2013/03/31 05:27:38 fdelahoyde $
 */
 #include <gswteos-10.h>
 
@@ -214,7 +214,7 @@ main(int argc, char **argv)
 
 	printf(
 "============================================================================\n"
-" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.1 (C)\n"
+" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.01 (C)\n"
 "============================================================================\n"
 "\n"
 " These are the check values for the subset of functions that have been \n"
