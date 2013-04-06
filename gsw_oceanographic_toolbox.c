@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v e5714569b040 2013/03/29 03:44:45 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 5c4a2a22ef44 2013/04/06 11:17:32 fdelahoyde $
 **  $Version: 3.01.0 $
 **
 **  This is a translation of the original f90 source code into C
@@ -160,7 +160,7 @@ gsw_sp_from_c(double c, double t, double p)
 	rt	= r/(rp*rt_lc);
 
 	if (rt < 0.0) {
-	    rt = 9e15;
+	    rt = GSW_INVALID_VALUE;
 	}
 
 	rtx	= sqrt(rt);
@@ -186,7 +186,7 @@ gsw_sp_from_c(double c, double t, double p)
 
     /* This line ensures that SP is non-negative. */
 	if (sp < 0.0) {
-	    sp	= 9e15;
+	    sp	= GSW_INVALID_VALUE;
 	}
 
 	return (sp);
