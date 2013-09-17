@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 5c4a2a22ef44 2013/04/06 11:17:32 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v ff64a09aa249 2013/09/17 21:43:56 fdelahoyde $
 **  $Version: 3.01.0 $
 **
 **  This is a translation of the original f90 source code into C
@@ -7,9 +7,9 @@
 **  at Scripps Institution of Oceanography -- sts-cr@sio.ucsd.edu.
 **  The original notices follow.
 **
-!=============================================================================
-! Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.01 (Fortran)
-!=============================================================================
+!==========================================================================
+! Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.02 (Fortran)
+!==========================================================================
 !
 ! This is a subset of functions contained in the Gibbs SeaWater (GSW) 
 ! Oceanographic Toolbox of TEOS-10 (version 3.03).
@@ -17,6 +17,7 @@
 ! Practical Salinity (SP), PSS-78
 ! gsw_sp_from_c           - Practical Salinity from conductivity
 ! gsw_c_from_sp           - conductivity from Practical Salinity
+! gsw_sp_from_sk          - Practical Salinity from Knudsen Salinity
 ! 
 ! salinity and temperature conversions
 ! gsw_sa_from_sp          - Absolute Salinity from Practical Salinity
@@ -39,18 +40,33 @@
 ! gsw_adiabatic_lapse_rate_from_ct - adiabatic lapse rate from CT
 !
 ! density and enthalpy, based on the 48-term expression for density
-! gsw_rho                 - in-situ density from CT, and potential density
+! gsw_rho                 - in-situ density and potential density
 ! gsw_alpha               - thermal expansion coefficient with respect to CT
 ! gsw_beta                - saline contraction coefficient at constant CT
+! gsw_alpha_on_beta       - alpha divided by beta
+! gsw_rho_first_derivatives  - first derivatives of density
 ! gsw_specvol             - specific volume
 ! gsw_specvol_anom        - specific volume anomaly
-! gsw_specvol_sso_0_p     : specvol_CT at (35.16504,0,p)
+! gsw_sigma0              - sigma0 with reference pressure of 0 dbar
+! gsw_sigma1              - sigma1 with reference pressure of 1000 dbar
+! gsw_sigma2              - sigma2 with reference pressure of 2000 dbar
+! gsw_sigma3              - sigma3 with reference pressure of 3000 dbar
+! gsw_sigma4              - sigma4 with reference pressure of 4000 dbar
 ! gsw_sound_speed         - sound speed
 ! gsw_kappa               - isentropic compressibility
+! gsw_cabbeling           - cabbeling coefficient
+! gsw_thermobaric         - thermobaric coefficient
 ! gsw_internal_energy     - internal energy
 ! gsw_enthalpy            - enthalpy
 ! gsw_dynamic_enthalpy    - dynamic enthalpy
 ! gsw_sa_from_rho         - Absolute Salinity from density
+!
+! water column properties, based on the 48-term expression for density
+! gsw_nsquared            - buoyancy (Brunt-Vaisala) frequency squared (N^2)
+! gsw_turner_rsubrho      - Turner angle & Rsubrho
+! gsw_ipv_vs_fnsquared_ratio  - ratio of the vertical gradient of potential density
+!                               (with reference pressure, p_ref), to the vertical gradient
+!                               of locally-referenced potential density
 !
 ! freezing temperatures
 ! gsw_ct_freezing         - Conservative Temperature freezing temperature of seawater
@@ -84,12 +100,13 @@
 ! gsw_entropy_part        - entropy minus the terms that are a function of only SA
 ! gsw_entropy_part_zerop  - entropy_part evaluated at 0 dbar
 ! gsw_gibbs_pt0_pt0       - gibbs(0,2,0,SA,t,0)
+! gsw_specvol_sso_0_p     - specvol at (SSO,CT=0,p)
 ! gsw_enthalpy_sso_0_p    - enthalpy at (SSO,CT=0,p)
 ! gsw_hill_ratio_at_sp2   - Hill ratio at Practical Salinity of 2
 !
 !
 ! Version 1.0 written by David Jackett
-! Modified by Paul Barker (version 3.01)
+! Modified by Paul Barker (version 3.02)
 !
 ! For help with this Oceanographic Toolbox email:- help_gsw@csiro.au
 !
@@ -480,13 +497,41 @@ gsw_c_from_sp(double sp, double t, double p)
 /*
 !--------------------------------------------------------------------------
 
+!==========================================================================
+function gsw_sp_from_sk(sk)
+!==========================================================================
+
+! Calculates Practical Salinity, SP, from SK
+!
+!  SK    : Knudsen Salinity                        [parts per thousand, ppt]
+!
+! gsw_sp_from_sk  : Practical Salinity                              [unitless]
+*/
+double
+gsw_sp_from_sk(double sk)
+{
+	double	gsw_sp_from_sk_value;
+
+
+	gsw_sp_from_sk_value = (sk - 0.03e0)*(1.80655e0/1.805e0);
+
+	/*! This line ensures that SP is non-negative.*/
+	if (gsw_sp_from_sk_value < 0e0)
+            gsw_sp_from_sk_value = GSW_INVALID_VALUE;
+
+	return (gsw_sp_from_sk_value);
+}
+
+/*
+!--------------------------------------------------------------------------
+
 !--------------------------------------------------------------------------
 ! salinity and temperature conversions
 !--------------------------------------------------------------------------
 */
 /*
 !==========================================================================
-function gsw_sa_from_sp(sp,p,lon,lat)       !bind(C, name='gsw_sa_from_sp')
+function gsw_sa_from_sp(sp,p,lon,lat)       
 !==========================================================================
 
 ! Calculates Absolute Salinity, SA, from Practical Salinity, SP
@@ -514,7 +559,7 @@ gsw_sa_from_sp(double sp, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_sstar_from_sp(sp,p,lon,lat)  !bind(C, name='gsw_sstar_from_sp')
+function gsw_sstar_from_sp(sp,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Preformed Salinity, Sstar, from Practical Salinity, SP. 
@@ -545,7 +590,7 @@ gsw_sstar_from_sp(double sp, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_ct_from_t(sa,t,p)  !bind(C, name='gsw_ct_from_t')
+function gsw_ct_from_t(sa,t,p)  
 !==========================================================================
    
 ! Calculates Conservative Temperature from in-situ temperature
@@ -567,7 +612,7 @@ gsw_ct_from_t(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_deltasa_from_sp(sp,p,lon,lat)  !bind(C, name='gsw_deltasa_from_sp')
+function gsw_deltasa_from_sp(sp,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Absolute Salinity Anomaly, deltaSA, from Practical Salinity, SP. 
@@ -592,7 +637,7 @@ gsw_deltasa_from_sp(double sp, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_sr_from_sp(sp)  !bind(C, name='gsw_sr_from_sp')
+function gsw_sr_from_sp(sp)  
 !==========================================================================
 
 ! Calculates Reference Salinity, SR, from Practical Salinity, SP. 
@@ -614,7 +659,7 @@ gsw_sr_from_sp(double sp)
 
 /*
 !==========================================================================
-function gsw_sp_from_sr(sr)  !bind(C, name='gsw_sp_from_sr')
+function gsw_sp_from_sr(sr)  
 !==========================================================================
 
 ! Calculates Practical Salinity, sp, from Reference Salinity, sr. 
@@ -636,7 +681,7 @@ gsw_sp_from_sr(double sr)
 
 /*
 !==========================================================================
-function gsw_sp_from_sa(sa,p,lon,lat)  !bind(C, name='gsw_sp_from_sa')
+function gsw_sp_from_sa(sa,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Practical salinity, sp, from Absolute salinity, sa  
@@ -664,7 +709,7 @@ gsw_sp_from_sa(double sa, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_sstar_from_sa(sa,p,lon,lat)  !bind(C, name='gsw_sstar_from_sa')
+function gsw_sstar_from_sa(sa,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Preformed Salinity, Sstar, from Absolute Salinity, SA. 
@@ -693,7 +738,7 @@ gsw_sstar_from_sa(double sa, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_sa_from_sstar(sstar,p,lon,lat)  !bind(C, name='gsw_sa_from_sstar')
+function gsw_sa_from_sstar(sstar,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Absolute Salinity, SA, from Preformed Salinity, Sstar.
@@ -722,7 +767,7 @@ gsw_sa_from_sstar(double sstar, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_sp_from_sstar(sstar,p,lon,lat)  !bind(C, name='gsw_sp_from_sstar')
+function gsw_sp_from_sstar(sstar,p,lon,lat)  
 !==========================================================================
 
 ! Calculates Practical Salinity, SP, from Preformed Salinity, Sstar. 
@@ -753,7 +798,7 @@ gsw_sp_from_sstar(double sstar, double p, double lon, double lat)
 
 /*
 !==========================================================================
-function gsw_t_from_ct(sa,ct,p)  !bind(C, name='gsw_t_from_ct')
+function gsw_t_from_ct(sa,ct,p)  
 !==========================================================================
 
 ! Calculates in-situ temperature from Conservative Temperature of seawater  
@@ -775,7 +820,7 @@ gsw_t_from_ct(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_ct_from_pt(sa,pt)  !bind(C, name='gsw_ct_from_pt')
+function gsw_ct_from_pt(sa,pt)  
 !==========================================================================
 
 ! Calculates Conservative Temperature from potential temperature of seawater  
@@ -818,7 +863,7 @@ gsw_ct_from_pt(double sa, double pt)
 
 /*
 !==========================================================================
-function gsw_pt_from_t(sa,t,p,p_ref)  !bind(C, name='gsw_pt_from_t')
+function gsw_pt_from_t(sa,t,p,p_ref)  
 !==========================================================================
    
 ! Calculates potential temperature of seawater from in-situ temperature 
@@ -865,7 +910,7 @@ gsw_pt_from_t(double sa, double t, double p, double p_ref)
 
 /*
 !==========================================================================
-function gsw_pt0_from_t(sa,t,p)  !bind(C, name='gsw_pt0_from_t')
+function gsw_pt0_from_t(sa,t,p)  
 !==========================================================================
    
 ! Calculates potential temperature with reference pressure, p_ref = 0 dbar. 
@@ -917,7 +962,7 @@ gsw_pt0_from_t(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_pt_from_ct(sa,ct)  !bind(C, name='gsw_pt_from_ct')
+function gsw_pt_from_ct(sa,ct)  
 !==========================================================================
 
 ! potential temperature of seawater from conservative temperature
@@ -1062,9 +1107,9 @@ function gsw_adiabatic_lapse_rate_from_ct(sa,ct,p)
 double
 gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p)
 {
-	int	n0, n1, n2, pr0;
+	int	n0, n1, n2;
 
-	double	pt0, t;
+	double	pt0, pr0, t;
 
 	n0	= 0;
 	n1	= 1;
@@ -1086,7 +1131,7 @@ gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_rho(sa,ct,p)  !bind(C, name='gsw_rho')
+function gsw_rho(sa,ct,p)  
 !==========================================================================
 
 !  Calculates in-situ density from Absolute Salinity and Conservative 
@@ -1153,12 +1198,12 @@ gsw_rho(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_alpha(sa,ct,p)  !bind(C, name='gsw_alpha')
+function gsw_alpha(sa,ct,p)  
 !==========================================================================
 
 !  Calculates the thermal expansion coefficient of seawater with respect to 
 !  Conservative Temperature using the computationally-efficient 48-term 
-!  expression for density in terms of SA, CT and p (McDougall et al., 2011)
+!  expression for density in terms of SA, CT and p (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1251,13 +1296,13 @@ gsw_alpha(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_beta(sa,ct,p)  !bind(C, name='gsw_beta')
+function gsw_beta(sa,ct,p)  
 !==========================================================================
 
 !  Calculates the saline (i.e. haline) contraction coefficient of seawater  
 !  at constant Conservative Temperature using the computationally-efficient
 !  48-term expression for density in terms of SA, CT and p 
-!  (McDougall et al., 2011).
+!  (IOC et al., 2010).
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1343,13 +1388,292 @@ gsw_beta(double sa, double ct, double p)
 }
 
 /*
+!--------------------------------------------------------------------------
+
 !==========================================================================
-function gsw_specvol(sa,ct,p)  !bind(C, name='gsw_specvol')
+function gsw_alpha_on_beta(sa,ct,p)  
+!==========================================================================
+
+!  Calculates alpha divided by beta, where alpha is the thermal expansion
+!  coefficient and beta is the saline contraction coefficient of seawater 
+!  from Absolute Salinity and Conservative Temperature.  This function uses
+!  the computationally-efficient 48-term expression for density in terms of 
+!  SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! p      : sea pressure                                    [dbar]
+! 
+! gsw_alpha_on_beta : thermal expansion coefficient of seawater (48 term equation)
+*/
+double
+gsw_alpha_on_beta(double sa, double ct, double p)
+{
+	double	v01 =  9.998420897506056e2,  v02 =  2.839940833161907e0,
+		v03 = -3.147759265588511e-2, v04 =  1.181805545074306e-3,
+		v05 = -6.698001071123802e0,  v06 = -2.986498947203215e-2,
+		v07 =  2.327859407479162e-4, v08 = -3.988822378968490e-2,
+		v09 =  5.095422573880500e-4, v10 = -1.426984671633621e-5,
+		v11 =  1.645039373682922e-7, v12 = -2.233269627352527e-2,
+		v13 = -3.436090079851880e-4, v14 =  3.726050720345733e-6,
+		v15 = -1.806789763745328e-4, v16 =  6.876837219536232e-7,
+		v17 = -3.087032500374211e-7, v18 = -1.988366587925593e-8,
+		v19 = -1.061519070296458e-11,v20 =  1.550932729220080e-10,
+		v21 =  1.0e0,
+		v22 = 2.775927747785646e-3,  v23 = -2.349607444135925e-5,
+		v24 =  1.119513357486743e-6, v25 =  6.743689325042773e-10,
+		v26 = -7.521448093615448e-3, v27 = -2.764306979894411e-5,
+		v28 =  1.262937315098546e-7, v29 =  9.527875081696435e-10,
+		v30 = -1.811147201949891e-11,v31 = -3.303308871386421e-5,
+		v32 =  3.801564588876298e-7, v33 = -7.672876869259043e-9,
+		v34 = -4.634182341116144e-11,v35 =  2.681097235569143e-12,
+		v36 =  5.419326551148740e-6, v37 = -2.742185394906099e-5,
+		v38 = -3.212746477974189e-7, v39 =  3.191413910561627e-9,
+		v40 = -1.931012931541776e-12,v41 = -1.105097577149576e-7,
+		v42 =  6.211426728363857e-10,v43 = -1.119011592875110e-10,
+		v44 = -1.941660213148725e-11,v45 = -1.864826425365600e-14,
+		v46 =  1.119522344879478e-14,v47 = -1.200507748551599e-15,
+		v48 =  6.057902487546866e-17,
+		a01 =  2.839940833161907e0,  a02 = -6.295518531177023e-2,
+		a03 =  3.545416635222918e-3, a04 = -2.986498947203215e-2,
+		a05 =  4.655718814958324e-4, a06 =  5.095422573880500e-4,
+		a07 = -2.853969343267241e-5, a08 =  4.935118121048767e-7,
+		a09 = -3.436090079851880e-4, a10 =  7.452101440691467e-6,
+		a11 =  6.876837219536232e-7, a12 = -1.988366587925593e-8,
+		a13 = -2.123038140592916e-11,a14 =  2.775927747785646e-3,
+		a15 = -4.699214888271850e-5, a16 =  3.358540072460230e-6,
+		a17 =  2.697475730017109e-9, a18 = -2.764306979894411e-5,
+		a19 =  2.525874630197091e-7, a20 =  2.858362524508931e-9,
+		a21 = -7.244588807799565e-11,a22 =  3.801564588876298e-7,
+		a23 = -1.534575373851809e-8, a24 = -1.390254702334843e-10,
+		a25 =  1.072438894227657e-11,a26 = -3.212746477974189e-7,
+		a27 =  6.382827821123254e-9, a28 = -5.793038794625329e-12,
+		a29 =  6.211426728363857e-10,a30 = -1.941660213148725e-11,
+		a31 = -3.729652850731201e-14,a32 =  1.119522344879478e-14,
+		a33 =  6.057902487546866e-17,
+		b01 = -6.698001071123802e0,  b02 = -2.986498947203215e-2,
+		b03 =  2.327859407479162e-4, b04 = -5.983233568452735e-2,
+		b05 =  7.643133860820750e-4, b06 = -2.140477007450431e-5,
+		b07 =  2.467559060524383e-7, b08 = -1.806789763745328e-4,
+		b09 =  6.876837219536232e-7, b10 =  1.550932729220080e-10,
+		b11 = -7.521448093615448e-3, b12 = -2.764306979894411e-5,
+		b13 =  1.262937315098546e-7, b14 =  9.527875081696435e-10,
+		b15 = -1.811147201949891e-11,b16 = -4.954963307079632e-5,
+		b17 =  5.702346883314446e-7, b18 = -1.150931530388857e-8,
+		b19 = -6.951273511674217e-11,b20 =  4.021645853353715e-12,
+		b21 =  1.083865310229748e-5, b22 = -1.105097577149576e-7,
+		b23 =  6.211426728363857e-10,b24 =  1.119522344879478e-14;
+
+	double	sqrtsa, v_hat_denominator, v_hat_numerator;
+	double	dvhatden_dct, dvhatnum_dct;
+	double	dvhatden_dsa, dvhatnum_dsa;
+
+	sqrtsa = sqrt(sa);
+
+	v_hat_denominator = v01 + ct*(v02 + ct*(v03 + v04*ct))
+			    + sa*(v05 + ct*(v06 + v07*ct)
+			    + sqrtsa*(v08 + ct*(v09 + ct*(v10 + v11*ct))))
+			    + p*(v12 + ct*(v13 + v14*ct) + sa*(v15 + v16*ct)
+			    + p*(v17 + ct*(v18 + v19*ct) + v20*sa));
+
+	v_hat_numerator = v21 + ct*(v22 + ct*(v23 + ct*(v24 + v25*ct)))
+			    + sa*(v26 + ct*(v27 + ct*(v28 + ct*(v29 + v30*ct)))
+			    + v36*sa + sqrtsa*
+				(v31 + ct*(v32 + ct*(v33 + ct*(v34 + v35*ct)))))
+			    + p*(v37 + ct*(v38 + ct*(v39 + v40*ct))
+			    + sa*(v41 + v42*ct)
+			    + p*(v43 + ct*(v44 + v45*ct + v46*sa)
+			    + p*(v47 + v48*ct)));
+       
+	dvhatden_dct = a01 + ct*(a02 + a03*ct)
+			+ sa*(a04 + a05*ct
+			+ sqrtsa*(a06 + ct*(a07 + a08*ct)))
+			+ p*(a09 + a10*ct + a11*sa
+			+ p*(a12 + a13*ct));
+
+	dvhatnum_dct = a14 + ct*(a15 + ct*(a16 + a17*ct))
+			+ sa*(a18 + ct*(a19 + ct*(a20 + a21*ct))
+			+ sqrtsa*(a22 + ct*(a23 + ct*(a24 + a25*ct))))
+			+ p*(a26 + ct*(a27 + a28*ct) + a29*sa
+			+ p*(a30 + a31*ct + a32*sa + a33*p));
+
+	dvhatden_dsa = b01 + ct*(b02 + b03*ct)
+			+ sqrtsa*(b04 + ct*(b05 + ct*(b06 + b07*ct)))
+			+ p*(b08 + b09*ct + b10*p);
+
+	dvhatnum_dsa = b11 + ct*(b12 + ct*(b13 + ct*(b14 + b15*ct)))
+			+ sqrtsa*(b16 + ct*(b17 + ct*(b18 + ct*(b19 + b20*ct))))
+			+ b21*sa + p*(b22 + ct*(b23 + b24*p));
+
+	return ((dvhatnum_dct*v_hat_denominator - dvhatden_dct*v_hat_numerator)/
+                (dvhatden_dsa*v_hat_numerator - dvhatnum_dsa*v_hat_denominator));
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+subroutine gsw_rho_first_derivatives(sa, ct, p, drho_dsa, drho_dct, drho_dp)
+!==========================================================================
+
+!  Calculates the three (3) partial derivatives of in situ density with 
+!  respect to Absolute Salinity, Conservative Temperature and pressure.  
+!  Note that the pressure derivative is done with respect to pressure in 
+!  Pa, not dbar.  This function uses the computationally-efficient 48-term 
+!  expression for density in terms of SA, CT and p.
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! p      : sea pressure                                    [dbar]
+! drho_dsa  : partial derivatives of density             [ kg^2/(g m^3) ]
+!              with respect to Absolute Salinity
+! drho_dct  : partial derivatives of density               [ kg/(K m^3) ]
+!              with respect to Conservative Temperature
+! drho_dp   : partial derivatives of density              [ kg/(Pa m^3) ]
+!              with respect to pressure in Pa
+*/
+void
+gsw_rho_first_derivatives(double sa, double ct, double p,
+	double *drho_dsa, double *drho_dct, double *drho_dp)
+{
+	double	v01 =  9.998420897506056e2,  v02 =  2.839940833161907e0,
+		v03 = -3.147759265588511e-2, v04 =  1.181805545074306e-3,
+		v05 = -6.698001071123802e0,  v06 = -2.986498947203215e-2,
+		v07 =  2.327859407479162e-4, v08 = -3.988822378968490e-2,
+		v09 =  5.095422573880500e-4, v10 = -1.426984671633621e-5,
+		v11 =  1.645039373682922e-7, v12 = -2.233269627352527e-2,
+		v13 = -3.436090079851880e-4, v14 =  3.726050720345733e-6,
+		v15 = -1.806789763745328e-4, v16 =  6.876837219536232e-7,
+		v17 = -3.087032500374211e-7, v18 = -1.988366587925593e-8,
+		v19 = -1.061519070296458e-11,v20 =  1.550932729220080e-10,
+		v21 =  1.0e0,
+		v22 = 2.775927747785646e-3,  v23 = -2.349607444135925e-5,
+		v24 =  1.119513357486743e-6, v25 =  6.743689325042773e-10,
+		v26 = -7.521448093615448e-3, v27 = -2.764306979894411e-5,
+		v28 =  1.262937315098546e-7, v29 =  9.527875081696435e-10,
+		v30 = -1.811147201949891e-11,v31 = -3.303308871386421e-5,
+		v32 =  3.801564588876298e-7, v33 = -7.672876869259043e-9,
+		v34 = -4.634182341116144e-11,v35 =  2.681097235569143e-12,
+		v36 =  5.419326551148740e-6, v37 = -2.742185394906099e-5,
+		v38 = -3.212746477974189e-7, v39 =  3.191413910561627e-9,
+		v40 = -1.931012931541776e-12,v41 = -1.105097577149576e-7,
+		v42 =  6.211426728363857e-10,v43 = -1.119011592875110e-10,
+		v44 = -1.941660213148725e-11,v45 = -1.864826425365600e-14,
+		v46 =  1.119522344879478e-14,v47 = -1.200507748551599e-15,
+		v48 =  6.057902487546866e-17,
+		a01 =  2.839940833161907e0,  a02 = -6.295518531177023e-2,
+		a03 =  3.545416635222918e-3, a04 = -2.986498947203215e-2,
+		a05 =  4.655718814958324e-4, a06 =  5.095422573880500e-4,
+		a07 = -2.853969343267241e-5, a08 =  4.935118121048767e-7,
+		a09 = -3.436090079851880e-4, a10 =  7.452101440691467e-6,
+		a11 =  6.876837219536232e-7, a12 = -1.988366587925593e-8,
+		a13 = -2.123038140592916e-11,a14 =  2.775927747785646e-3,
+		a15 = -4.699214888271850e-5, a16 =  3.358540072460230e-6,
+		a17 =  2.697475730017109e-9, a18 = -2.764306979894411e-5,
+		a19 =  2.525874630197091e-7, a20 =  2.858362524508931e-9,
+		a21 = -7.244588807799565e-11,a22 =  3.801564588876298e-7,
+		a23 = -1.534575373851809e-8, a24 = -1.390254702334843e-10,
+		a25 =  1.072438894227657e-11,a26 = -3.212746477974189e-7,
+		a27 =  6.382827821123254e-9, a28 = -5.793038794625329e-12,
+		a29 =  6.211426728363857e-10,a30 = -1.941660213148725e-11,
+		a31 = -3.729652850731201e-14,a32 =  1.119522344879478e-14,
+		a33 =  6.057902487546866e-17,
+		b01 = -6.698001071123802e0,  b02 = -2.986498947203215e-2,
+		b03 =  2.327859407479162e-4, b04 = -5.983233568452735e-2,
+		b05 =  7.643133860820750e-4, b06 = -2.140477007450431e-5,
+		b07 =  2.467559060524383e-7, b08 = -1.806789763745328e-4,
+		b09 =  6.876837219536232e-7, b10 =  1.550932729220080e-10,
+		b11 = -7.521448093615448e-3, b12 = -2.764306979894411e-5,
+		b13 =  1.262937315098546e-7, b14 =  9.527875081696435e-10,
+		b15 = -1.811147201949891e-11,b16 = -4.954963307079632e-5,
+		b17 =  5.702346883314446e-7, b18 = -1.150931530388857e-8,
+		b19 = -6.951273511674217e-11,b20 =  4.021645853353715e-12,
+		b21 =  1.083865310229748e-5, b22 = -1.105097577149576e-7,
+		b23 =  6.211426728363857e-10,b24 =  1.119522344879478e-14,
+		c01 = -2.233269627352527e-2, c02 = -3.436090079851880e-4,
+		c03 =  3.726050720345733e-6, c04 = -1.806789763745328e-4,
+		c05 =  6.876837219536232e-7, c06 = -6.174065000748422e-7,
+		c07 = -3.976733175851186e-8, c08 = -2.123038140592916e-11,
+		c09 =  3.101865458440160e-10,c10 = -2.742185394906099e-5,
+		c11 = -3.212746477974189e-7, c12 =  3.191413910561627e-9,
+		c13 = -1.931012931541776e-12,c14 = -1.105097577149576e-7,
+		c15 =  6.211426728363857e-10,c16 = -2.238023185750219e-10,
+		c17 = -3.883320426297450e-11,c18 = -3.729652850731201e-14,
+		c19 =  2.239044689758956e-14,c20 = -3.601523245654798e-15,
+		c21 =  1.817370746264060e-16,pa2db = 1e-4;
+
+	double	sqrtsa, v_hat_denominator, v_hat_numerator;
+	double	dvhatden_dct, dvhatnum_dct, dvhatden_dsa, dvhatnum_dsa;
+	double	dvhatden_dp, dvhatnum_dp, rho, rec_num;
+
+	sqrtsa = sqrt(sa);
+
+	v_hat_denominator = v01 + ct*(v02 + ct*(v03 + v04*ct))
+			+ sa*(v05 + ct*(v06 + v07*ct)
+			+ sqrtsa*(v08 + ct*(v09 + ct*(v10 + v11*ct))))
+			+ p*(v12 + ct*(v13 + v14*ct) + sa*(v15 + v16*ct)
+			+ p*(v17 + ct*(v18 + v19*ct) + v20*sa));
+
+	v_hat_numerator = v21 + ct*(v22 + ct*(v23 + ct*(v24 + v25*ct)))
+			+ sa*(v26 + ct*(v27 + ct*(v28 + ct*(v29 + v30*ct)))
+			+ v36*sa
+			+ sqrtsa*(v31 + ct*(v32 + ct*(v33 + ct*(v34 + v35*ct)))))
+			+ p*(v37 + ct*(v38 + ct*(v39 + v40*ct))
+			+ sa*(v41 + v42*ct)
+			+ p*(v43 + ct*(v44 + v45*ct + v46*sa)
+			+ p*(v47 + v48*ct)));
+       
+	dvhatden_dct = a01 + ct*(a02 + a03*ct)
+			+ sa*(a04 + a05*ct
+			+ sqrtsa*(a06 + ct*(a07 + a08*ct)))
+			+ p*(a09 + a10*ct + a11*sa
+			+ p*(a12 + a13*ct));
+
+	dvhatnum_dct = a14 + ct*(a15 + ct*(a16 + a17*ct))
+			+ sa*(a18 + ct*(a19 + ct*(a20 + a21*ct))
+			+ sqrtsa*(a22 + ct*(a23 + ct*(a24 + a25*ct))))
+			+ p*(a26 + ct*(a27 + a28*ct) + a29*sa
+			+ p*(a30 + a31*ct + a32*sa + a33*p));
+
+	dvhatden_dsa = b01 + ct*(b02 + b03*ct)
+			+ sqrtsa*(b04 + ct*(b05 + ct*(b06 + b07*ct)))
+			+ p*(b08 + b09*ct + b10*p);
+
+	dvhatnum_dsa = b11 + ct*(b12 + ct*(b13 + ct*(b14 + b15*ct)))
+			+ sqrtsa*(b16 + ct*(b17 + ct*(b18 + ct*(b19 + b20*ct))))
+			+ b21*sa
+			+ p*(b22 + ct*(b23 + b24*p));
+		
+	dvhatden_dp = c01 + ct*(c02 + c03*ct)
+			+ sa*(c04 + c05*ct)
+			+ p*(c06 + ct*(c07 + c08*ct) + c09*sa);
+
+	dvhatnum_dp = c10 + ct*(c11 + ct*(c12 + c13*ct))
+			+ sa*(c14 + c15*ct)
+			+ p*(c16 + ct*(c17 + c18*ct + c19*sa)
+			+ p*(c20 + c21*ct));
+
+	rec_num = 1e0/v_hat_numerator;
+       
+	rho = rec_num*v_hat_denominator;
+
+	*drho_dsa = (dvhatden_dsa - dvhatnum_dsa*rho)*rec_num;
+
+	*drho_dct = (dvhatden_dct - dvhatnum_dct*rho)*rec_num;
+
+	*drho_dp = pa2db*(dvhatden_dp - dvhatnum_dp*rho)*rec_num;
+
+	return;
+}
+
+/*
+!==========================================================================
+function gsw_specvol(sa,ct,p)
 !==========================================================================
 
 !  Calculates specific volume of seawater using the computationally-
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1365,7 +1689,7 @@ gsw_specvol(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_specvol_anom(sa,ct,p)  !bind(C, name='gsw_specvol_anom')
+function gsw_specvol_anom(sa,ct,p)
 !==========================================================================
 
 !  Calculates specific volume anomaly of seawater using the computationally-
@@ -1385,13 +1709,168 @@ gsw_specvol_anom(double sa, double ct, double p)
 }
 
 /*
+!--------------------------------------------------------------------------
+
 !==========================================================================
-function gsw_sound_speed(sa,ct,p)  !bind(C, name='gsw_sound_speed')
+function gsw_sigma0(sa,ct) 
+!==========================================================================
+
+!  Calculates potential density anomaly with reference pressure of 0 dbar,
+!  this being this particular potential density minus 1000 kg/m^3.  This
+!  function has inputs of Absolute Salinity and Conservative Temperature.
+!  This function uses the computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! 
+! gsw_sigma0  : potential density anomaly with reference pressure of 0
+!                                                      (48 term equation)
+*/
+double
+gsw_sigma0(double sa, double ct)
+{
+	double	v01 =  9.998420897506056e2,  v02 =  2.839940833161907e0,
+		v03 = -3.147759265588511e-2, v04 =  1.181805545074306e-3,
+		v05 = -6.698001071123802e0,  v06 = -2.986498947203215e-2,
+		v07 =  2.327859407479162e-4, v08 = -3.988822378968490e-2,
+		v09 =  5.095422573880500e-4, v10 = -1.426984671633621e-5,
+		v11 =  1.645039373682922e-7,
+		v21 =  1.0e0,
+		v22 =  2.775927747785646e-3, v23 = -2.349607444135925e-5,
+		v24 =  1.119513357486743e-6, v25 =  6.743689325042773e-10,
+		v26 = -7.521448093615448e-3, v27 = -2.764306979894411e-5,
+		v28 =  1.262937315098546e-7, v29 =  9.527875081696435e-10,
+		v30 = -1.811147201949891e-11,v31 = -3.303308871386421e-5,
+		v32 =  3.801564588876298e-7, v33 = -7.672876869259043e-9,
+		v34 = -4.634182341116144e-11,v35 =  2.681097235569143e-12,
+		v36 =  5.419326551148740e-6;
+
+	double	v_hat_denominator, v_hat_numerator, sqrtsa;
+
+	sqrtsa = sqrt(sa);
+
+	v_hat_denominator = v01 + ct*(v02 + ct*(v03 + v04*ct))
+		+ sa*(v05 + ct*(v06 + v07*ct)
+		+ sqrtsa*(v08 + ct*(v09 + ct*(v10 + v11*ct))));
+
+	v_hat_numerator = v21 + ct*(v22 + ct*(v23 + ct*(v24 + v25*ct)))
+		+ sa*(v26 + ct*(v27 + ct*(v28 + ct*(v29 + v30*ct))) + v36*sa
+		+ sqrtsa*(v31 + ct*(v32 + ct*(v33 + ct*(v34 + v35*ct)))));
+
+	return (v_hat_denominator/v_hat_numerator  - 1000e0);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_sigma1(sa,ct) 
+!==========================================================================
+
+!  Calculates potential density anomaly with reference pressure of 1000 dbar,
+!  this being this particular potential density minus 1000 kg/m^3.  This
+!  function has inputs of Absolute Salinity and Conservative Temperature.
+!  This function uses the computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! 
+! gsw_sigma1  : potential density anomaly with reference pressure of 1000
+!                                                      (48 term equation)
+*/
+double
+gsw_sigma1(double sa, double ct)
+{
+	return (gsw_rho(sa,ct,1000e0) - 1000e0);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_sigma2(sa,ct) 
+!==========================================================================
+
+!  Calculates potential density anomaly with reference pressure of 2000 dbar,
+!  this being this particular potential density minus 1000 kg/m^3.  This
+!  function has inputs of Absolute Salinity and Conservative Temperature.
+!  This function uses the computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! 
+! gsw_sigma2  : potential density anomaly with reference pressure of 2000
+!                                                      (48 term equation)
+*/
+double
+gsw_sigma2(double sa, double ct)
+{
+	return (gsw_rho(sa,ct,2000e0) - 1000e0);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_sigma3(sa,ct) 
+!==========================================================================
+
+!  Calculates potential density anomaly with reference pressure of 3000 dbar,
+!  this being this particular potential density minus 1000 kg/m^3.  This
+!  function has inputs of Absolute Salinity and Conservative Temperature.
+!  This function uses the computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! 
+! gsw_sigma3  : potential density anomaly with reference pressure of 3000
+!                                                      (48 term equation)
+*/
+double
+gsw_sigma3(double sa, double ct)
+{
+	return (gsw_rho(sa,ct,3000e0) - 1000e0);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_sigma4(sa,ct) 
+!==========================================================================
+
+!  Calculates potential density anomaly with reference pressure of 4000 dbar,
+!  this being this particular potential density minus 1000 kg/m^3.  This
+!  function has inputs of Absolute Salinity and Conservative Temperature.
+!  This function uses the computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! 
+! gsw_sigma4  : potential density anomaly with reference pressure of 4000
+!                                                      (48 term equation)
+*/
+double
+gsw_sigma4(double sa, double ct)
+{
+	return (gsw_rho(sa,ct,4000e0) - 1000e0);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_sound_speed(sa,ct,p)  
 !==========================================================================
 
 !  Calculates sound speed of seawater using the computationally-
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1475,7 +1954,7 @@ gsw_sound_speed(double sa, double ct, double p)
 		(v_hat_numerator*v_hat_numerator)/
 		(dvden_dp*v_hat_numerator - dvnum_dp*v_hat_denominator);
     
-	return (100*sqrt(dp_drho));
+	return (100.0*sqrt(dp_drho));
 }
 
 /*
@@ -1487,7 +1966,7 @@ function gsw_kappa(sa,ct,p)
 
 !  Calculates isentropic compressibility of seawater using the computationally
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1571,12 +2050,367 @@ gsw_kappa(double sa, double ct, double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_internal_energy(sa,ct,p)  !bind(C, name='gsw_internal_energy')
+function gsw_cabbeling(sa,ct,p)  
+!==========================================================================
+
+!  Calculates the cabbeling coefficient of seawater with respect to  
+!  Conservative Temperature.  This function uses the computationally-
+!  efficient 48-term expression for density in terms of SA, CT and p
+!  (IOC et al., 2010)
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! p      : sea pressure                                    [dbar]
+! 
+! gsw_cabbeling  : cabbeling coefficient with respect to            [ 1/K^2 ]
+!                  Conservative Temperature. (48 term equation)
+*/
+double
+gsw_cabbeling(double sa, double ct, double p)
+{
+	double	v01 =  9.998420897506056e2,   v02 =  2.839940833161907e0,
+		v03 = -3.147759265588511e-2,  v04 =  1.181805545074306e-3,
+		v05 = -6.698001071123802e0,   v06 = -2.986498947203215e-2,
+		v07 =  2.327859407479162e-4,  v08 = -3.988822378968490e-2,
+		v09 =  5.095422573880500e-4,  v10 = -1.426984671633621e-5,
+		v11 =  1.645039373682922e-7,  v12 = -2.233269627352527e-2,
+		v13 = -3.436090079851880e-4,  v14 =  3.726050720345733e-6,
+		v15 = -1.806789763745328e-4,  v16 =  6.876837219536232e-7,
+		v17 = -3.087032500374211e-7,  v18 = -1.988366587925593e-8,
+		v19 = -1.061519070296458e-11, v20 =  1.550932729220080e-10,
+		v21 =  1.0e0,
+		v22 =  2.775927747785646e-3,  v23 = -2.349607444135925e-5,
+		v24 =  1.119513357486743e-6,  v25 =  6.743689325042773e-10,
+		v26 = -7.521448093615448e-3,  v27 = -2.764306979894411e-5,
+		v28 =  1.262937315098546e-7,  v29 =  9.527875081696435e-10,
+		v30 = -1.811147201949891e-11, v31 = -3.303308871386421e-5,
+		v32 =  3.801564588876298e-7,  v33 = -7.672876869259043e-9,
+		v34 = -4.634182341116144e-11, v35 =  2.681097235569143e-12,
+		v36 =  5.419326551148740e-6,  v37 = -2.742185394906099e-5,
+		v38 = -3.212746477974189e-7,  v39 =  3.191413910561627e-9,
+		v40 = -1.931012931541776e-12, v41 = -1.105097577149576e-7,
+		v42 =  6.211426728363857e-10, v43 = -1.119011592875110e-10,
+		v44 = -1.941660213148725e-11, v45 = -1.864826425365600e-14,
+		v46 =  1.119522344879478e-14, v47 = -1.200507748551599e-15,
+		v48 =  6.057902487546866e-17 ,
+		a01 =  2.839940833161907e0,   a02 = -6.295518531177023e-2,
+		a03 =  3.545416635222918e-3,  a04 = -2.986498947203215e-2,
+		a05 =  4.655718814958324e-4,  a06 =  5.095422573880500e-4,
+		a07 = -2.853969343267241e-5,  a08 =  4.935118121048767e-7,
+		a09 = -3.436090079851880e-4,  a10 =  7.452101440691467e-6,
+		a11 =  6.876837219536232e-7,  a12 = -1.988366587925593e-8,
+		a13 = -2.123038140592916e-11, a14 =  2.775927747785646e-3,
+		a15 = -4.699214888271850e-5,  a16 =  3.358540072460230e-6,
+		a17 =  2.697475730017109e-9,  a18 = -2.764306979894411e-5,
+		a19 =  2.525874630197091e-7,  a20 =  2.858362524508931e-9,
+		a21 = -7.244588807799565e-11, a22 =  3.801564588876298e-7,
+		a23 = -1.534575373851809e-8,  a24 = -1.390254702334843e-10,
+		a25 =  1.072438894227657e-11, a26 = -3.212746477974189e-7,
+		a27 =  6.382827821123254e-9,  a28 = -5.793038794625329e-12,
+		a29 =  6.211426728363857e-10, a30 = -1.941660213148725e-11,
+		a31 = -3.729652850731201e-14, a32 =  1.119522344879478e-14,
+		a33 =  6.057902487546866e-17, 
+		b01 = -6.698001071123802e0,   b02 = -2.986498947203215e-2,
+		b03 =  2.327859407479162e-4,  b04 = -5.983233568452735e-2,
+		b05 =  7.643133860820750e-4,  b06 = -2.140477007450431e-5,
+		b07 =  2.467559060524383e-7,  b08 = -1.806789763745328e-4,
+		b09 =  6.876837219536232e-7,  b10 =  1.550932729220080e-10,
+		b11 = -7.521448093615448e-3,  b12 = -2.764306979894411e-5,
+		b13 =  1.262937315098546e-7,  b14 =  9.527875081696435e-10,
+		b15 = -1.811147201949891e-11, b16 = -4.954963307079632e-5,
+		b17 =  5.702346883314446e-7,  b18 = -1.150931530388857e-8,
+		b19 = -6.951273511674217e-11, b20 =  4.021645853353715e-12,
+		b21 =  1.083865310229748e-5,  b22 = -1.105097577149576e-7,
+		b23 =  6.211426728363857e-10, b24 =  1.119522344879478e-14;
+
+	double	sqrtsa, v_hat_denominator, v_hat_numerator;
+	double	dvhatden_dct, dvhatnum_dct, dvhatden_dctdct, dvhatden_dctdsa;
+	double	dvhatden_dsa, dvhatnum_dsa, dvhatnum_dsadsa, dvhatden_dsadsa;
+	double	dvhatnum_dctdct, dvhatnum_dsadct, dvhatnum_dctdsa;
+	double	p1a, p1b, p1c, p1d, part1, factor2a, factor2b;
+	double	p2a, p2b, p2c, p2d, p2e, part2;
+	double	factor3a, factor3b, p3a, p3b, p3c, p3d, part3;
+
+	sqrtsa = sqrt(sa);
+
+	v_hat_denominator = v01 + ct*(v02 + ct*(v03 + v04*ct))
+			+ sa*(v05 + ct*(v06 + v07*ct)
+			+ sqrtsa*(v08 + ct*(v09 + ct*(v10 + v11*ct))))
+			+ p*(v12 + ct*(v13 + v14*ct) + sa*(v15 + v16*ct)
+			+ p*(v17 + ct*(v18 + v19*ct) + v20*sa));
+
+	v_hat_numerator = v21 + ct*(v22 + ct*(v23 + ct*(v24 + v25*ct)))
+			+ sa*(v26 + ct*(v27 + ct*(v28 + ct*(v29 + v30*ct)))
+			+ v36*sa
+			+ sqrtsa*(v31 + ct*(v32 + ct*(v33 + ct*(v34 + v35*ct)))))
+			+ p*(v37 + ct*(v38 + ct*(v39 + v40*ct))
+			+ sa*(v41 + v42*ct)
+			+ p*(v43 + ct*(v44 + v45*ct + v46*sa)
+			+ p*(v47 + v48*ct)));
+
+	dvhatden_dct = a01 + ct*(a02 + a03*ct)
+			+ sa*(a04 + a05*ct
+			+ sqrtsa*(a06 + ct*(a07 + a08*ct)))
+			+ p*(a09 + a10*ct + a11*sa
+			+ p*(a12 + a13*ct));
+
+	dvhatnum_dct = a14 + ct*(a15 + ct*(a16 + a17*ct))
+			+ sa*(a18 + ct*(a19 + ct*(a20 + a21*ct))
+			+ sqrtsa*(a22 + ct*(a23 + ct*(a24 + a25*ct))))
+			+ p*(a26 + ct*(a27 + a28*ct) + a29*sa
+			+ p*(a30 + a31*ct + a32*sa + a33*p));
+
+	dvhatden_dctdct = a02 + 2e0*a03*ct
+			+ sa*(a05 + sqrtsa*(a07 + 2e0*a08*ct))
+			+ p*(a10 + a13*p);
+     
+	dvhatden_dctdsa = a04 + a05*ct
+			+ (3e0/2e0)*sqrtsa*(a06 + ct*(a07 + a08*ct))
+			+ a11*p;
+
+	dvhatden_dsa = b01 + ct*(b02 + b03*ct)
+			+ sqrtsa*(b04 + ct*(b05 + ct*(b06 + b07*ct)))
+			+ p*(b08 + b09*ct + b10*p);
+
+	dvhatnum_dsa = b11 + ct*(b12 + ct*(b13 + ct*(b14 + b15*ct)))
+			+ sqrtsa*(b16 + ct*(b17 + ct*(b18 + ct*(b19 + b20*ct))))
+			+ b21*sa
+			+ p*(b22 + ct*(b23 + b24*p));
+
+	dvhatnum_dctdct = a15 + ct*(2*a16 + 3*a17*ct)
+			+ sa*(a19 + ct*(2*a20 + 3*a21*ct)
+			+sqrtsa*(a23 + ct*(2*a24 + 3*a25*ct)))
+			+ p*(a27 + 2*a28*ct + a31*p);
+
+	dvhatnum_dctdsa = a18 + ct*(a19 + ct*(a20 + a21*ct))
+			+ (3e0/2e0)*sqrtsa*(a22 + ct*(a23 + ct*(a24 + a25*ct)))
+			+ p*(a29 + p*a32);
+
+	dvhatnum_dsadsa = (1e0/(2e0*sqrtsa))*(b16 +
+			   ct*(b17 + ct*(b18 + ct*(b19 + b20*ct)))) + b21;
+
+	dvhatden_dsadsa = (1e0/(2e0*sqrtsa))*(b04 +
+			   ct*(b05 + ct*(b06 + b07*ct)));
+
+	p1a = dvhatnum_dctdct/v_hat_numerator;
+	p1b = (dvhatnum_dct*dvhatden_dct)/(v_hat_numerator*v_hat_denominator);
+	p1c = dvhatden_dctdct/v_hat_denominator;
+	p1d = dvhatden_dct/v_hat_denominator;
+
+	part1 = p1a - 2e0*p1b - p1c + 2e0*p1d*p1d;
+
+	factor2a = (v_hat_denominator*dvhatnum_dct
+		   - v_hat_numerator*dvhatden_dct);
+	factor2b = (v_hat_denominator*dvhatnum_dsa
+		   - v_hat_numerator*dvhatden_dsa);
+
+	p2a = dvhatnum_dctdsa/v_hat_numerator;
+	p2b = (dvhatnum_dct*dvhatden_dsa)/(v_hat_numerator*v_hat_denominator);
+	p2c = (dvhatnum_dsa*dvhatden_dct)/(v_hat_numerator*v_hat_denominator);
+	p2d = dvhatden_dctdsa/v_hat_denominator;
+	p2e = (dvhatden_dct*dvhatden_dsa)/(v_hat_denominator*v_hat_denominator);
+
+	part2 = p2a - p2b - p2c - p2d + 2e0*p2e;
+
+	factor3a = (v_hat_denominator*dvhatnum_dct
+		   - v_hat_numerator*dvhatden_dct);
+	factor3b = (v_hat_denominator*dvhatnum_dsa
+		   - v_hat_numerator*dvhatden_dsa);
+
+	p3a = dvhatnum_dsadsa/v_hat_numerator;
+	p3b = (dvhatnum_dsa*dvhatden_dsa)/(v_hat_numerator*v_hat_denominator);
+	p3c = (v_hat_numerator*dvhatden_dsadsa)/
+		(v_hat_numerator*v_hat_denominator);
+	p3d = dvhatden_dsa/v_hat_denominator;
+
+	part3 = p3a - 2e0*p3b - p3c + 2e0*p3d*p3d;
+
+	return (part1 - 2e0*(factor2a/factor2b)*part2 +
+		(factor3a/factor3b)*(factor3a/factor3b)*part3);
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_thermobaric(sa,ct,p)  
+!==========================================================================
+
+!  Calculates the thermobaric coefficient of seawater with respect to
+!  Conservative Temperature.  This routine calculates rho from the 
+!  computationally-efficient 48-term expression for density in terms of
+!  SA, CT and p (IOC et al., 2010).
+!
+! sa     : Absolute Salinity                               [g/kg]
+! ct     : Conservative Temperature                        [deg C]
+! p      : sea pressure                                    [dbar]
+! 
+! gsw_thermobaric  : thermobaric coefficient with          [ 1/(K Pa) ] 
+!                    respect to Conservative Temperature (48 term equation)
+*/
+double
+gsw_thermobaric(double sa, double ct, double p)
+{
+	double	v01 =  9.998420897506056e2,   v02 =  2.839940833161907e0,
+		v03 = -3.147759265588511e-2,  v04 =  1.181805545074306e-3,
+		v05 = -6.698001071123802e0,   v06 = -2.986498947203215e-2,
+		v07 =  2.327859407479162e-4,  v08 = -3.988822378968490e-2,
+		v09 =  5.095422573880500e-4,  v10 = -1.426984671633621e-5,
+		v11 =  1.645039373682922e-7,  v12 = -2.233269627352527e-2,
+		v13 = -3.436090079851880e-4,  v14 =  3.726050720345733e-6,
+		v15 = -1.806789763745328e-4,  v16 =  6.876837219536232e-7,
+		v17 = -3.087032500374211e-7,  v18 = -1.988366587925593e-8,
+		v19 = -1.061519070296458e-11, v20 =  1.550932729220080e-10,
+		v21 =  1.0e0,
+		v22 =  2.775927747785646e-3,  v23 = -2.349607444135925e-5,
+		v24 =  1.119513357486743e-6,  v25 =  6.743689325042773e-10,
+		v26 = -7.521448093615448e-3,  v27 = -2.764306979894411e-5,
+		v28 =  1.262937315098546e-7,  v29 =  9.527875081696435e-10,
+		v30 = -1.811147201949891e-11, v31 = -3.303308871386421e-5,
+		v32 =  3.801564588876298e-7,  v33 = -7.672876869259043e-9,
+		v34 = -4.634182341116144e-11, v35 =  2.681097235569143e-12,
+		v36 =  5.419326551148740e-6,  v37 = -2.742185394906099e-5,
+		v38 = -3.212746477974189e-7,  v39 =  3.191413910561627e-9,
+		v40 = -1.931012931541776e-12, v41 = -1.105097577149576e-7,
+		v42 =  6.211426728363857e-10, v43 = -1.119011592875110e-10,
+		v44 = -1.941660213148725e-11, v45 = -1.864826425365600e-14,
+		v46 =  1.119522344879478e-14, v47 = -1.200507748551599e-15,
+		v48 =  6.057902487546866e-17 ,
+		a01 =  2.839940833161907e0,   a02 = -6.295518531177023e-2,
+		a03 =  3.545416635222918e-3,  a04 = -2.986498947203215e-2,
+		a05 =  4.655718814958324e-4,  a06 =  5.095422573880500e-4,
+		a07 = -2.853969343267241e-5,  a08 =  4.935118121048767e-7,
+		a09 = -3.436090079851880e-4,  a10 =  7.452101440691467e-6,
+		a11 =  6.876837219536232e-7,  a12 = -1.988366587925593e-8,
+		a13 = -2.123038140592916e-11, a14 =  2.775927747785646e-3,
+		a15 = -4.699214888271850e-5,  a16 =  3.358540072460230e-6,
+		a17 =  2.697475730017109e-9,  a18 = -2.764306979894411e-5,
+		a19 =  2.525874630197091e-7,  a20 =  2.858362524508931e-9,
+		a21 = -7.244588807799565e-11, a22 =  3.801564588876298e-7,
+		a23 = -1.534575373851809e-8,  a24 = -1.390254702334843e-10,
+		a25 =  1.072438894227657e-11, a26 = -3.212746477974189e-7,
+		a27 =  6.382827821123254e-9,  a28 = -5.793038794625329e-12,
+		a29 =  6.211426728363857e-10, a30 = -1.941660213148725e-11,
+		a31 = -3.729652850731201e-14, a32 =  1.119522344879478e-14,
+		a33 =  6.057902487546866e-17, 
+		b01 = -6.698001071123802e0,   b02 = -2.986498947203215e-2,
+		b03 =  2.327859407479162e-4,  b04 = -5.983233568452735e-2,
+		b05 =  7.643133860820750e-4,  b06 = -2.140477007450431e-5,
+		b07 =  2.467559060524383e-7,  b08 = -1.806789763745328e-4,
+		b09 =  6.876837219536232e-7,  b10 =  1.550932729220080e-10,
+		b11 = -7.521448093615448e-3,  b12 = -2.764306979894411e-5,
+		b13 =  1.262937315098546e-7,  b14 =  9.527875081696435e-10,
+		b15 = -1.811147201949891e-11, b16 = -4.954963307079632e-5,
+		b17 =  5.702346883314446e-7,  b18 = -1.150931530388857e-8,
+		b19 = -6.951273511674217e-11, b20 =  4.021645853353715e-12,
+		b21 =  1.083865310229748e-5,  b22 = -1.105097577149576e-7,
+		b23 =  6.211426728363857e-10, b24 =  1.119522344879478e-14,
+		c01 = -2.233269627352527e-2,  c02 = -3.436090079851880e-4,
+		c03 =  3.726050720345733e-6,  c04 = -1.806789763745328e-4,
+		c05 =  6.876837219536232e-7,  c06 = -6.174065000748422e-7,
+		c07 = -3.976733175851186e-8,  c08 = -2.123038140592916e-11,
+		c09 =  3.101865458440160e-10, c10 = -2.742185394906099e-5,
+		c11 = -3.212746477974189e-7,  c12 =  3.191413910561627e-9,
+		c13 = -1.931012931541776e-12, c14 = -1.105097577149576e-7,
+		c15 =  6.211426728363857e-10, c16 = -2.238023185750219e-10,
+		c17 = -3.883320426297450e-11, c18 = -3.729652850731201e-14,
+		c19 =  2.239044689758956e-14, c20 = -3.601523245654798e-15,
+		c21 =  1.817370746264060e-16,db2pa = 1e-4;
+
+	double	sqrtsa, v_hat_denominator, v_hat_numerator;
+	double	dvhatden_dct, dvhatnum_dct, dvhatden_dp, dvhatnum_dp;
+	double	dvhatden_dsa, dvhatnum_dsa, dvhatden_dpdct, dvhatnum_dpdct;
+	double	dvhatden_dpdsa, dvhatnum_dpdsa;
+	double	p1a, p1b, p1c, p1d, p1e, part1, factor2;
+	double	p2a, p2b, p2c, p2d, p2e, part2;
+
+	sqrtsa = sqrt(sa);
+
+	v_hat_denominator = v01 + ct*(v02 + ct*(v03 + v04*ct))
+		+ sa*(v05 + ct*(v06 + v07*ct)
+		+ sqrtsa*(v08 + ct*(v09 + ct*(v10 + v11*ct))))
+		+ p*(v12 + ct*(v13 + v14*ct) + sa*(v15 + v16*ct)
+		+ p*(v17 + ct*(v18 + v19*ct) + v20*sa));
+
+	v_hat_numerator = v21 + ct*(v22 + ct*(v23 + ct*(v24 + v25*ct)))
+		+ sa*(v26 + ct*(v27 + ct*(v28 + ct*(v29 + v30*ct))) + v36*sa
+		+ sqrtsa*(v31 + ct*(v32 + ct*(v33 + ct*(v34 + v35*ct)))))
+		+ p*(v37 + ct*(v38 + ct*(v39 + v40*ct))
+		+ sa*(v41 + v42*ct)
+		+ p*(v43 + ct*(v44 + v45*ct + v46*sa)
+		+ p*(v47 + v48*ct)));
+
+	dvhatden_dct = a01 + ct*(a02 + a03*ct)
+		+ sa*(a04 + a05*ct
+		+ sqrtsa*(a06 + ct*(a07 + a08*ct)))
+		+ p*(a09 + a10*ct + a11*sa
+		+ p*(a12 + a13*ct));
+
+	dvhatnum_dct = a14 + ct*(a15 + ct*(a16 + a17*ct))
+		+ sa*(a18 + ct*(a19 + ct*(a20 + a21*ct))
+		+ sqrtsa*(a22 + ct*(a23 + ct*(a24 + a25*ct))))
+		+ p*(a26 + ct*(a27 + a28*ct) + a29*sa
+		+ p*(a30 + a31*ct + a32*sa + a33*p));
+
+	dvhatden_dsa = b01 + ct*(b02 + b03*ct)
+		+ sqrtsa*(b04 + ct*(b05 + ct*(b06 + b07*ct)))
+		+ p*(b08 + b09*ct + b10*p);
+
+	dvhatnum_dsa = b11 + ct*(b12 + ct*(b13 + ct*(b14 + b15*ct)))
+		+ sqrtsa*(b16 + ct*(b17 + ct*(b18 + ct*(b19 + b20*ct))))
+		+ b21*sa + p*(b22 + ct*(b23 + b24*p));
+
+	dvhatden_dp = c01 + ct*(c02 + c03*ct)
+		+ sa*(c04 + c05*ct)
+		+ p*(c06 + ct*(c07 + c08*ct) + c09*sa);
+
+	dvhatnum_dp = c10 + ct*(c11 + ct*(c12 + c13*ct))
+		+ sa*(c14 + c15*ct)
+		+ p*(c16 + ct*(c17 + c18*ct + c19*sa)
+		+ p*(c20 + c21*ct));
+
+	dvhatden_dpdct = c02 + 2e0*c03*ct + c05*sa
+		+ p*(c07 + 2e0*c08*ct);
+       
+	dvhatnum_dpdct = c11 + ct*(2e0*c12 + 3e0*c13*ct) + c15*sa
+		+ p*(c17 + ct*2e0*c18 + c19*sa + c21*p);
+
+	dvhatden_dpdsa = c04 + c05*ct + c09*p;
+
+	dvhatnum_dpdsa = c14 + c15*ct + c19*ct*p;
+
+	p1a = dvhatnum_dpdct/v_hat_numerator;
+	p1b = (dvhatnum_dct*dvhatden_dp)/(v_hat_numerator*v_hat_denominator);
+	p1c = (dvhatnum_dp*dvhatden_dct)/(v_hat_numerator*v_hat_denominator);
+	p1d = (dvhatden_dp*dvhatden_dct)/(v_hat_denominator*v_hat_denominator);
+	p1e = dvhatden_dpdct/v_hat_denominator;
+
+	part1 =  p1a - p1b - p1c + 2e0*p1d - p1e;
+
+	factor2 = (v_hat_denominator*dvhatnum_dct
+		   - v_hat_numerator*dvhatden_dct)/
+           (v_hat_denominator*dvhatnum_dsa - v_hat_numerator*dvhatden_dsa);
+
+	p2a = dvhatnum_dpdsa/v_hat_numerator;
+	p2b = (dvhatnum_dsa*dvhatden_dp)/(v_hat_numerator*v_hat_denominator);
+	p2c = (dvhatnum_dp*dvhatden_dsa)/(v_hat_numerator*v_hat_denominator);
+	p2d = (dvhatden_dp*dvhatden_dsa)/(v_hat_denominator*v_hat_denominator);
+	p2e = dvhatden_dpdsa/v_hat_denominator;
+
+	part2 =  p2a - p2b - p2c + 2e0*p2d - p2e;
+
+	return ((part1 - factor2*part2)*db2pa);
+}
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+function gsw_internal_energy(sa,ct,p)  
 !==========================================================================
 
 !  Calculates internal energy of seawater using the computationally
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1595,12 +2429,12 @@ gsw_internal_energy(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_enthalpy(sa,ct,p)  !bind(C, name='gsw_enthalpy')
+function gsw_enthalpy(sa,ct,p)  
 !==========================================================================
 
 !  Calculates specific enthalpy of seawater using the computationally-
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1685,12 +2519,12 @@ gsw_enthalpy(double sa, double ct, double p)
 
 /*
 !==========================================================================
-function gsw_dynamic_enthalpy(sa,ct,p)  !bind(C, name='gsw_dynamic_enthalpy')
+function gsw_dynamic_enthalpy(sa,ct,p)  
 !==========================================================================
 
 !  Calculates dynamic enthalpy of seawater using the computationally-
 !  efficient 48-term expression for density in terms of SA, CT and p
-!  (McDougall et al., 2011)
+!  (IOC et al., 2010)
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! ct     : Conservative Temperature                        [deg C]
@@ -1780,7 +2614,7 @@ function gsw_sa_from_rho(rho,ct,p)
 !  Calculates the Absolute Salinity of a seawater sample, for given values
 !  of its density, Conservative Temperature and sea pressure (in dbar).
 !  This function uses the computationally-efficient 48-term expression for
-!  density in terms of SA, CT and p (McDougall et al., 2013).
+!  density in terms of SA, CT and p (IOC et al., 2010).
 
 !  rho =  density of a seawater sample (e.g. 1026 kg/m^3).       [ kg/m^3 ]
 !   Note. This input has not had 1000 kg/m^3 subtracted from it.
@@ -1829,11 +2663,214 @@ gsw_sa_from_rho(double rho, double ct, double p)
 !--------------------------------------------------------------------------
 
 !--------------------------------------------------------------------------
+! water column properties, based on the 48-term expression for density
+!--------------------------------------------------------------------------
+
+!==========================================================================
+subroutine gsw_nsquared(sa,ct,p,lat,nz,n2,p_mid)
+!==========================================================================
+
+!  Calculates the buoyancy frequency squared (N^2)(i.e. the Brunt-Vaisala 
+!  frequency squared) at the mid pressure from the equation,
+!
+!
+!           2      2             beta.d(SA) - alpha.d(CT)
+!         N   =  g  .rho_local. -------------------------
+!                                          dP
+!
+!  The pressure increment, dP, in the above formula is in Pa, so that it is
+!  10^4 times the pressure increment dp in dbar. 
+!
+!  Note. This routine uses rho from "gsw_rho", which is the computationally
+!  efficient 48-term expression for density in terms of SA, CT and p.  The    
+!  48-term equation has been fitted in a restricted range of parameter 
+!  space, and is most accurate inside the "oceanographic funnel" described 
+!  in IOC et al. (2010).  The GSW library function "gsw_infunnel(SA,CT,p)" 
+!  is avaialble to be used if one wants to test if some of one's data lies
+!  outside this "funnel".  
+
+! sa     : Absolute Salinity         (a profile (length nz))     [g/kg]
+! ct     : Conservative Temperature  (a profile (length nz))     [deg C]
+! p      : sea pressure              (a profile (length nz))     [dbar]
+! lat    : latitude                  (a profile (length nz))     [deg N]                            
+! nz     : number of bottles                             
+! n2     : Brunt-Vaisala Frequency squared  (length nz-1)        [s^-2]
+! p_mid  : Mid pressure between p grid      (length nz-1)        [dbar]
+*/
+void
+gsw_nsquared(double *sa, double *ct, double *p, double *lat, int nz,
+	double *n2, double *p_mid)
+{
+	int	k;
+
+	double	db2pa = 1e4;
+	double	grav_local, dsa, sa_mid, dct, ct_mid, dp, rho_mid;
+	double	alpha_mid, beta_mid;
+
+	for (k = 0; k < nz-1; k++) {
+	    grav_local = 0.5*(gsw_grav(lat[k],p[k]) + gsw_grav(lat[k+1],p[k+1]));
+
+	    dsa = (sa[k+1] - sa[k]);
+	    sa_mid = 0.5*(sa[k] + sa[k+1]);
+	    dct = (ct[k+1] - ct[k]);
+	    ct_mid = 0.5*(ct[k] + ct[k+1]);
+	    dp = (p[k+1] - p[k]);
+	    p_mid[k] = 0.5*(p[k] + p[k+1]);
+
+	    rho_mid = gsw_rho(sa_mid,ct_mid,p_mid[k]);
+	    alpha_mid = gsw_alpha(sa_mid,ct_mid,p_mid[k]);
+	    beta_mid = gsw_beta(sa_mid,ct_mid,p_mid[k]);
+
+	    n2[k] = (grav_local*grav_local)*(rho_mid/(db2pa*dp))*
+			(beta_mid*dsa - alpha_mid*dct);
+	}
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+subroutine gsw_turner_rsubrho(sa,ct,p,nz,tu,rsubrho,p_mid)
+!==========================================================================
+
+!  Calculates the Turner angle and the Rsubrho as a function of pressure 
+!  down a vertical water column.  These quantities express the relative 
+!  contributions of the vertical gradients of Conservative Temperature 
+!  and Absolute Salinity to the vertical stability (the square of the 
+!  Brunt-Vaisala Frequency squared, N^2).  Tu and Rsubrho are evaluated at 
+!  the mid pressure between the individual data points in the vertical.  
+!  This function uses computationally-efficient 48-term expression for 
+!  density in terms of SA, CT and p (IOC et al., 2010).  Note that 
+!  in the double-diffusive literature, papers concerned with the 
+!  "diffusive" form of double-diffusive convection often define the 
+!  stability ratio as the reciprocal of what is defined here as the 
+!  stability ratio.  
+!
+!  Note. The 48-term equation has been fitted in a restricted range of parameter 
+!  space, and is most accurate inside the "oceanographic funnel" described 
+!  in IOC et al. (2010).  The GSW library function "gsw_infunnel(SA,CT,p)" 
+!  is avaialble to be used if one wants to test if some of one's data lies
+!  outside this "funnel".  
+
+! sa      : Absolute Salinity         (a profile (length nz))     [g/kg]
+! ct      : Conservative Temperature  (a profile (length nz))     [deg C]
+! p       : sea pressure              (a profile (length nz))     [dbar]                            
+! nz      : number of bottles                             
+! tu      : Turner angle, on the same (nz-1) grid as p_mid.
+!           Turner angle has units of:           [ degrees of rotation ]
+! rsubrho : Stability Ratio, on the same (nz-1) grid as p_mid.
+!           Rsubrho is dimensionless.                       [ unitless ]
+! p_mid   : Mid pressure between p grid  (length nz-1)           [dbar]
+*/
+void
+gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
+	double *tu, double *rsubrho, double *p_mid)
+{
+	int	k;
+
+	double	pi = 3.141592653589793e0;
+	double	dsa, sa_mid, dct, ct_mid, dp;
+	double	alpha_mid, beta_mid;
+
+	for (k = 0; k < nz-1; k++) {
+	    dsa = (sa[k] - sa[k+1]);
+	    sa_mid = 0.5e0*(sa[k] + sa[k+1]);
+	    dct = (ct[k] - ct[k+1]);
+	    ct_mid = 0.5e0*(ct[k] + ct[k+1]);
+	    dp = (p[k] - p[k+1]);
+	    p_mid[k] = 0.5e0*(p[k] + p[k+1]);
+
+	    alpha_mid = gsw_alpha(sa_mid,ct_mid,p_mid[k]);
+	    beta_mid = gsw_beta(sa_mid,ct_mid,p_mid[k]);
+
+	    tu[k] = (180e0/pi)*atan2((alpha_mid*dct + beta_mid*dsa),
+				(alpha_mid*dct - beta_mid*dsa));
+
+	    if (dsa == 0e0)
+		rsubrho[k] = GSW_INVALID_VALUE;
+	    else 
+		rsubrho[k] = (alpha_mid*dct)/(beta_mid*dsa);
+	}
+}
+
+/*
+!--------------------------------------------------------------------------
+
+!==========================================================================
+subroutine gsw_ipv_vs_fnsquared_ratio(sa,ct,p,nz,ipv_vs_fnsquared_ratio,p_mid)
+!==========================================================================
+
+!  Calculates the ratio of the vertical gradient of potential density to 
+!  the vertical gradient of locally-referenced potential density.  This 
+!  ratio is also the ratio of the planetary Isopycnal Potential Vorticity
+!  (IPV) to f times N^2, hence the name for this variable,
+!  IPV_vs_fNsquared_ratio (see Eqn. (3.20.5) of IOC et al. (2010)). 
+!  The reference sea pressure, p_ref, of the potential density surface must
+!  have a constant value.
+!
+!  IPV_vs_fNsquared_ratio is evaluated at the mid pressure between the 
+!  individual data points in the vertical.  This function uses the 
+!  computationally-efficient 48-term expression for density in terms of 
+!  SA, CT and p (IOC et al., 2010). 
+!  Note. The 48-term equation has been fitted in a restricted range of parameter 
+!  space, and is most accurate inside the "oceanographic funnel" described 
+!  in IOC et al. (2010).  The GSW library function "gsw_infunnel(SA,CT,p)" 
+!  is avaialble to be used if one wants to test if some of one's data lies
+!  outside this "funnel".  
+
+! sa      : Absolute Salinity         (a profile (length nz))     [g/kg]
+! ct      : Conservative Temperature  (a profile (length nz))     [deg C]
+! p       : sea pressure              (a profile (length nz))     [dbar]                            
+! nz      : number of bottles                             
+! IPV_vs_fNsquared_ratio
+!         : The ratio of the vertical gradient of potential density
+!           referenced to p_ref, to the vertical gradient of locally-
+!           referenced potential density.  It is ouput on the same
+!           vertical (M-1)xN grid as p_mid. 
+!           IPV_vs_fNsquared_ratio is dimensionless.          [ unitless ]
+! p_mid   : Mid pressure between p grid  (length nz-1)           [dbar]
+*/
+void
+gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, int nz,
+	double *ipv_vs_fnsquared_ratio, double *p_mid)
+{
+	int	k;
+
+	double	dsa, sa_mid, dct, ct_mid, dp, p_ref;
+	double	alpha_mid, beta_mid;
+	double	alpha_pref, beta_pref, numerator, denominator;
+
+	for (k = 0; k < nz-1; k++) {
+	    dsa = (sa[k+1] - sa[k]);
+	    sa_mid = 0.5*(sa[k] + sa[k+1]);
+	    dct = (ct[k+1] - ct[k]);
+	    ct_mid = 0.5*(ct[k] + ct[k+1]);
+	    dp = (p[k+1] - p[k]);
+	    p_mid[k] = 0.5*(p[k] + p[k+1]);
+
+	    alpha_mid = gsw_alpha(sa_mid,ct_mid,p_mid[k]);
+	    beta_mid = gsw_beta(sa_mid,ct_mid,p_mid[k]);
+	    alpha_pref = gsw_alpha(sa_mid,ct_mid,p_ref);
+	    beta_pref = gsw_beta(sa_mid,ct_mid,p_ref);
+
+	    numerator = dct*alpha_pref - dsa*beta_pref;
+	    denominator = dct*alpha_mid - dsa*beta_mid;
+
+	    if (denominator == 0)
+		ipv_vs_fnsquared_ratio[k] = GSW_INVALID_VALUE;
+	    else
+		ipv_vs_fnsquared_ratio[k] = numerator/denominator;
+	}
+}
+/*
+!--------------------------------------------------------------------------
+
+!--------------------------------------------------------------------------
 ! freezing temperatures
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_ct_freezing(sa,p,saturation_fraction)  !bind(C, name='gsw_ct_freezing')
+function gsw_ct_freezing(sa,p,saturation_fraction)  
 !==========================================================================
 
 ! Calculates the Conservative Temperature at which of seawater freezes 
@@ -1894,7 +2931,7 @@ gsw_ct_freezing(double sa, double p, double saturation_fraction)
 
 /*
 !==========================================================================
-function gsw_t_freezing(sa,p,saturation_fraction)  !bind(C, name='gsw_t_freezing')
+function gsw_t_freezing(sa,p,saturation_fraction)  
 !==========================================================================
 
 ! Calculates the in-situ temperature at which of seawater freezes 
@@ -1927,7 +2964,7 @@ gsw_t_freezing(double sa, double p, double saturation_fraction)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_latentheat_melting(sa,p)  !bind(C, name='gsw_latentheat_melting')
+function gsw_latentheat_melting(sa,p)  
 !==========================================================================
 
 ! Calculates latent heat, or enthalpy, of melting.
@@ -1970,7 +3007,7 @@ gsw_latentheat_melting(double sa, double p)
 
 /*
 !==========================================================================
-function gsw_latentheat_evap_ct(sa,ct)  !bind(C, name='gsw_latentheat_evap_ct')
+function gsw_latentheat_evap_ct(sa,ct)  
 !==========================================================================
 
 ! Calculates latent heat, or enthalpy, of evaporation.
@@ -2013,7 +3050,7 @@ gsw_latentheat_evap_ct(double sa, double ct)
 
 /*
 !==========================================================================
-function gsw_latentheat_evap_t(sa,t)  !bind(C, name='gsw_latentheat_evap_t')
+function gsw_latentheat_evap_t(sa,t)  
 !==========================================================================
 
 ! Calculates latent heat, or enthalpy, of evaporation.
@@ -2079,7 +3116,7 @@ gsw_grav(double lat, double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_rho_t_exact(sa,t,p)  !bind(C, name='gsw_rho_t_exact')
+function gsw_rho_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates in-situ density of seawater from Absolute Salinity and 
@@ -2106,7 +3143,7 @@ gsw_rho_t_exact(double sa, double t, double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_pot_rho_t_exact(sa,t,p,p_ref)  !bind(C, name='gsw_pot_rho_t_exact')
+function gsw_pot_rho_t_exact(sa,t,p,p_ref)  
 !==========================================================================
 
 ! Calculates the potential density of seawater
@@ -2130,7 +3167,7 @@ gsw_pot_rho_t_exact(double sa, double t, double p, double p_ref)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_alpha_wrt_t_exact(sa,t,p)  !bind(C, name='gsw_alpha_wrt_t_exact')
+function gsw_alpha_wrt_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates thermal expansion coefficient of seawater with respect to 
@@ -2158,7 +3195,7 @@ gsw_alpha_wrt_t_exact(double sa, double t, double p)
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_beta_const_t_exact(sa,t,p)  !bind(C, name='gsw_beta_const_t_exact')
+function gsw_beta_const_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates saline (haline) contraction coefficient of seawater at 
@@ -2183,7 +3220,7 @@ gsw_beta_const_t_exact(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_specvol_t_exact(sa,t,p)  !bind(C, name='gsw_specvol_t_exact')
+function gsw_specvol_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates the specific volume of seawater
@@ -2207,7 +3244,7 @@ gsw_specvol_t_exact(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_sound_speed_t_exact(sa,t,p)  !bind(C, name='gsw_sound_speed_t_exact')
+function gsw_sound_speed_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates the sound speed of seawater
@@ -2237,7 +3274,7 @@ gsw_sound_speed_t_exact(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_kappa_t_exact(sa,t,p)  !bind(C, name='gsw_kappa_t_exact')
+function gsw_kappa_t_exact(sa,t,p)  
 !==========================================================================
 
 ! isentropic compressibility of seawater
@@ -2267,7 +3304,7 @@ gsw_kappa_t_exact(double sa, double t, double p)
 
 /*
 !==========================================================================
-function gsw_enthalpy_t_exact(sa,t,p)  !bind(C, name='gsw_enthalpy_t_exact')
+function gsw_enthalpy_t_exact(sa,t,p)  
 !==========================================================================
 
 ! Calculates the specific enthalpy of seawater

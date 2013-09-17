@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v 9a11f73db829 2013/03/31 05:27:38 fdelahoyde $
+**  $Id: gsw_check_functions.c,v ff64a09aa249 2013/09/17 21:43:56 fdelahoyde $
 */
 #include <gswteos-10.h>
 
@@ -16,6 +16,7 @@ static void	report(char *what, double acceptable, double actual,
 #define alpha_ca  8.264713918662917e-015
 #define alpha_ct_exact_ca  8.257102480598889e-015
 #define alpha_ct_exact_rab_ca  8.257102480598889e-015
+#define alpha_on_beta_ca 1.052907760978883e-11
 #define alpha_rab_ca  8.264713918662917e-015
 #define alpha_wrt_ct_t_exact_ca  8.257094010269417e-015
 #define alpha_wrt_pt_t_exact_ca  8.599068316130290e-015
@@ -29,7 +30,7 @@ static void	report(char *what, double acceptable, double actual,
 #define beta_rab_ca  1.846179459308317e-015
 #define brinesa_ct_ca  1.300080043620255e-010
 #define brinesa_t_ca  1.300293206440983e-010
-#define cabbeling_ca  1.744482989595071e-015
+#define cabbeling_ca  1.634722766223964e-16
 #define c_from_sp_ca  6.163816124171717e-010
 #define chem_potential_salt_t_exact_ca  4.805315256817266e-007
 #define chem_potential_t_exact_ca  1.317864928296331e-009
@@ -52,6 +53,9 @@ static void	report(char *what, double acceptable, double actual,
 #define deltasa_atlas_ca  6.945514042372425e-013
 #define depth_from_z_ca  2.287223921371151e-008
 #define distance_ca  4.470348358154297e-008
+#define drho_dct_ca 8.315403920988729e-12
+#define drho_dp_ca 1.782157321023048e-18
+#define drho_dsa_ca 1.943112337698949e-12
 #define dynamic_enthalpy_ca  2.288754734930485e-007
 #define dynamic_enthalpy_ct_exact_ca  2.288797986693680e-007
 #define dynamic_enthalpy_t_exact_ca  2.288943505845964e-007
@@ -98,7 +102,7 @@ static void	report(char *what, double acceptable, double actual,
 #define ipvfn2_ca  3.474816878679121e-009
 #define isochoric_heat_cap_t_exact_ca  1.614353095646948e-009
 #define isopycnal_slope_ratio_ca  3.781384094736495e-010
-#define kappa_ca 1.717743939542931e-021
+#define kappa_ca 1.717743939542931e-21
 #define kappa_const_t_exact_ca  1.697064424229105e-021
 #define kappa_t_exact_ca  1.712677458291044e-021
 #define latentheat_evap_ct_ca  1.455657184123993e-006
@@ -175,7 +179,7 @@ static void	report(char *what, double acceptable, double actual,
 #define t_freezing_ca  2.157829470661454e-011
 #define t_from_ct_ca  6.000142604989378e-010
 #define t_from_rho_exact_ca  6.032974120273593e-010
-#define thermobaric_ca  2.527995218416681e-021
+#define thermobaric_ca  4.890907320111513e-23
 #define t_maxdensity_exact_ca  6.274447628129565e-011
 #define tu_ca  2.190718007000214e-008
 #define z_from_depth_ca  2.287223921371151e-008
@@ -189,8 +193,33 @@ int	gsw_error_flag=0, debug;
 int
 main(int argc, char **argv)
 {
+	int	nz=3;
 	double	sp, sa, sstar, sr, t, ct, pt, p, p_bs, p_ref, c, rho;
 	double	lon, long_bs, lat, lat_bs, saturation_fraction;
+	double	cabbeling, thermobaric, alpha_on_beta;
+	double	sigma0, sigma1, sigma2, sigma3, sigma4;
+	double	drho_dsa, drho_dct, drho_dp, drho_dsa_error, drho_dct_error;
+	double	drho_dp_error;
+
+	double	n2[2], p_mid_n2[2], n2_error[2], p_mid_n2_error[2];
+	double	ipvfn2[2],p_mid_ipvfn2[2];
+	double	ipvfn2_error[2], p_mid_ipvfn2_error[2];
+	double	tu[2], rsubrho[2], p_mid_tursr[2];
+	double	tu_error[2], rsubrho_error[2], p_mid_tursr_error[2];
+	double	sa_profile[3], ct_profile[3], p_profile[3], lat_profile[3];
+
+	sa_profile[0] = 35.5e0;
+	sa_profile[1] = 35.7e0;
+	sa_profile[2] = 35.6e0;
+	ct_profile[0] = 12.5e0;
+	ct_profile[1] = 15e0;
+	ct_profile[2] = 10e0;
+	p_profile[0] = 00e0;
+	p_profile[1] = 50e0;
+	p_profile[2] = 100e0;
+	lat_profile[0] = 10e0;
+	lat_profile[1] = 10e0;
+	lat_profile[2] = 10e0;
 
 	sp	=  35.5e0;
 	sa	= 35.7e0;
@@ -214,7 +243,7 @@ main(int argc, char **argv)
 
 	printf(
 "============================================================================\n"
-" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.01 (C)\n"
+" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.02 (C)\n"
 "============================================================================\n"
 "\n"
 " These are the check values for the subset of functions that have been \n"
@@ -282,14 +311,42 @@ main(int argc, char **argv)
 		gsw_alpha(sa,ct,p), 2.62460550806784356e-4);
 	report("gsw_beta", beta_ca,
 		gsw_beta(sa,ct,p), 7.29314455934463365e-4 );
+	report("gsw_alpha_on_beta", alpha_on_beta_ca,
+		gsw_alpha_on_beta(sa,ct,p), 0.359872958325632e0 );
+	gsw_rho_first_derivatives(sa,ct,p,&drho_dsa,&drho_dct,&drho_dp);
+	drho_dsa_error = fabs(drho_dsa - 0.748609372480258e0);
+	drho_dct_error = fabs(drho_dct + 0.269404269504765e0);
+	drho_dp_error = fabs(drho_dp - 4.287533235942749e-7);
+	printf("\t%-32.32s  ........  ", "gsw_rho_first_derivatives");
+	if (drho_dsa_error < drho_dsa_ca && drho_dct_error < drho_dct_ca
+	    && drho_dp_error < drho_dp_ca)
+            printf("passed\n");
+        else {
+            printf("failed\n");
+            gsw_error_flag      = 1;
+ 	}
 	report("gsw_specvol", specvol_ca,
 		gsw_specvol(sa,ct,p), 9.74225654586897711e-4 );
 	report("gsw_specvol_anom", specvol_anom_ca,
 		gsw_specvol_anom(sa,ct,p), 2.90948181201264571e-6 );
+	report("gsw_sigma0", sigma0_ca,
+		gsw_sigma0(sa,ct), 25.165674636323047e0);
+	report("gsw_sigma1", sigma1_ca,
+		gsw_sigma1(sa,ct), 29.434338510752923e0);
+	report("gsw_sigma2", sigma2_ca,
+		gsw_sigma2(sa,ct), 33.609842926904093e0);
+	report("gsw_sigma3", sigma3_ca,
+		gsw_sigma3(sa,ct), 37.695147569371784e0);
+	report("gsw_sigma4", sigma4_ca,
+		gsw_sigma4(sa,ct), 41.693064726656303e0);
 	report("gsw_sound_speed", sound_speed_ca,
 		gsw_sound_speed(sa,ct,p), 1527.2011773569989e0 );
 	report("gsw_kappa", kappa_ca,
 		gsw_kappa(sa,ct,p), 4.177024873349404e-010);
+	report("gsw_cabbeling", cabbeling_ca,
+		gsw_cabbeling(sa,ct,p), 9.463053321129075e-6);
+	report("gsw_thermobaric", thermobaric_ca,
+		gsw_thermobaric(sa,ct,p), 1.739078662082863e-12);
 	report("gsw_internal_energy", internal_energy_ca,
 		gsw_internal_energy(sa,ct,p), 79740.482561720783e0 );
 	report("gsw_enthalpy", enthalpy_ca,
@@ -299,6 +356,57 @@ main(int argc, char **argv)
 	rho	= gsw_rho(sa,ct,p);
 	report("gsw_sa_from_rho", rho_ca,
 		gsw_sa_from_rho(rho,ct,p), sa);
+	printf(
+  "\nWater column properties, based on the 48-term expression for density:\n\n"
+	);
+	gsw_nsquared(sa_profile,ct_profile,p_profile,lat_profile,nz,n2,
+			p_mid_n2);
+	n2_error[0] = fabs(n2[0] + 0.070960392693051e-3);
+	n2_error[1] = fabs(n2[1] - 0.175435821615983e-3);
+	p_mid_n2_error[0] = fabs(p_mid_n2[0] - 25e0);
+	p_mid_n2_error[1] = fabs(p_mid_n2[1] - 75e0);
+	printf("\t%-32.32s  ........  ", "gsw_nsquared");
+	if (n2_error[0] < n2_ca && n2_error[1] < n2_ca &&
+	    p_mid_n2_error[0] < p_mid_n2_ca && p_mid_n2_error[1] < p_mid_n2_ca)
+            printf("passed\n");
+        else {
+            printf("failed\n");
+            gsw_error_flag      = 1;
+ 	}
+	gsw_turner_rsubrho(sa_profile,ct_profile,p_profile,nz,tu,
+				rsubrho,p_mid_tursr);
+	tu_error[0] = fabs(tu[0] + 1.187243981606485e2);
+	tu_error[1] = fabs(tu[1] - 0.494158257088517e2);
+	rsubrho_error[0] = fabs(rsubrho[0] - 3.425146897090065e0);
+	rsubrho_error[1] = fabs(rsubrho[1] - 12.949399443139164e0);
+	p_mid_tursr_error[0] = fabs(p_mid_tursr[0] - 25e0);
+	p_mid_tursr_error[1] = fabs(p_mid_tursr[1] - 75e0);
+	printf("\t%-32.32s  ........  ", "gsw_turner_rsubrho");
+	if (tu_error[0] < tu_ca && tu_error[1] < tu_ca &&  
+	    rsubrho_error[0] < rsubrho_ca && rsubrho_error[1] < rsubrho_ca &&  
+	    p_mid_tursr_error[0] < p_mid_tursr_ca &&
+	    p_mid_tursr_error[1] < p_mid_tursr_ca)
+            printf("passed\n");
+        else {
+            printf("failed\n");
+            gsw_error_flag      = 1;
+ 	}
+	gsw_ipv_vs_fnsquared_ratio(sa_profile,ct_profile,p_profile,nz,
+					ipvfn2,p_mid_ipvfn2);
+	ipvfn2_error[0] = fabs(ipvfn2[0] - 0.996783975249010e0);
+	ipvfn2_error[1] = fabs(ipvfn2[1] - 0.992112251478320e0);
+	p_mid_ipvfn2_error[0] = fabs(p_mid_ipvfn2[0] - 25e0);
+	p_mid_ipvfn2_error[1] = fabs(p_mid_ipvfn2[1] - 75e0);
+	printf("\t%-32.32s  ........  ", "gsw_ipv_vs_fnsquared_ratio");
+	if (ipvfn2_error[0] < ipvfn2_ca && 
+	    ipvfn2_error[1] < ipvfn2_ca && 
+	    p_mid_ipvfn2_error[0] < p_mid_ipvfn2_ca && 
+	    p_mid_ipvfn2_error[1] < p_mid_ipvfn2_ca)
+            printf("passed\n");
+        else {
+            printf("failed\n");
+            gsw_error_flag      = 1;
+ 	}
 	printf(
 	"\nFreezing temperatures:\n\n"
 	);
@@ -363,7 +471,7 @@ report(char *what, double acceptable, double actual, double expected)
 {
 	double	diff=fabs(actual-expected);
 
-	printf("\t%-24.24s  ........  ", what);
+	printf("\t%-32.32s  ........  ", what);
 	if (diff < acceptable)
 	    printf("passed\n");
 	else {
