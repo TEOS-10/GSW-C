@@ -1,5 +1,5 @@
-#  $Id: GNUmakefile,v e3e29ea3fb8e 2013/03/31 05:35:54 fdelahoyde $
-#  $Version: 3.01.0 $
+#  $Id: GNUmakefile,v 077b19612310 2013/09/17 22:55:03 fdelahoyde $
+#  $Version: 3.02.0 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
 .PHONY: MAKEVERSION_ERROR
@@ -116,3 +116,4 @@ show-release:
 getdocs:
 		@wget -k -np -p -m -nH --cut-dirs=2 \
 			http://teos-10.org/pubs/gsw/html/gsw_contents.html
+
