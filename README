@@ -1,7 +1,7 @@
-$Id: README,v 84284f7615b3 2013/03/29 03:52:26 fdelahoyde $
+$Id: README,v de674c62720f 2013/09/17 21:46:41 fdelahoyde $
 $Version: 3.01.0 $
 
-TEOS-10 V3.01 GSW Oceanographic Toolbox in C
+TEOS-10 V3.02 GSW Oceanographic Toolbox in C
 
 This is a translation of the original Fortran-90 source code into C.
 You should download the documentation from http://teos-10.org.
@@ -36,7 +36,8 @@ supplied header file:
 
 ChangeLog:
 
-2013-03-29	gsw-3.01.0
+2013-09-17:	gsw-3.02
+2013-03-29:	gsw-3.01.0
 2012-10-07:	gsw-3.0.1 New gsw_check_functions.c based on revised f90.
 2011-09-23:	gsw-3.0 Initial creation.
 
