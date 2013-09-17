@@ -1,5 +1,5 @@
 #
-#  $Id: Makefile,v 077b19612310 2013/09/17 22:55:03 fdelahoyde $
+#  $Id: Makefile,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
 #
                CFLAGS:=	-O
             CINCLUDES:=	-I.
@@ -26,4 +26,3 @@ $(Library):	$($(Library)_SRCS)
 
 clean:
 	rm -f $(Program) $(Library) $($(Library)_OBJS)
-

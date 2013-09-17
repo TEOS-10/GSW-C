@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 077b19612310 2013/09/17 22:55:03 fdelahoyde $
+#  $Id: GNUmakefile,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
 #  $Version: 3.02.0 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -116,4 +116,3 @@ show-release:
 getdocs:
 		@wget -k -np -p -m -nH --cut-dirs=2 \
 			http://teos-10.org/pubs/gsw/html/gsw_contents.html
-

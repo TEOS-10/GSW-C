@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v 077b19612310 2013/09/17 22:55:03 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
 */
 #include <gswteos-10.h>
 
@@ -486,4 +486,3 @@ report(char *what, double acceptable, double actual, double expected)
 /*
 **  The End.
 */
-

@@ -1,5 +1,5 @@
 /*
-**  $Id: gswteos-10.h,v 077b19612310 2013/09/17 22:55:03 fdelahoyde $
+**  $Id: gswteos-10.h,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
 **  $Version: 3.02.0 $
 **
 **  GSW TEOS-10 V3.02 definitions and prototypes.
@@ -109,4 +109,3 @@ extern double gsw_z_from_p(double p, double lat);
 #endif
 
 #endif /* GSWTEOS_10_H */
-
