@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v a71f3513c95d 2013/09/17 23:28:39 fdelahoyde $
 **  $Version: 3.02.0 $
 **
 **  This is a translation of the original f90 source code into C
@@ -109,7 +109,7 @@
 ! Version 1.0 written by David Jackett
 ! Modified by Paul Barker (version 3.02)
 !
-! For help with this Oceanographic Toolbox email:- help_gsw@csiro.au
+! For help with this Oceanographic Toolbox email:- help_gsw@teos-10.org
 !
 ! This software is available from http://www.teos-10.org
 !
