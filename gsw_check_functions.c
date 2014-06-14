@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_check_functions.c,v d6398dd29e3b 2013/09/17 23:04:22 fdelahoyde $
-**  $Version: 3.02.0 $
+**  $Id: gsw_check_functions.c,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+**  $Version: 3.03.0 $
 */
 #include <gswteos-10.h>
 
@@ -444,6 +444,8 @@ main(int argc, char **argv)
 		gsw_kappa_t_exact(sa,t,p), 4.25506953386609075e-010);
 	report("gsw_enthalpy_t_exact", enthalpy_t_exact_ca,
 		gsw_enthalpy_t_exact(sa,t,p), 62520.680485510929e0);
+	report("gsw_cp_t_exact", cp_t_exact_ca,
+		gsw_cp_t_exact(sa,t,p), 3982.7832563441461e0);
 	printf(
 "\nLibrary functions of the GSW toolbox:\n\n"
 	);

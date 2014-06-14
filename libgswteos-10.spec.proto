@@ -1,5 +1,5 @@
-#  $Id: libgswteos-10.spec.proto,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
-#  $Version: 3.02.0 $
+#  $Id: libgswteos-10.spec.proto,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+#  $Version: 3.03.0 $
 #  rpmbuild .spec file for libgswteos-10-*.rpm
 #
 %if "%{dist}" == ""
@@ -62,3 +62,4 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Sun Mar 31 2013 Frank Delahoyde <fdelahoyde@ucsd.edu> 3.1.0-1
 - Initial packaging.
+

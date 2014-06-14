@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v a71f3513c95d 2013/09/17 23:28:39 fdelahoyde $
-**  $Version: 3.02.0 $
+**  $Id: gsw_oceanographic_toolbox.c,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+**  $Version: 3.03.0 $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -9,7 +9,7 @@
 **
 
 !==========================================================================
-! Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.02 (Fortran)
+! Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.03 (Fortran)
 !==========================================================================
 !
 ! This is a subset of functions contained in the Gibbs SeaWater (GSW) 
@@ -90,6 +90,7 @@
 ! gsw_sound_speed_t_exact - sound speed
 ! gsw_kappa_t_exact       - isentropic compressibility
 ! gsw_enthalpy_t_exact    - enthalpy
+! gsw_cp_t_exact          - isobaric heat capacity
 !
 ! Library functions of the GSW toolbox
 ! gsw_gibbs               - the TEOS-10 Gibbs function and its derivatives
@@ -107,7 +108,7 @@
 !
 !
 ! Version 1.0 written by David Jackett
-! Modified by Paul Barker (version 3.02)
+! Modified by Paul Barker (version 3.03)
 !
 ! For help with this Oceanographic Toolbox email:- help_gsw@teos-10.org
 !
@@ -2316,7 +2317,7 @@ gsw_thermobaric(double sa, double ct, double p)
 		c15 =  6.211426728363857e-10, c16 = -2.238023185750219e-10,
 		c17 = -3.883320426297450e-11, c18 = -3.729652850731201e-14,
 		c19 =  2.239044689758956e-14, c20 = -3.601523245654798e-15,
-		c21 =  1.817370746264060e-16,db2pa = 1e-4;
+		c21 =  1.817370746264060e-16,rec_db2pa = 1e-4;
 
 	double	sqrtsa, v_hat_denominator, v_hat_numerator;
 	double	dvhatden_dct, dvhatnum_dct, dvhatden_dp, dvhatnum_dp;
@@ -2400,7 +2401,7 @@ gsw_thermobaric(double sa, double ct, double p)
 
 	part2 =  p2a - p2b - p2c + 2e0*p2d - p2e;
 
-	return ((part1 - factor2*part2)*db2pa);
+	return ((part1 - factor2*part2)*rec_db2pa);
 }
 /*
 !--------------------------------------------------------------------------
@@ -3326,6 +3327,30 @@ gsw_enthalpy_t_exact(double sa, double t, double p)
 
 	return (gsw_gibbs(n0,n0,n0,sa,t,p) -
 		(t+273.15e0)*gsw_gibbs(n0,n1,n0,sa,t,p));
+}
+
+/*
+!==========================================================================
+function gsw_cp_t_exact(sa,t,p)
+!==========================================================================
+
+! Calculates isobaric heat capacity of seawater
+!
+! sa     : Absolute Salinity                               [g/kg]
+! t      : in-situ temperature                             [deg C]
+! p      : sea pressure                                    [dbar]
+!
+! gsw_cp_t_exact : heat capacity                           [J/(kg K)]
+*/
+double
+gsw_cp_t_exact(double sa, double t, double p)
+{
+	int	n0, n2;
+
+	n0 = 0;
+	n2 = 2;
+
+	return (-(t+273.15e0)*gsw_gibbs(n0,n2,n0,sa,t,p));
 }
 
 /*

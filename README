@@ -1,7 +1,7 @@
-$Id: README,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
-$Version: 3.02.0 $
+$Id: README,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+$Version: 3.03.0 $
 
-TEOS-10 V3.02 GSW Oceanographic Toolbox in C
+TEOS-10 V3.03 GSW Oceanographic Toolbox in C
 
 This is a translation of the original Fortran-90 source code into C.
 You should download the documentation from http://teos-10.org.
@@ -14,7 +14,6 @@ Manifest:
 
 README				-- this file.
 gsw_check_functions.c		-- C implementation of the check functions
-gsw_data_v3_0.dat.gz		-- global absolute salinity anomaly data
 gsw_format.c			-- program to create gsw_saar_data.c from
 				   gsw_data_v3_0.dat
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
@@ -36,6 +35,7 @@ supplied header file:
 
 ChangeLog:
 
+2014-06-13:	gsw-3.03
 2013-09-17:	gsw-3.02
 2013-03-29:	gsw-3.01
 2012-10-07:	gsw-3.0.1 New gsw_check_functions.c based on revised f90.
