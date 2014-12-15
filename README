@@ -1,4 +1,4 @@
-$Id: README,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+$Id: README,v 9bcb5859b27a 2014/12/15 16:52:21 fdelahoyde $
 $Version: 3.03.0 $
 
 TEOS-10 V3.03 GSW Oceanographic Toolbox in C
@@ -14,12 +14,10 @@ Manifest:
 
 README				-- this file.
 gsw_check_functions.c		-- C implementation of the check functions
-gsw_format.c			-- program to create gsw_saar_data.c from
-				   gsw_data_v3_0.dat
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
 gsw_saar.c			-- gsw_saar and gsw_deltasa_atlas (modified)
 gsw_saar_data.c			-- static global absolute salinity anomaly data
-				   used by gsw_saar.c and created by gsw_format
+				   used by gsw_saar.c
 gswteos-10.h			-- GSW function prototypes
 Makefile			-- basic make file to build gsw_check_functions
 				   and libgswteos-10.so

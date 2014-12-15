@@ -1,5 +1,5 @@
-#  $Id: GNUmakefile,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
-#  $Version: 3.02.0 $
+#  $Id: GNUmakefile,v 9bcb5859b27a 2014/12/15 16:52:21 fdelahoyde $
+#  $Version: 3.03.0 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
 .PHONY: MAKEVERSION_ERROR
@@ -48,12 +48,10 @@ MAKEVERSION_ERROR:
            DESTINCDIR:=	$(DESTDIR)/include
            DESTLIBDIR:= $(DESTDIR)/$(libdirname)
              TARFILES:=	README gsw_check_functions.c \
-			gsw_data_v3_0.dat.gz gsw_format.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h GNUmakefile \
 			html
              ZIPFILES:= README gsw_check_functions.c \
-			gsw_data_v3_0.dat.gz gsw_format.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h Makefile
               ZIPLINK:=	gsw_c_v$(shell echo $(STSVersion) | \
