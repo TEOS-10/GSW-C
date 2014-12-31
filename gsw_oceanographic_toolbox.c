@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+**  $Id: gsw_oceanographic_toolbox.c,v 1baa8bcfa4bb 2014/12/31 02:33:31 fdelahoyde $
 **  $Version: 3.03.0 $
 **
 **  This is a translation of the original f90 source code into C
@@ -2833,19 +2833,23 @@ subroutine gsw_ipv_vs_fnsquared_ratio(sa,ct,p,nz,ipv_vs_fnsquared_ratio,p_mid)
 ! p_mid   : Mid pressure between p grid  (length nz-1)           [dbar]
 */
 void
-gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, int nz,
-	double *ipv_vs_fnsquared_ratio, double *p_mid)
+gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, double p_ref,
+	int nz, double *ipv_vs_fnsquared_ratio, double *p_mid)
 {
 	int	k;
 
-	double	dsa, sa_mid, dct, ct_mid, dp, p_ref;
+	double	dsa, sa_mid, dct, ct_mid, dp;
 	double	alpha_mid, beta_mid;
 	double	alpha_pref, beta_pref, numerator, denominator;
 
 	for (k = 0; k < nz-1; k++) {
-	    dsa = (sa[k+1] - sa[k]);
+	    /* FIXED */
+	    /* dsa = (sa[k+1] - sa[k]); */
+	    dsa = (sa[k] - sa[k+1]);
 	    sa_mid = 0.5*(sa[k] + sa[k+1]);
-	    dct = (ct[k+1] - ct[k]);
+	    /* FIXED */
+	    /* dct = (ct[k+1] - ct[k]); */
+	    dct = (ct[k] - ct[k+1]);
 	    ct_mid = 0.5*(ct[k] + ct[k+1]);
 	    dp = (p[k+1] - p[k]);
 	    p_mid[k] = 0.5*(p[k] + p[k+1]);

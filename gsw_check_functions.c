@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v d7a5468a0b8c 2014/06/14 02:35:01 fmd $
+**  $Id: gsw_check_functions.c,v 1baa8bcfa4bb 2014/12/31 02:33:31 fdelahoyde $
 **  $Version: 3.03.0 $
 */
 #include <gswteos-10.h>
@@ -392,7 +392,7 @@ main(int argc, char **argv)
             printf("failed\n");
             gsw_error_flag      = 1;
  	}
-	gsw_ipv_vs_fnsquared_ratio(sa_profile,ct_profile,p_profile,nz,
+	gsw_ipv_vs_fnsquared_ratio(sa_profile,ct_profile,p_profile,0.0,nz,
 					ipvfn2,p_mid_ipvfn2);
 	ipvfn2_error[0] = fabs(ipvfn2[0] - 0.996783975249010e0);
 	ipvfn2_error[1] = fabs(ipvfn2[1] - 0.992112251478320e0);
