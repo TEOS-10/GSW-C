@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v 1baa8bcfa4bb 2014/12/31 02:33:31 fdelahoyde $
+**  $Id: gsw_check_functions.c,v f5399aa52f18 2014/12/31 19:30:35 fdelahoyde $
 **  $Version: 3.03.0 $
 */
 #include <gswteos-10.h>
@@ -186,7 +186,7 @@ static void	report(char *what, double acceptable, double actual,
 #define z_from_depth_ca  2.287223921371151e-008
 #define z_from_p_ca  2.287223921371151e-008
 
-int	gsw_error_flag=0, debug;
+int	gsw_error_flag=0, debug=0;
 
 /*
 **  Main
