@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 7b257ba0d45e 2015/01/02 02:24:14 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 78df7cf7695d 2015/01/02 23:03:01 fdelahoyde $
 **  $Version: 3.0.3 $
 **
 **  This is a translation of the original f90 source code into C
@@ -2838,7 +2838,7 @@ gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, double p_ref,
 {
 	int	k;
 
-	double	dsa, sa_mid, dct, ct_mid, dp;
+	double	dsa, sa_mid, dct, ct_mid;
 	double	alpha_mid, beta_mid;
 	double	alpha_pref, beta_pref, numerator, denominator;
 
@@ -2847,7 +2847,6 @@ gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, double p_ref,
 	    sa_mid = 0.5*(sa[k] + sa[k+1]);
 	    dct = (ct[k] - ct[k+1]);
 	    ct_mid = 0.5*(ct[k] + ct[k+1]);
-	    dp = (p[k+1] - p[k]);
 	    p_mid[k] = 0.5*(p[k] + p[k+1]);
 
 	    alpha_mid = gsw_alpha(sa_mid,ct_mid,p_mid[k]);
