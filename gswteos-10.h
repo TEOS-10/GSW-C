@@ -1,8 +1,8 @@
 /*
-**  $Id: gswteos-10.h,v 1baa8bcfa4bb 2014/12/31 02:33:31 fdelahoyde $
-**  $Version: 3.03.0 $
+**  $Id: gswteos-10.h,v 237ec254b992 2015/01/02 02:28:24 fdelahoyde $
+**  $Version: 3.0.3 $
 **
-**  GSW TEOS-10 V3.03 definitions and prototypes.
+**  GSW TEOS-10 V3.0.3 definitions and prototypes.
 */
 #ifndef GSWTEOS_10_H
 #define GSWTEOS_10_H
