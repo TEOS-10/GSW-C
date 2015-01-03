@@ -1,5 +1,5 @@
-$Id: README,v 9bcb5859b27a 2014/12/15 16:52:21 fdelahoyde $
-$Version: 3.03.0 $
+$Id: README,v 483981b1a05e 2015/01/03 00:23:33 fdelahoyde $
+$Version: 3.0.3 $
 
 TEOS-10 V3.03 GSW Oceanographic Toolbox in C
 
@@ -8,7 +8,7 @@ You should download the documentation from http://teos-10.org.
 The functions gsw_saar and gsw_deltasa_atlas have been modified from the
 original to not use an external data file for global absolute salinity
 anomaly and absolute salinity anomaly ratio data. The data are instead
-incorporated into static tables that are used directly.
+incorporated into static data that are used directly.
 
 Manifest:
 
@@ -31,11 +31,19 @@ supplied header file:
 
 #include <gswteos-10.h>
 
+Notes:
+
+The whole reason for implementing GSW TEOS-10 in C is performance, and this is
+necessarily system-dependent. Our environment is GNU/Linux (CentOS/RHEL) and
+the support files are targeted to this platform. Note that my laptop is a
+Macbook Pro, but I don't develop for this platform because the performance
+isn't especially great and MacOs is a one-of-a-kind  development environment.
+
 ChangeLog:
 
-2014-06-13:	gsw-3.03
-2013-09-17:	gsw-3.02
-2013-03-29:	gsw-3.01
+2014-06-13:	gsw-3.03 Bug fixes, new additions.
+2013-09-17:	gsw-3.02 Bug fixes, new additions.
+2013-03-29:	gsw-3.01 Bug fixes, new additions.
 2012-10-07:	gsw-3.0.1 New gsw_check_functions.c based on revised f90.
 2011-09-23:	gsw-3.0 Initial creation.
 
