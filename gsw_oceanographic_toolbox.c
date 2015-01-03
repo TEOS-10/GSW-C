@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 78df7cf7695d 2015/01/02 23:03:01 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 011d6a1d414a 2015/01/03 00:41:02 fdelahoyde $
 **  $Version: 3.0.3 $
 **
 **  This is a translation of the original f90 source code into C
@@ -123,7 +123,6 @@
 !--------------------------------------------------------------------------
 ! Practical Salinity (SP), PSS-78
 !--------------------------------------------------------------------------
-*/
 /*
 !==========================================================================
 function gsw_sp_from_c(c,t,p)
