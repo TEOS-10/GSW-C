@@ -1,4 +1,4 @@
-$Id: README,v 483981b1a05e 2015/01/03 00:23:33 fdelahoyde $
+$Id: README,v 7cb60ad0c4fe 2015/01/03 01:38:24 fdelahoyde $
 $Version: 3.0.3 $
 
 TEOS-10 V3.03 GSW Oceanographic Toolbox in C
@@ -8,7 +8,7 @@ You should download the documentation from http://teos-10.org.
 The functions gsw_saar and gsw_deltasa_atlas have been modified from the
 original to not use an external data file for global absolute salinity
 anomaly and absolute salinity anomaly ratio data. The data are instead
-incorporated into static data that are used directly.
+incorporated into static variables that are used directly.
 
 Manifest:
 
@@ -22,22 +22,21 @@ gswteos-10.h			-- GSW function prototypes
 Makefile			-- basic make file to build gsw_check_functions
 				   and libgswteos-10.so
 
-You'll probably want to build gsw_oceanographic_toolbox.c, and gsw_saar.c
-into a library. "make library" will attempt to build a shared library for
-gcc/GNU Linux platforms.
+Notes:
 
 C programs using the GSW Oceanographic Toolbox should include the
 supplied header file:
 
 #include <gswteos-10.h>
 
-Notes:
+You'll probably want to build gsw_oceanographic_toolbox.c, and gsw_saar.c
+into a library. "make library" will attempt to build a shared library for
+gcc/GNU Linux platforms.
 
-The whole reason for implementing GSW TEOS-10 in C is performance, and this is
-necessarily system-dependent. Our environment is GNU/Linux (CentOS/RHEL) and
-the support files are targeted to this platform. Note that my laptop is a
-Macbook Pro, but I don't develop for this platform because the performance
-isn't especially great and MacOs is a one-of-a-kind  development environment.
+The main reasons for implementing GSW TEOS-10 in C are performance and
+accessibility (you can link to it), and this is necessarily system-dependent.
+Our environment is GNU/Linux (CentOS/RHEL) and the support files are targeted
+to this platform.
 
 ChangeLog:
 
