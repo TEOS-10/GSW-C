@@ -1,8 +1,12 @@
 /*
-**  $Id: gsw_format.c,v 7c235f8731c0 2013/09/17 22:56:24 fdelahoyde $
+**  $Id: gsw_format.c,v d89bdac4ee51 2015/01/05 18:18:33 fdelahoyde $
 **
 **  gsw_format -- format the TEOS-10 V3.0  global absolute salinity anomaly
-**  and absolute salinity anomaly ratio data into C for subsequent compilation.
+**  and absolute salinity anomaly ratio data from the Fortran-90 version
+**  of the gsw_oceanographic_toolbox into C for subsequent compilation.
+**  This program only needs to be built and run if the data have changed.
+**  The program reads the data from gsw_data_v3_0.dat and writes the
+**  C source code to gsw_saar_data.c.
 */
 
 #include <stdio.h>
@@ -18,7 +22,7 @@ main(int argc, char **argv)
 	int	i;
 	double	*longs_ref, *lats_ref, *p_ref, *ndepth_ref, *saar_ref,
 		*delta_sa_ref;
-	FILE	*fin;
+	FILE	*fin, *fout;
 	char	buf[256], b[64], *pC;
 
 	longs_ref	= malloc(nx*sizeof (double));
@@ -30,6 +34,10 @@ main(int argc, char **argv)
 
 	if ((fin=fopen("gsw_data_v3_0.dat", "r"))==NULL) {
 	    perror("gsw_data_v3_0.dat");
+	    exit(1);
+	}
+	if ((fout=fopen("gsw_saar_data.c", "w"))==NULL) {
+	    perror("gsw_saar_data.c");
 	    exit(1);
 	}
 	for (i=0; i<nx; i++) {
@@ -63,97 +71,100 @@ main(int argc, char **argv)
 	    delta_sa_ref[i]	= strtod(buf, NULL);
 	}
 	fclose(fin);
-	printf("static int\tgsw_nx=%d, gsw_ny=%d, gsw_nz=%d;\n",
+	fprintf(fout,"/*\n** gsw_saar_data.c\n** --generated automatically "
+		"by gsw_format. Don't edit.\n*/\n");
+	fprintf(fout,"static int\tgsw_nx=%d, gsw_ny=%d, gsw_nz=%d;\n",
 		nx, ny, nz);
-	printf("static double\tlongs_ref[%d] = {\n",nx);
+	fprintf(fout,"static double\tlongs_ref[%d] = {\n",nx);
 	buf[0]	= '\0';
 	for (i=0; i<nx; i++) {
 	    sprintf(b,"%.17g", longs_ref[i]);
 	    if (i<(nx-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
-	printf("static double\tlats_ref[%d] = {\n",ny);
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fprintf(fout,"static double\tlats_ref[%d] = {\n",ny);
 	buf[0]	= '\0';
 	for (i=0; i<ny; i++) {
 	    sprintf(b,"%.17g", lats_ref[i]);
 	    if (i<(ny-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
-	printf("static double\tp_ref[%d] = {\n",nz);
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fprintf(fout,"static double\tp_ref[%d] = {\n",nz);
 	buf[0]	= '\0';
 	for (i=0; i<nz; i++) {
 	    sprintf(b,"%.17g", p_ref[i]);
 	    if (i<(nz-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
-	printf("static double\tndepth_ref[%d] = {\n",nx*ny);
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fprintf(fout,"static double\tndepth_ref[%d] = {\n",nx*ny);
 	buf[0]	= '\0';
 	for (i=0; i<nx*ny; i++) {
 	    sprintf(b,"%.17g", ndepth_ref[i]);
 	    if (i<(nx*ny-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
-	printf("static double\tsaar_ref[%d] = {\n",nx*ny*nz);
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fprintf(fout,"static double\tsaar_ref[%d] = {\n",nx*ny*nz);
 	buf[0]	= '\0';
 	for (i=0; i<nx*ny*nz; i++) {
 	    sprintf(b,"%.17g", saar_ref[i]);
 	    if (i<(nx*ny*nz-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
-	printf("static double\tdelta_sa_ref[%d] = {\n",nx*ny*nz);
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fprintf(fout,"static double\tdelta_sa_ref[%d] = {\n",nx*ny*nz);
 	buf[0]	= '\0';
 	for (i=0; i<nx*ny*nz; i++) {
 	    sprintf(b,"%.17g", delta_sa_ref[i]);
 	    if (i<(nx*ny*nz-1))
 		strcat(b,",");
 	    if (strlen(buf)+strlen(b) > MAX_CHARS) {
-		printf("\t%s\n",buf);
+		fprintf(fout,"\t%s\n",buf);
 		buf[0]	= '\0';
 	    }
 	    strcat(buf,b);
 	}
 	if (strlen(buf) != 0)
-	    printf("\t%s\n",buf);
-	printf("\t};\n");
+	    fprintf(fout,"\t%s\n",buf);
+	fprintf(fout,"\t};\n");
+	fclose(fout);
 	return (0);
 }
