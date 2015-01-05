@@ -1,6 +1,4 @@
 /*
-**  $Id: gsw_format.c,v d89bdac4ee51 2015/01/05 18:18:33 fdelahoyde $
-**
 **  gsw_format -- format the TEOS-10 V3.0  global absolute salinity anomaly
 **  and absolute salinity anomaly ratio data from the Fortran-90 version
 **  of the gsw_oceanographic_toolbox into C for subsequent compilation.
