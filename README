@@ -1,4 +1,4 @@
-$Id: README,v 7cb60ad0c4fe 2015/01/03 01:38:24 fdelahoyde $
+$Id: README,v 6125c523b1c5 2015/01/05 18:32:58 fdelahoyde $
 $Version: 3.0.3 $
 
 TEOS-10 V3.03 GSW Oceanographic Toolbox in C
@@ -12,7 +12,8 @@ incorporated into static variables that are used directly.
 
 Manifest:
 
-README				-- this file.
+LICENSE				-- Copywrite information.
+README				-- This file.
 gsw_check_functions.c		-- C implementation of the check functions
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
 gsw_saar.c			-- gsw_saar and gsw_deltasa_atlas (modified)
