@@ -10,7 +10,6 @@ incorporated into static variables that are used directly.
 
 Manifest:
 
-LICENSE				-- Copywrite information.
 README				-- This file.
 gsw_check_functions.c		-- C implementation of the check functions
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
@@ -39,6 +38,7 @@ to this platform.
 
 ChangeLog:
 
+2015-01-07:	gsw-3.03 Bug fixes, new additions.
 2014-06-13:	gsw-3.03 Bug fixes, new additions.
 2013-09-17:	gsw-3.02 Bug fixes, new additions.
 2013-03-29:	gsw-3.01 Bug fixes, new additions.
