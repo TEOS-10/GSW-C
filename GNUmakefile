@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 079aee286ce1 2015/01/07 20:33:11 fdelahoyde $
+#  $Id: GNUmakefile,v fa3aaaf17f16 2015/01/07 20:37:05 fdelahoyde $
 #  $Version: 3.0.3 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -17,8 +17,7 @@
           STSVersion :=	$(shell if [ -d .hg ]; then \
 			hg tip --template "{latesttag}"; \
 			elif [-d .git]; then \
-			git describe --tags HEAD | \
-			sed -e 's/\(.*\)-[0-9]*-[a-z0-9]*/\1/'; \
+			git describe --tags --abbrev=0 HEAD; \
 			else basename `pwd` | sed -e 's/$(STSPackage)-//'; fi)
   ifeq (,$(STSVersion))
 	@echo "There is currently no version for $(STSPackage)."; \
