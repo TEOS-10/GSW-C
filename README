@@ -10,6 +10,7 @@ incorporated into static variables that are used directly.
 
 Manifest:
 
+LICENSE				-- GSW C software license
 README				-- This file.
 gsw_check_functions.c		-- C implementation of the check functions
 gsw_oceanographic_toolbox.c	-- The C GSW library less gsw_saar
