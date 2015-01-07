@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v eaf019c77cc3 2015/01/05 18:37:03 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v dcf5ff4a0411 2015/01/07 05:33:27 fdelahoyde $
 **  $Version: 3.0.3 $
 **
 **  This is a translation of the original f90 source code into C
@@ -2631,7 +2631,7 @@ gsw_sa_from_rho(double rho, double ct, double p)
 	int	no_iter;
 
 	double	sa, v_lab, v_0, v_50, v_sa,
-		sa_old, delta_v, sa_mean, alpha, beta;
+		sa_old, delta_v, sa_mean, beta_mean, rho_mean;
 
 	v_lab	= 1e0/rho;
 	v_0	= gsw_specvol(0e0,ct,p);
@@ -2648,9 +2648,9 @@ gsw_sa_from_rho(double rho, double ct, double p)
 	    delta_v	= gsw_specvol(sa_old,ct,p) - v_lab;
 	    sa		= sa_old - delta_v/v_sa;
 	    sa_mean	= 0.5e0*(sa + sa_old);
-	    alpha	= gsw_alpha(sa_mean,ct,p);
-	    beta	= gsw_beta(sa_mean,ct,p);
-	    v_sa	= - beta/rho;
+	    rho_mean	= gsw_rho(sa_mean,ct,p);
+	    beta_mean	= gsw_beta(sa_mean,ct,p);
+	    v_sa	= -beta_mean/rho_mean;
 	    sa		= sa_old - delta_v/v_sa;
 	    if (sa < 0e0 || sa > 50e0)
 	 	sa	= GSW_INVALID_VALUE;
