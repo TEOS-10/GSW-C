@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v fa3aaaf17f16 2015/01/07 20:37:05 fdelahoyde $
+#  $Id: GNUmakefile,v a91011fbbc27 2015/01/07 20:39:03 fdelahoyde $
 #  $Version: 3.0.3 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -16,7 +16,7 @@
   endif
           STSVersion :=	$(shell if [ -d .hg ]; then \
 			hg tip --template "{latesttag}"; \
-			elif [-d .git]; then \
+			elif [ -d .git ]; then \
 			git describe --tags --abbrev=0 HEAD; \
 			else basename `pwd` | sed -e 's/$(STSPackage)-//'; fi)
   ifeq (,$(STSVersion))
