@@ -1,0 +1,9 @@
+The file GNUmakefile is supplied for use on Linux/GNU systems. It has two
+major purposes:
+
+    * To build a zip archive of the distribution suitable for TEOS-10.org; and
+    * To set up a versioned source distribution suitable for building source
+      and binary RPMs on RedHat Enterprise and CentOS Linux systems.
+
+The file libgswteos-10.spec.proto is used by GNUmakefile for the "new-rpm"
+target to make libgswteos-10.spec which is the control file for rpmbuild.

@@ -1,8 +1,7 @@
-#  $Id: GNUmakefile,v d89bdac4ee51 2015/01/05 18:18:33 fdelahoyde $
+#  $Id: GNUmakefile,v fa3aaaf17f16 2015/01/07 20:37:05 fdelahoyde $
 #  $Version: 3.0.3 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
-.PHONY: MAKEVERSION_ERROR
 .PHONY: all clean install dist new-rpm new-release
 .PHONY: show-release getdocs
 
@@ -10,7 +9,6 @@
         _makeVersion :=	$(shell $(MAKE) -v -f /dev/null 2>&1 |\
 			head -1 | awk '{if ($$3 >= 3.76) printf "%.2f\n",$$3}')
   ifeq (,$(_makeVersion))
-MAKEVERSION_ERROR:
 	@echo "This Makefile requires GNU make version 3.76 or greater."; \
 	echo "Please read the file README in this directory"; \
 	echo "for details."; exit 1; \
@@ -18,7 +16,14 @@ MAKEVERSION_ERROR:
   endif
           STSVersion :=	$(shell if [ -d .hg ]; then \
 			hg tip --template "{latesttag}"; \
+			elif [-d .git]; then \
+			git describe --tags --abbrev=0 HEAD; \
 			else basename `pwd` | sed -e 's/$(STSPackage)-//'; fi)
+  ifeq (,$(STSVersion))
+	@echo "There is currently no version for $(STSPackage)."; \
+	 echo "You need to set one."; exit 1; \
+	 fi;
+  endif
 	  STSRelease := $(shell echo $(STSVersion)|sed -e 's/[^-]*-\?//')
   ifeq (,$(STSRelease))
           STSRelease := 1
