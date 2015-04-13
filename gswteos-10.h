@@ -1,5 +1,5 @@
 /*
-**  $Id: gswteos-10.h,v 237ec254b992 2015/01/02 02:28:24 fdelahoyde $
+**  $Id: gswteos-10.h,v 53df8a6cba27 2015/04/13 20:40:59 fdelahoyde $
 **  $Version: 3.0.3 $
 **
 **  GSW TEOS-10 V3.0.3 definitions and prototypes.
@@ -95,6 +95,9 @@ extern double gsw_sp_from_sa(double sa, double p, double lon, double lat);
 extern double gsw_sp_from_sk(double sk);
 extern double gsw_sp_from_sr(double sr);
 extern double gsw_sp_from_sstar(double sstar, double p,double lon,double lat);
+extern double gsw_spiciness0(double sa, double ct);
+extern double gsw_spiciness1(double sa, double ct);
+extern double gsw_spiciness2(double sa, double ct);
 extern double gsw_sr_from_sp(double sp);
 extern double gsw_sstar_from_sa(double sa, double p, double lon, double lat);
 extern double gsw_sstar_from_sp(double sp, double p, double lon, double lat);

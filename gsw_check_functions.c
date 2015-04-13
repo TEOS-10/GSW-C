@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_check_functions.c,v f5399aa52f18 2014/12/31 19:30:35 fdelahoyde $
-**  $Version: 3.03.0 $
+**  $Id: gsw_check_functions.c,v 53df8a6cba27 2015/04/13 20:40:59 fdelahoyde $
+**  $Version: 3.0.3 $
 */
 #include <gswteos-10.h>
 
@@ -457,6 +457,16 @@ main(int argc, char **argv)
 		gsw_sa_from_sp_baltic(sp,long_bs,lat_bs) , 35.666154857142850e0);
 	report("gsw_sp_from_sa_baltic", sp_from_sa_ca,
 		gsw_sp_from_sa_baltic(sa,long_bs,lat_bs), 35.533769845749660e0);
+	printf(
+"\nSpiciness functions of the GSW toolbox:\n\n"
+	);
+	report("gsw_spiciness0", sp_from_sa_ca,
+		gsw_spiciness0(sa,ct), 3.909833210457435e0);
+	report("gsw_spiciness1", sp_from_sa_ca,
+		gsw_spiciness1(sa,ct), 4.368103663398628e0);
+	report("gsw_spiciness2", sp_from_sa_ca,
+		gsw_spiciness2(sa,ct), 4.811233077656070e0);
+
 
 	if (gsw_error_flag)
 	    printf("\nYour installation of the Gibbs SeaWater (GSW) "
