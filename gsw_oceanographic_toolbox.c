@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v dcf5ff4a0411 2015/01/07 05:33:27 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 53df8a6cba27 2015/04/13 20:40:59 fdelahoyde $
 **  $Version: 3.0.3 $
 **
 **  This is a translation of the original f90 source code into C
@@ -106,6 +106,11 @@
 ! gsw_enthalpy_sso_0_p    - enthalpy at (SSO,CT=0,p)
 ! gsw_hill_ratio_at_sp2   - Hill ratio at Practical Salinity of 2
 !
+! Spiciness functions of the GSW toolbox
+! gsw_spiciness0          - spiciness at a reference pressure of 0 dbar
+! gsw_spiciness1          - spiciness at a reference pressure of 1000 dbar
+! gsw_spiciness2          - spiciness at a reference pressure of 2000 dbar
+!
 !
 ! Version 1.0 written by David Jackett
 ! Modified by Paul Barker (version 3.03)
@@ -211,8 +216,6 @@ gsw_sp_from_c(double c, double t, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_c_from_sp(sp,t,p)
 !==========================================================================
@@ -496,8 +499,6 @@ gsw_c_from_sp(double sp, double t, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sp_from_sk(sk)
 !==========================================================================
@@ -524,8 +525,6 @@ gsw_sp_from_sk(double sk)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !--------------------------------------------------------------------------
 ! salinity and temperature conversions
 !--------------------------------------------------------------------------
@@ -1033,8 +1032,6 @@ gsw_pt_from_ct(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_z_from_p(p,lat)
 !==========================================================================
@@ -1065,8 +1062,6 @@ gsw_z_from_p(double p, double lat)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_entropy_from_t(sa,t,p)
 !==========================================================================
@@ -1092,7 +1087,6 @@ gsw_entropy_from_t(double sa, double t, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
 !==========================================================================
 function gsw_adiabatic_lapse_rate_from_ct(sa,ct,p)
 !==========================================================================
@@ -1125,8 +1119,6 @@ gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !--------------------------------------------------------------------------
 ! density and enthalpy, based on the 48-term expression for density
 !--------------------------------------------------------------------------
@@ -1389,8 +1381,6 @@ gsw_beta(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_alpha_on_beta(sa,ct,p)  
 !==========================================================================
@@ -1511,8 +1501,6 @@ gsw_alpha_on_beta(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 subroutine gsw_rho_first_derivatives(sa, ct, p, drho_dsa, drho_dct, drho_dp)
 !==========================================================================
@@ -1710,8 +1698,6 @@ gsw_specvol_anom(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sigma0(sa,ct) 
 !==========================================================================
@@ -1763,8 +1749,6 @@ gsw_sigma0(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sigma1(sa,ct) 
 !==========================================================================
@@ -1788,8 +1772,6 @@ gsw_sigma1(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sigma2(sa,ct) 
 !==========================================================================
@@ -1813,8 +1795,6 @@ gsw_sigma2(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sigma3(sa,ct) 
 !==========================================================================
@@ -1838,8 +1818,6 @@ gsw_sigma3(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sigma4(sa,ct) 
 !==========================================================================
@@ -1863,8 +1841,6 @@ gsw_sigma4(double sa, double ct)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sound_speed(sa,ct,p)  
 !==========================================================================
@@ -1959,8 +1935,6 @@ gsw_sound_speed(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_kappa(sa,ct,p)
 !==========================================================================
@@ -2048,8 +2022,6 @@ gsw_kappa(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_cabbeling(sa,ct,p)  
 !==========================================================================
@@ -2231,8 +2203,6 @@ gsw_cabbeling(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_thermobaric(sa,ct,p)  
 !==========================================================================
@@ -2403,8 +2373,6 @@ gsw_thermobaric(double sa, double ct, double p)
 	return ((part1 - factor2*part2)*rec_db2pa);
 }
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_internal_energy(sa,ct,p)  
 !==========================================================================
@@ -2606,8 +2574,6 @@ gsw_dynamic_enthalpy(double sa, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_sa_from_rho(rho,ct,p)
 !==========================================================================
@@ -2661,8 +2627,6 @@ gsw_sa_from_rho(double rho, double ct, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !--------------------------------------------------------------------------
 ! water column properties, based on the 48-term expression for density
 !--------------------------------------------------------------------------
@@ -2728,8 +2692,6 @@ gsw_nsquared(double *sa, double *ct, double *p, double *lat, int nz,
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 subroutine gsw_turner_rsubrho(sa,ct,p,nz,tu,rsubrho,p_mid)
 !==========================================================================
@@ -2795,8 +2757,6 @@ gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 subroutine gsw_ipv_vs_fnsquared_ratio(sa,ct,p,nz,ipv_vs_fnsquared_ratio,p_mid)
 !==========================================================================
@@ -2863,8 +2823,6 @@ gsw_ipv_vs_fnsquared_ratio(double *sa, double *ct, double *p, double p_ref,
 	}
 }
 /*
-!--------------------------------------------------------------------------
-
 !--------------------------------------------------------------------------
 ! freezing temperatures
 !--------------------------------------------------------------------------
@@ -3071,8 +3029,6 @@ gsw_latentheat_evap_t(double sa, double t)
 
 /*
 !--------------------------------------------------------------------------
-
-!--------------------------------------------------------------------------
 ! planet Earth properties
 !--------------------------------------------------------------------------
 
@@ -3110,8 +3066,6 @@ gsw_grav(double lat, double p)
 
 /*
 !--------------------------------------------------------------------------
-
-!--------------------------------------------------------------------------
 ! basic thermodynamic properties in terms of in-situ t, based on the exact Gibbs function
 !--------------------------------------------------------------------------
 
@@ -3140,8 +3094,6 @@ gsw_rho_t_exact(double sa, double t, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_pot_rho_t_exact(sa,t,p,p_ref)  
 !==========================================================================
@@ -3164,8 +3116,6 @@ gsw_pot_rho_t_exact(double sa, double t, double p, double p_ref)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_alpha_wrt_t_exact(sa,t,p)  
 !==========================================================================
@@ -3192,8 +3142,6 @@ gsw_alpha_wrt_t_exact(double sa, double t, double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_beta_const_t_exact(sa,t,p)  
 !==========================================================================
@@ -4226,8 +4174,6 @@ gsw_specvol_sso_0_p(double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function gsw_enthalpy_sso_0_p(p)
 !==========================================================================
@@ -4290,8 +4236,6 @@ gsw_enthalpy_sso_0_p(double p)
 }
 
 /*
-!--------------------------------------------------------------------------
-
 !==========================================================================
 function  gsw_hill_ratio_at_sp2(t)
 !==========================================================================
@@ -4363,6 +4307,332 @@ gsw_hill_ratio_at_sp2(double t)
 
 	return (2.0/sp_hill_raw_at_sp2);
 }
+
+/*
+!==========================================================================
+function gsw_spiciness0(sa,ct)  
+!==========================================================================
+
+
+! gsw_spiciness0                                    spiciness at p = 0 dbar
+!                                                        (75-term equation)
+!==========================================================================
+! 
+! USAGE:  
+!  spiciness0 = gsw_spiciness0(SA,CT)
+!
+! DESCRIPTION:
+!  Calculates spiciness from Absolute Salinity and Conservative 
+!  Temperature at a pressure of 0 dbar, as described by McDougall and 
+!  Krzysik (2015).  This routine is based on the computationally-efficient 
+!  expression for specific volume in terms of SA, CT and p (Roquet et al., 
+!  2015).
+!
+!  Note that the 75-term equation has been fitted in a restricted range of 
+!  parameter space, and is most accurate inside the "oceanographic funnel" 
+!  described in IOC et al. (2010).  The GSW library function 
+!  "gsw_infunnel(SA,CT,p)" is available to be used if one wants to test if 
+!  some of one's data lies outside this "funnel".  
+!
+! INPUT:
+!  SA  =  Absolute Salinity                                        [ g/kg ]
+!  CT  =  Conservative Temperature (ITS-90)                       [ deg C ]
+!
+!  SA & CT need to have the same dimensions.
+!
+! OUTPUT:
+!  spiciness0  =  spiciness referenced to a pressure of 0 dbar, 
+!                 i.e. the surface                             [ kg/m^3 ]
+!
+! AUTHOR: 
+!  Oliver Krzysik and Trevor McDougall                 [ help@teos-10.org ]
+!
+! VERSION NUMBER: 3.05 (5th December, 2014)
+!
+! REFERENCES:
+!  IOC, SCOR and IAPSO, 2010: The international thermodynamic equation of 
+!   seawater - 2010: Calculation and use of thermodynamic properties.  
+!   Intergovernmental Oceanographic Commission, Manuals and Guides No. 56,
+!   UNESCO (English), 196 pp.  Available from http://www.TEOS-10.org
+!
+!  McDougall, T.J., and O.A. Krzysik, 2015: Spiciness. To be submitted to
+!   the Journal of Marine Research.  
+!
+!  Roquet, F., G. Madec, T.J. McDougall and P.M. Barker, 2015: Accurate
+!   polynomial expressions for the density and specific volume of seawater
+!   using the TEOS-10 standard. Ocean Modelling, in press. 
+!   
+!  The software is available from http://www.TEOS-10.org
+!
+!==========================================================================
+*/
+
+double
+gsw_spiciness0(double sa, double ct)
+{
+	double	
+		s01 = -9.22982898371678e1, s02 = -1.35727873628866e1,
+		s03 =  1.87353650994010e1,	s04 = -1.61360047373455e1,
+		s05 =  3.76112762286425e1,	s06 = -4.27086671461257e1,
+		s07 =  2.00820111041594e1, 	s08 =  2.87969717584045e2,
+		s09 =  1.13747111959674e1,	s10 =  6.07377192990680e1,
+		s11 = -7.37514033570187e1,	s12 = -7.51171878953574e1,
+		s13 =  1.63310989721504e2,	s14 = -8.83222751638095e1,
+		s15 = -6.41725302237048e2,	s16 =  2.79732530789261e1,
+		s17 = -2.49466901993728e2,	s18 =  3.26691295035416e2,
+		s19 =  2.66389243708181e1,	s20 = -2.93170905757579e2,
+		s21 =  1.76053907144524e2,	s22 =  8.27634318120224e2,
+		s23 = -7.02156220126926e1,	s24 =  3.82973336590803e2,
+		s25 = -5.06206828083959e2,	s26 =  6.69626565169529e1,
+		s27 =  3.02851235050766e2,	s28 = -1.96345285604621e2,
+		s29 = -5.74040806713526e2,	s30 =  7.03285905478333e1,
+		s31 = -2.97870298879716e2,	s32 =  3.88340373735118e2,
+		s33 = -8.29188936089122e1,	s34 = -1.87602137195354e2,
+		s35 =  1.27096944425793e2,	s36 =  2.11671167892147e2,
+		s37 = -3.15140919876285e1,	s38 =  1.16458864953602e2,
+		s39 = -1.50029730802344e2,	s40 =  3.76293848660589e1,
+		s41 =  6.47247424373200e1,	s42 = -4.47159994408867e1,
+		s43 = -3.23533339449055e1,	s44 =  5.30648562097667,
+		s45 = -1.82051249177948e1,	s46 =  2.33184351090495e1,
+		s47 = -6.22909903460368,	s48 = -9.55975464301446,
+		s49 =  6.61877073960113;
+	
+	double	sfac = 0.0248826675584615;  
+	double	offset = 5.971840214030754e-1;	
+	double 	x2, xs, ys, spiciness0;
+	
+	x2 			= 	sfac*sa;
+	xs 			= 	sqrt(x2+offset);
+	ys 			= 	ct*0.025;
+	
+	spiciness0	= s01+ys*(s02+ys*(s03+ys*(s04+ys*(s05+ys*(s06+s07*ys)))))
+		+xs*(s08+ys*(s09+ys*(s10+ys*(s11+ys*(s12+ys*(s13+s14*ys)))))
+		+xs*(s15+ys*(s16+ys*(s17+ys*(s18+ys*(s19+ys*(s20+s21*ys)))))
+		+xs*(s22+ys*(s23+ys*(s24+ys*(s25+ys*(s26+ys*(s27+s28*ys)))))
+		+xs*(s29+ys*(s30+ys*(s31+ys*(s32+ys*(s33+ys*(s34+s35*ys)))))
+		+xs*(s36+ys*(s37+ys*(s38+ys*(s39+ys*(s40+ys*(s41+s42*ys)))))
+		+xs*(s43+ys*(s44+ys*(s45+ys*(s46+ys*(s47+ys*(s48+s49*ys)))))))))));
+	
+	
+	return (spiciness0);
+}
+
+/*
+!==========================================================================
+function gsw_spiciness1(sa,ct)  
+!==========================================================================
+
+
+! gsw_spiciness1                                 spiciness at p = 1000 dbar
+!                                                        (75-term equation)
+!==========================================================================
+! 
+! USAGE:  
+!  spiciness1 = gsw_spiciness1(SA,CT)
+!
+! DESCRIPTION:
+!  Calculates spiciness from Absolute Salinity and Conservative 
+!  Temperature at a pressure of 1000 dbar, as described by McDougall and 
+!  Krzysik (2015).  This routine is based on the computationally-efficient 
+!  expression for specific volume in terms of SA, CT and p (Roquet et al., 
+!  2015).
+!
+!  Note that the 75-term equation has been fitted in a restricted range of 
+!  parameter space, and is most accurate inside the "oceanographic funnel" 
+!  described in IOC et al. (2010).  The GSW library function 
+!  "gsw_infunnel(SA,CT,p)" is available to be used if one wants to test if 
+!  some of one's data lies outside this "funnel".  
+!
+! INPUT:
+!  SA  =  Absolute Salinity                                        [ g/kg ]
+!  CT  =  Conservative Temperature (ITS-90)                       [ deg C ]
+!
+!  SA & CT need to have the same dimensions.
+!
+! OUTPUT:
+!  spiciness1  =  spiciness referenced to a pressure of 1000 dbar [ kg/m^3 ]                                            [ kg/m^3 ]
+!
+! AUTHOR: 
+!  Oliver Krzysik and Trevor McDougall                 [ help@teos-10.org ]
+!
+! VERSION NUMBER: 3.05 (5th December, 2014)
+!
+! REFERENCES:
+!  IOC, SCOR and IAPSO, 2010: The international thermodynamic equation of 
+!   seawater - 2010: Calculation and use of thermodynamic properties.  
+!   Intergovernmental Oceanographic Commission, Manuals and Guides No. 56,
+!   UNESCO (English), 196 pp.  Available from http://www.TEOS-10.org
+!
+!  McDougall, T.J., and O.A. Krzysik, 2015: Spiciness. To be submitted to
+!   the Journal of Marine Research.  
+!
+!  Roquet, F., G. Madec, T.J. McDougall and P.M. Barker, 2015: Accurate
+!   polynomial expressions for the density and specific volume of seawater
+!   using the TEOS-10 standard. Ocean Modelling, in press. 
+!   
+!  The software is available from http://www.TEOS-10.org
+!
+!==========================================================================
+*/
+
+double
+gsw_spiciness1(double sa, double ct)
+{
+	double	
+	s01 = -9.19874584868912e1,	s02 = -1.33517268529408e1,
+	s03 =  2.18352211648107e1,	s04 = -2.01491744114173e1,
+	s05 =  3.70004204355132e1,	s06 = -3.78831543226261e1,
+	s07 =  1.76337834294554e1,	s08 =  2.87838842773396e2,
+	s09 =  2.14531420554522e1,	s10 =  3.14679705198796e1,
+	s11 = -4.04398864750692e1,	s12 = -7.70796428950487e1,
+	s13 =  1.36783833820955e2,	s14 = -7.36834317044850e1,
+	s15 = -6.41753415180701e2,	s16 =  1.33701981685590,
+	s17 = -1.75289327948412e2,	s18 =  2.42666160657536e2,
+	s19 =  3.17062400799114e1,	s20 = -2.28131490440865e2,
+	s21 =  1.39564245068468e2,	s22 =  8.27747934506435e2,
+	s23 = -3.50901590694775e1,	s24 =  2.87473907262029e2,
+	s25 = -4.00227341144928e2,	s26 =  6.48307189919433e1,
+	s27 =  2.16433334701578e2,	s28 = -1.48273032774305e2,
+	s29 = -5.74545648799754e2,	s30 =  4.50446431127421e1,
+	s31 = -2.30714981343772e2,	s32 =  3.15958389253065e2,
+	s33 = -8.60635313930106e1,	s34 = -1.22978455069097e2,
+	s35 =  9.18287282626261e1,	s36 =  2.12120473062203e2,
+	s37 = -2.21528216973820e1,	s38 =  9.19013417923270e1,
+	s39 = -1.24400776026014e2,	s40 =  4.08512871163839e1,
+	s41 =  3.91127352213516e1,	s42 = -3.10508021853093e1,
+	s43 = -3.24790035899152e1,	s44 =  3.91029016556786,
+	s45 = -1.45362719385412e1,	s46 =  1.96136194246355e1,
+	s47 = -7.06035474689088,	s48 = -5.36884688614009,
+	s49 =  4.43247303092448;
+	
+	double 	sfac 	= 	0.0248826675584615;   // sfac = 1/(40*(35.16504/35)).
+	double	offset 	= 	5.971840214030754e-1; // offset = deltaS*sfac.
+	double 	x2, xs, ys, spiciness1;
+	
+	x2 			= 	sfac*sa;
+	xs 			= 	sqrt(x2+offset);
+	ys 			= 	ct*0.025;
+	
+	spiciness1	= s01+ys*(s02+ys*(s03+ys*(s04+ys*(s05+ys*(s06+s07*ys)))))
+		+xs*(s08+ys*(s09+ys*(s10+ys*(s11+ys*(s12+ys*(s13+s14*ys)))))
+		+xs*(s15+ys*(s16+ys*(s17+ys*(s18+ys*(s19+ys*(s20+s21*ys)))))
+		+xs*(s22+ys*(s23+ys*(s24+ys*(s25+ys*(s26+ys*(s27+s28*ys)))))
+		+xs*(s29+ys*(s30+ys*(s31+ys*(s32+ys*(s33+ys*(s34+s35*ys)))))
+		+xs*(s36+ys*(s37+ys*(s38+ys*(s39+ys*(s40+ys*(s41+s42*ys)))))
+		+xs*(s43+ys*(s44+ys*(s45+ys*(s46+ys*(s47+ys*(s48+s49*ys)))))))))));
+	
+	
+	return (spiciness1);
+}
+
+/*
+!==========================================================================
+function gsw_spiciness1(sa,ct)  
+!==========================================================================
+
+
+! gsw_spiciness2                                 spiciness at p = 2000 dbar
+!                                                        (75-term equation)
+!==========================================================================
+! 
+! USAGE:  
+!  spiciness2 = gsw_spiciness2(SA,CT)
+!
+! DESCRIPTION:
+!  Calculates spiciness from Absolute Salinity and Conservative 
+!  Temperature at a pressure of 2000 dbar, as described by McDougall and 
+!  Krzysik (2015).  This routine is based on the computationally-efficient 
+!  expression for specific volume in terms of SA, CT and p (Roquet et al., 
+!  2015).
+!
+!  Note that the 75-term equation has been fitted in a restricted range of 
+!  parameter space, and is most accurate inside the "oceanographic funnel" 
+!  described in IOC et al. (2010).  The GSW library function 
+!  "gsw_infunnel(SA,CT,p)" is available to be used if one wants to test if 
+!  some of one's data lies outside this "funnel".  
+!
+! INPUT:
+!  SA  =  Absolute Salinity                                        [ g/kg ]
+!  CT  =  Conservative Temperature (ITS-90)                       [ deg C ]
+!
+!  SA & CT need to have the same dimensions.
+!
+! OUTPUT:
+!  spiciness2  =  spiciness referenced to a pressure of 2000 dbar [ kg/m^3 ]                                            [ kg/m^3 ]
+!
+! AUTHOR: 
+!  Oliver Krzysik and Trevor McDougall                 [ help@teos-10.org ]
+!
+! VERSION NUMBER: 3.05 (5th December, 2014)
+!
+! REFERENCES:
+!  IOC, SCOR and IAPSO, 2010: The international thermodynamic equation of 
+!   seawater - 2010: Calculation and use of thermodynamic properties.  
+!   Intergovernmental Oceanographic Commission, Manuals and Guides No. 56,
+!   UNESCO (English), 196 pp.  Available from http://www.TEOS-10.org
+!
+!  McDougall, T.J., and O.A. Krzysik, 2015: Spiciness. To be submitted to
+!   the Journal of Marine Research.  
+!
+!  Roquet, F., G. Madec, T.J. McDougall and P.M. Barker, 2015: Accurate
+!   polynomial expressions for the density and specifc volume of seawater
+!   using the TEOS-10 standard. Ocean Modelling, in press. 
+!   
+!  The software is available from http://www.TEOS-10.org
+!
+!==========================================================================
+*/
+
+double
+gsw_spiciness2(double sa, double ct)
+{
+	double	
+		s01 = -9.17327320732265e1,	s02 = -1.31200235147912e1,
+		s03 =  2.49574345782503e1,	s04 = -2.41678075247398e1,
+		s05 =  3.61654631402053e1,	s06 = -3.22582164667710e1,
+		s07 =  1.45092623982509e1,	s08 =  2.87776645983195e2,
+		s09 =  3.13902307672447e1,	s10 =  1.69777467534459,
+		s11 = -5.69630115740438,	s12 = -7.97586359017987e1,
+		s13 =  1.07507460387751e2,	s14 = -5.58234404964787e1,
+		s15 = -6.41708068766557e2,	s16 = -2.53494801286161e1,
+		s17 = -9.86755437385364e1,	s18 =  1.52406930795842e2,
+		s19 =  4.23888258264105e1,	s20 = -1.60118811141438e2,
+		s21 =  9.67497898053989e1,	s22 =  8.27674355478637e2,
+		s23 =  5.27561234412133e-1,	s24 =  1.87440206992396e2,
+		s25 = -2.83295392345171e2,	s26 =  5.14485994597635e1,
+		s27 =  1.29975755062696e2,	s28 = -9.36526588377456e1,
+		s29 = -5.74911728972948e2,	s30 =  1.91175851862772e1,
+		s31 = -1.59347231968841e2,	s32 =  2.33884725744938e2,
+		s33 = -7.87744010546157e1,	s34 = -6.04757235443685e1,
+		s35 =  5.27869695599657e1,	s36 =  2.12517758478878e2,
+		s37 = -1.24351794740528e1,	s38 =  6.53904308937490e1,
+		s39 = -9.44804080763788e1,	s40 =  3.93874257887364e1,
+		s41 =  1.49425448888996e1,	s42 = -1.62350721656367e1,
+		s43 = -3.25936844276669e1,	s44 =  2.44035700301595,
+		s45 = -1.05079633683795e1,	s46 =  1.51515796259082e1,
+		s47 = -7.06609886460683,	s48 = -1.48043337052968,
+		s49 =  2.10066653978515;
+	
+	double 	sfac 	= 	0.0248826675584615;    // sfac = 1/(40*(35.16504/35)).
+	double	offset 	= 	5.971840214030754e-1;  // offset = deltaS*sfac.
+	double 	x2, xs, ys, spiciness2;
+	
+	x2 			= 	sfac*sa;
+	xs 			= 	sqrt(x2+offset);
+	ys 			= 	ct*0.025;
+	
+	spiciness2	= s01+ys*(s02+ys*(s03+ys*(s04+ys*(s05+ys*(s06+s07*ys)))))
+		+xs*(s08+ys*(s09+ys*(s10+ys*(s11+ys*(s12+ys*(s13+s14*ys)))))
+		+xs*(s15+ys*(s16+ys*(s17+ys*(s18+ys*(s19+ys*(s20+s21*ys)))))
+		+xs*(s22+ys*(s23+ys*(s24+ys*(s25+ys*(s26+ys*(s27+s28*ys)))))
+		+xs*(s29+ys*(s30+ys*(s31+ys*(s32+ys*(s33+ys*(s34+s35*ys)))))
+		+xs*(s36+ys*(s37+ys*(s38+ys*(s39+ys*(s40+ys*(s41+s42*ys)))))
+		+xs*(s43+ys*(s44+ys*(s45+ys*(s46+ys*(s47+ys*(s48+s49*ys)))))))))));
+	
+	
+	return (spiciness2);
+}
+
 /*
 **  The End
 **!==========================================================================
