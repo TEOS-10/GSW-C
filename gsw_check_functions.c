@@ -1,501 +1,573 @@
 /*
-**  $Id: gsw_check_functions.c,v 436b1be5f0c7 2015/04/13 21:14:36 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
 **  $Version: 3.0.3 $
 */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 #include <gswteos-10.h>
+#include <gsw_check_data.c>
 
-static void	report(char *what, double acceptable, double actual,
-			double expected);
+#define test_func(name, arglist, value, var) \
+	for (i=0; i<count; i++) { \
+	    value[i] = gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var ## _ca, #var, count, value, var)
 
-/*
-** Acceptable differences from check values:
-*/
-#define abs_pressure_from_p_ca  2.300031483173370e-004
-#define adiabatic_lapse_rate_from_ct_ca  5.699743845487985e-019
-#define adiabatic_lapse_rate_from_t_ca  5.699738675609156e-019
-#define adiabatic_lapse_rate_t_exact_ca  5.699738675609156e-019
-#define alpha_ca  8.264713918662917e-015
-#define alpha_ct_exact_ca  8.257102480598889e-015
-#define alpha_ct_exact_rab_ca  8.257102480598889e-015
-#define alpha_on_beta_ca 1.052907760978883e-11
-#define alpha_rab_ca  8.264713918662917e-015
-#define alpha_wrt_ct_t_exact_ca  8.257094010269417e-015
-#define alpha_wrt_pt_t_exact_ca  8.599068316130290e-015
-#define alpha_wrt_t_exact_ca  8.594856868316542e-015
-#define beta_ca  1.846179459308317e-015
-#define beta_const_ct_t_exact_ca  1.847372081698051e-015
-#define beta_const_pt_t_exact_ca  1.805738718274608e-015
-#define beta_const_t_exact_ca  1.804871356536619e-015
-#define beta_ct_exact_ca  1.847372081698051e-015
-#define beta_ct_exact_rab_ca  1.847372081698051e-015
-#define beta_rab_ca  1.846179459308317e-015
-#define brinesa_ct_ca  1.300080043620255e-010
-#define brinesa_t_ca  1.300293206440983e-010
-#define cabbeling_ca  1.634722766223964e-16
-#define c_from_sp_ca  6.163816124171717e-010
-#define chem_potential_salt_t_exact_ca  4.805315256817266e-007
-#define chem_potential_t_exact_ca  1.317864928296331e-009
-#define chem_potential_water_t_exact_ca  4.811790859093890e-007
-#define cp_t_exact_ca  2.813976607285440e-009
-#define ct_freezing_ca  2.257127817983928e-011
-#define ct_from_entropy_ca  6.261107188265669e-010
-#define ct_from_pt_ca  6.261107188265669e-010
-#define ct_from_rho_ca  6.298552790440226e-010
-#define ct_from_rho_exact_ca  6.280096442878858e-010
-#define ct_from_t_ca  6.261107188265669e-010
-#define ct_maxdensity_ca  6.688338771709823e-011
-#define ct_maxdensity_exact_ca  5.839062566792563e-011
-#define ct_pt_ca  2.964295475749168e-013
-#define ct_pt_pt_ca  5.551115123125783e-014
-#define ct_sa_ca  1.006231122729906e-012
-#define ct_sa_pt_ca  1.457167719820518e-014
-#define ct_sa_sa_ca  1.431146867680866e-014
-#define deltasa_from_sp_ca  6.963318810448982e-013
-#define deltasa_atlas_ca  6.945514042372425e-013
-#define depth_from_z_ca  2.287223921371151e-008
-#define distance_ca  4.470348358154297e-008
-#define drho_dct_ca 8.315403920988729e-12
-#define drho_dp_ca 1.782157321023048e-18
-#define drho_dsa_ca 1.943112337698949e-12
-#define dynamic_enthalpy_ca  2.288754734930485e-007
-#define dynamic_enthalpy_ct_exact_ca  2.288797986693680e-007
-#define dynamic_enthalpy_t_exact_ca  2.288943505845964e-007
-#define enthalpy_ca  2.499356924090534e-006
-#define enthalpy_ct_exact_ca  2.499349648132920e-006
-#define enthalpy_diff_ca  1.154347728515859e-010
-#define enthalpy_diff_ct_exact_ca  7.275957614183426e-011
-#define enthalpy_t_exact_ca  2.499349648132920e-006
-#define entropy_from_ct_ca  9.028163105995191e-009
-#define entropy_from_pt_ca  9.028163105995191e-009
-#define entropy_from_t_ca  9.028163105995191e-009
-#define entropy_t_exact_ca  9.028163105995191e-009
-#define eta_ct_ca  3.137579085432662e-011
-#define eta_ct_ct_ca  2.381358998881922e-013
-#define eta_sa_ca  4.653527563291959e-012
-#define eta_sa_ct_ca  4.981922535098049e-014
-#define eta_sa_sa_ca  6.995931611797346e-013
-#define f_ca  1.000000000000000e-015
-#define fdelta_ca  2.702939055302528e-014
-#define g_ct_ca  2.854610769986721e-009
-#define geo_strf_cunningham_ca  9.926097845891491e-007
-#define geo_strf_dyn_height_ca  9.969444363377988e-007
-#define geo_strf_dyn_height_pc_ca  4.210555459849275e-008
-#define geo_strf_dyn_height_pc_p_mid_ca  1.000000000000000e-015
-#define geo_strf_isopycnal_ca  4.297791695861974e-007
-#define geo_strf_isopycnal_pc_ca  8.540336438045415e-009
-#define geo_strf_isopycnal_pc_p_mid_ca  1.000000000000000e-015
-#define geo_strf_montgomery_ca  9.915690188933013e-007
-#define geo_strf_velocity_ca  8.024344404222727e-009
-#define geo_strf_velocity_mid_lat_ca  1.000000000000000e-015
-#define geo_strf_velocity_mid_long_ca  1.000000000000000e-015
-#define grav_ca  5.329070518200751e-014
-#define h_ct_ca  3.160494088660926e-010
-#define h_ct_ct_ca  1.135647131889073e-011
-#define helmholtz_energy_t_exact_ca  2.440137905068696e-007
-#define h_p_ca  2.818925648462312e-016
-#define h_sa_ca  2.371365326325758e-010
-#define h_sa_ct_ca  2.188554892867956e-012
-#define h_sa_sa_ca  7.264189250122399e-013
-#define internal_energy_ca  2.499342372175306e-006
-#define internal_energy_ct_exact_ca  2.499335096217692e-006
-#define internal_energy_t_exact_ca  2.499335096217692e-006
-#define ionic_strength_from_sa_ca  2.768674178810215e-012
-#define ipvfn2_ca  3.474816878679121e-009
-#define isochoric_heat_cap_t_exact_ca  1.614353095646948e-009
-#define isopycnal_slope_ratio_ca  3.781384094736495e-010
-#define kappa_ca 1.717743939542931e-21
-#define kappa_const_t_exact_ca  1.697064424229105e-021
-#define kappa_t_exact_ca  1.712677458291044e-021
-#define latentheat_evap_ct_ca  1.455657184123993e-006
-#define latentheat_evap_t_ca  1.443084329366684e-006
-#define latentheat_melting_ca  6.286427378654480e-008
-#define molality_from_sa_ca  4.446665258228677e-012
-#define n2_ca  1.578186366313350e-014
-#define ntpptct_ca  5.024869409453459e-013
-#define osmotic_coefficient_t_exact_ca  3.583799923490005e-013
-#define osmotic_pressure_t_exact_ca  1.023465756588848e-009
-#define p_from_abs_pressure_ca  2.300066626048647e-008
-#define p_from_z_ca  2.301931090187281e-008
-#define p_mid_g_ct_ca  2.300021151313558e-008
-#define p_mid_ipvfn2_ca  2.300021151313558e-008
-#define p_mid_n2_ca  2.300021151313558e-008
-#define p_mid_tursr_ca  2.300021151313558e-008
-#define pot_enthalpy_from_pt_ca  2.499356924090534e-006
-#define pot_rho_t_exact_ca  2.929709808086045e-010
-#define pt0_from_t_ca  6.054037271496782e-010
-#define pt_ct_ca  2.733369086627135e-013
-#define pt_ct_ct_ca  4.440892098500626e-014
-#define pt_from_ct_ca  6.054037271496782e-010
-#define pt_from_entropy_ca  6.054072798633570e-010
-#define pt_from_t_ca  6.054037271496782e-010
-#define pt_sa_ca  9.670458878119348e-013
-#define pt_sa_ct_ca  1.199127602768968e-014
-#define pt_sa_sa_ca  2.081668171172169e-014
-#define r_from_sp_ca  1.436317731418058e-011
-#define rho_ca  2.945625965367071e-010
-#define rho_ct_exact_ca  2.944489096989855e-010
-#define rho_ct_exact_rab_ca  2.944489096989855e-010
-#define rho_rab_ca  2.944489096989855e-010
-#define rho_t_exact_ca  2.944489096989855e-010
-#define rsubrho_ca  1.709803143512545e-008
-#define sa_from_rho_ca  1.308677610722953e-010
-#define sa_from_rho_ct_exact_ca  1.306119656874216e-010
-#define sa_from_rho_t_exact_ca  1.304769625676272e-010
-#define sa_from_sp_ca  1.300080043620255e-010
-#define sa_from_sstar_ca  1.300222152167407e-010
-#define sa_sa_sstar_from_sp_ca  1.300008989346679e-010
-#define sigma0_ca  2.933120413217694e-010
-#define sigma0_ct_exact_ca  2.929709808086045e-010
-#define sigma0_pt0_exact_ca  2.929709808086045e-010
-#define sigma1_ca  2.999058779096231e-010
-#define sigma1_ct_exact_ca  2.994511305587366e-010
-#define sigma2_ca  3.060449671465904e-010
-#define sigma2_ct_exact_ca  3.055902197957039e-010
-#define sigma3_ca  3.119566827081144e-010
-#define sigma3_ct_exact_ca  3.117293090326712e-010
-#define sigma4_ca  3.180957719450817e-010
-#define sigma4_ct_exact_ca  3.176410245941952e-010
-#define sound_speed_ca  2.596152626210824e-009
-#define sound_speed_ct_exact_ca  2.590240910649300e-009
-#define sound_speed_t_exact_ca  2.590240910649300e-009
-#define specvol_anom_ca  2.810252031082428e-016
-#define specvol_anom_ct_exact_ca  2.805915222392486e-016
-#define specvol_anom_t_exact_ca  2.805915222392486e-016
-#define specvol_ca  2.821094052807283e-016
-#define specvol_ct_exact_ca  2.818925648462312e-016
-#define specvol_t_exact_ca  2.818925648462312e-016
-#define sp_from_c_ca  1.297193463756230e-010
-#define sp_from_r_ca  2.681299626772216e-012
-#define sp_from_sa_ca  1.297113527698457e-010
-#define sp_from_sr_ca  1.297122409482654e-010
-#define sp_from_sstar_ca  1.297122409482654e-010
-#define sp_salinometer_ca  1.297131291266851e-010
-#define sr_from_sp_ca  1.303233077010191e-010
-#define sstar_from_sa_ca  1.300008989346679e-010
-#define sstar_from_sp_ca  1.300008989346679e-010
-#define sstar_sa_sstar_from_sp_ca  1.300008989346679e-010
-#define steric_height_ca  1.017674460257467e-007
-#define t90_from_t48_ca  5.997407015456702e-010
-#define t90_from_t68_ca  5.998579410970706e-010
-#define t_freezing_ca  2.157829470661454e-011
-#define t_from_ct_ca  6.000142604989378e-010
-#define t_from_rho_exact_ca  6.032974120273593e-010
-#define thermobaric_ca  4.890907320111513e-23
-#define t_maxdensity_exact_ca  6.274447628129565e-011
-#define tu_ca  2.190718007000214e-008
-#define z_from_depth_ca  2.287223921371151e-008
-#define z_from_p_ca  2.287223921371151e-008
+#define test_sub1(name,arglist,val1,var1) \
+	for (i=0; i<count; i++) { \
+	    gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var1 ## _ca, #var1, count, val1, var1)
 
-int	gsw_error_flag=0, debug=0;
+#define VALS1 &val1[i]
 
-/*
-**  Main
-*/
+#define test_sub2(name,arglist,val1,var1,val2,var2) \
+	for (i=0; i<count; i++) { \
+	    gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var1 ## _ca, #var1, count, val1, var1); \
+	check_accuracy(#name, var2 ## _ca, #var2, count, val2, var2)
+
+#define VALS2 &val1[i],&val2[i]
+
+#define test_sub3(name,arglist,val1,var1,val2,var2,val3,var3) \
+	for (i=0; i<count; i++) { \
+	    gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var1 ## _ca, #var1, count, val1, var1); \
+	check_accuracy(#name, var2 ## _ca, #var2, count, val2, var2); \
+	check_accuracy(#name, var3 ## _ca, #var3, count, val3, var3)
+
+#define VALS3 &val1[i],&val2[i],&val3[i]
+
+#define test_sub4(name,arglist,val1,var1,val2,var2,val3,var3,val4,var4) \
+	for (i=0; i<count; i++) { \
+	    gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var1 ## _ca, #var1, count, val1, var1); \
+	check_accuracy(#name, var2 ## _ca, #var2, count, val2, var2); \
+	check_accuracy(#name, var3 ## _ca, #var3, count, val3, var3); \
+	check_accuracy(#name, var4 ## _ca, #var4, count, val4, var4)
+
+#define VALS4 &val1[i],&val2[i],&val3[i],&val4[i]
+
+#define test_sub5(name,arglist,val1,var1,val2,var2,val3,var3,val4,var4,\
+		val5,var5) \
+	for (i=0; i<count; i++) { \
+	    gsw_ ## name arglist; \
+	} \
+	check_accuracy(#name, var1 ## _ca, #var1, count, val1, var1); \
+	check_accuracy(#name, var2 ## _ca, #var2, count, val2, var2); \
+	check_accuracy(#name, var3 ## _ca, #var3, count, val3, var3); \
+	check_accuracy(#name, var4 ## _ca, #var4, count, val4, var4); \
+	check_accuracy(#name, var5 ## _ca, #var5, count, val5, var5)
+
+#define VALS5 &val1[i],&val2[i],&val3[i],&val4[i],&val5[i]
+
+typedef struct gsw_error_info {
+	int	ncomp, flags;
+#define GSW_ERROR_LIMIT_FLAG	1
+#define GSW_ERROR_ERROR_FLAG	2
+	double	max,
+		rel,
+		limit,
+		rlimit;
+}	gsw_error_info;
+	
+void report(char *funcname, char *varname, gsw_error_info *errs);
+void check_accuracy(char *funcname, double accuracy, char *varname,
+			int count, double *calcval, double *refval);
+void section_title(char *title);
+
+int		debug=0, check_count, gsw_error_flag=0;
+double		c[cast_m*cast_n];
+double		sr[cast_m*cast_n];
+double		sstar[cast_m*cast_n];
+double		pt[cast_m*cast_n];
+double		pt0[cast_m*cast_n];
+double		entropy[cast_m*cast_n];
+double		ctf[cast_m*cast_n];
+double		tf[cast_m*cast_n];
+double		ctf_poly[cast_m*cast_n];
+double		tf_poly[cast_m*cast_n];
+double		h[cast_m*cast_n];
+
 int
 main(int argc, char **argv)
 {
-	int	nz=3;
-	double	sp, sa, sstar, sr, t, ct, pt, p, p_bs, p_ref, c, rho;
-	double	lon, long_bs, lat, lat_bs, saturation_fraction;
-	double	cabbeling, thermobaric, alpha_on_beta;
-	double	sigma0, sigma1, sigma2, sigma3, sigma4;
-	double	drho_dsa, drho_dct, drho_dp, drho_dsa_error, drho_dct_error;
-	double	drho_dp_error;
-
-	double	n2[2], p_mid_n2[2], n2_error[2], p_mid_n2_error[2];
-	double	ipvfn2[2],p_mid_ipvfn2[2];
-	double	ipvfn2_error[2], p_mid_ipvfn2_error[2];
-	double	tu[2], rsubrho[2], p_mid_tursr[2];
-	double	tu_error[2], rsubrho_error[2], p_mid_tursr_error[2];
-	double	sa_profile[3], ct_profile[3], p_profile[3], lat_profile[3];
-
-	sa_profile[0] = 35.5e0;
-	sa_profile[1] = 35.7e0;
-	sa_profile[2] = 35.6e0;
-	ct_profile[0] = 12.5e0;
-	ct_profile[1] = 15e0;
-	ct_profile[2] = 10e0;
-	p_profile[0] = 00e0;
-	p_profile[1] = 50e0;
-	p_profile[2] = 100e0;
-	lat_profile[0] = 10e0;
-	lat_profile[1] = 10e0;
-	lat_profile[2] = 10e0;
-
-	sp	=  35.5e0;
-	sa	= 35.7e0;
-	sstar	= 35.5e0;
-	sr	= 35.5e0;
-	t	= 15e0;
-	ct	= 20e0;
-	pt	= 15e0;
-	p	= 300e0;
-	p_bs	= 50e0;
-	p_ref	= 100e0;
-	c	= 43.6e0;
-	lon	= 260e0;
-	long_bs	= 20e0;
-	lat	= 16e0;
-	lat_bs	= 60e0;
-	saturation_fraction	= 0.5e0;
+	int	count = cast_m*cast_n, i, j, k, l;
+	double	saturation_fraction, value[count], lat[count],
+		lon[count], val1[count], val2[count], val3[count],
+		val4[count], val5[count];
 
 	if (argc==2 && !strcmp(argv[1],"-debug"))
 	    debug	= 1;
 
+	for (i=0; i<cast_n; i++) {
+	    for (j=i*cast_m, k=j+cast_m; j<k; j++) {
+		lat[j]	= lat_cast[i];
+		lon[j]	= long_cast[i];
+	    }
+	}
+
 	printf(
 "============================================================================\n"
-" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.03 (C)\n"
+" Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 version 3.05 (C)\n"
 "============================================================================\n"
 "\n"
 " These are the check values for the subset of functions that have been \n"
 " converted into C from the Gibbs SeaWater (GSW) Oceanographic Toolbox \n"
-" of TEOS-10 (version 3.03).\n"
-	);
-	printf(
-"\nPractical Salinity, PSS-78:\n\n"
-	);
-	report("gsw_sp_from_c", sp_from_c_ca,
-		gsw_sp_from_c(c,t,p), 35.500961780774482e0);
-	report("gsw_c_from_sp", c_from_sp_ca,
-		gsw_c_from_sp(sp,t,p), 43.598945605280484e0);
-	printf(
-"\nAbsolute Salinity, Preformed Salinity and Conservative Temperature:\n\n"
-	);
-	report("gsw_sa_from_sp", sa_from_sp_ca,
-		gsw_sa_from_sp(sp,p,lon,lat), 35.671358392019094e0);
-	report("gsw_sstar_from_sp", sstar_from_sp_ca,
-		gsw_sstar_from_sp(sa,p,lon,lat), 35.866946753006239e0);
-	report("gsw_ct_from_t", ct_from_t_ca,
-		gsw_ct_from_t(sa,t,p),  14.930280459895560e0);
-	printf(
-"\nOther conversions between temperatures, salinities, entropy, pressure\n"
-"and height:\n\n"
-	);
-	report("gsw_deltasa_from_sp", deltasa_from_sp_ca,
-		gsw_deltasa_from_sp(sp,p,lon,lat),  3.96067773336028495e-3);
-	report("gsw_sr_from_sp", sr_from_sp_ca,
-		gsw_sr_from_sp(sp),  35.667397714285734e0);
-	report("gsw_sp_from_sr", sp_from_sr_ca,
-		gsw_sp_from_sr(sr),  35.333387933015295e0);
-	report("gsw_sp_from_sa", sp_from_sa_ca,
-		gsw_sp_from_sa(sa,p,lon,lat), 35.528504019167094e0);
-	report("gsw_sstar_from_sa", sstar_from_sa_ca,
-		gsw_sstar_from_sa(sa,p,lon,lat), 35.694648791860907e0);
-	report("gsw_sp_from_sstar", sp_from_sstar_ca,
-		gsw_sp_from_sstar(sstar,p,lon,lat), 35.334761242083573e0);
-	report("gsw_sa_from_sstar", sa_from_sstar_ca,
-		gsw_sa_from_sstar(sstar,p,lon,lat), 35.505322027120805e0);
-	report("gsw_pt_from_ct", pt_from_ct_ca,
-		gsw_pt_from_ct(sa,ct), 20.023899375975017e0);
-	report("gsw_t_from_ct", t_from_ct_ca,
-		gsw_t_from_ct(sa,ct,p), 20.079820359223014e0);
-	report("gsw_ct_from_pt", ct_from_pt_ca,
-		gsw_ct_from_pt(sa,pt), 14.976021403957613e0);
-	report("gsw_pt0_from_t", pt0_from_t_ca,
-		gsw_pt0_from_t(sa,t,p),  14.954241363902305e0);
-	report("gsw_pt_from_t", pt_from_t_ca,
-		gsw_pt_from_t(sa,t,p,p_ref), 14.969381237883740e0);
-	report("gsw_z_from_p", z_from_p_ca,
-		gsw_z_from_p(p,lat), -2.980161553316402e2);
-	report("gsw_entropy_from_t", entropy_from_t_ca,
-		gsw_entropy_from_t(sa,t,p), 212.30166821093002e0);
-	report("gsw_adiabatic_lapse_rate_from_ct",
-		adiabatic_lapse_rate_from_ct_ca,
-		gsw_adiabatic_lapse_rate_from_ct(sa,ct,p),
-		1.877941744191155e-8);
-	printf(
-"\nDensity and enthalpy, based on the 48-term expression for density:\n\n"
-	);
-	report("gsw_rho", rho_ca,
-		gsw_rho(sa,ct,p), 1026.4562376198473e0);
-	report("gsw_alpha", alpha_ca,
-		gsw_alpha(sa,ct,p), 2.62460550806784356e-4);
-	report("gsw_beta", beta_ca,
-		gsw_beta(sa,ct,p), 7.29314455934463365e-4 );
-	report("gsw_alpha_on_beta", alpha_on_beta_ca,
-		gsw_alpha_on_beta(sa,ct,p), 0.359872958325632e0 );
-	gsw_rho_first_derivatives(sa,ct,p,&drho_dsa,&drho_dct,&drho_dp);
-	drho_dsa_error = fabs(drho_dsa - 0.748609372480258e0);
-	drho_dct_error = fabs(drho_dct + 0.269404269504765e0);
-	drho_dp_error = fabs(drho_dp - 4.287533235942749e-7);
-	printf("\t%-32.32s  ........  ", "gsw_rho_first_derivatives");
-	if (drho_dsa_error < drho_dsa_ca && drho_dct_error < drho_dct_ca
-	    && drho_dp_error < drho_dp_ca)
-            printf("passed\n");
-        else {
-            printf("failed\n");
-            gsw_error_flag      = 1;
- 	}
-	report("gsw_specvol", specvol_ca,
-		gsw_specvol(sa,ct,p), 9.74225654586897711e-4 );
-	report("gsw_specvol_anom", specvol_anom_ca,
-		gsw_specvol_anom(sa,ct,p), 2.90948181201264571e-6 );
-	report("gsw_sigma0", sigma0_ca,
-		gsw_sigma0(sa,ct), 25.165674636323047e0);
-	report("gsw_sigma1", sigma1_ca,
-		gsw_sigma1(sa,ct), 29.434338510752923e0);
-	report("gsw_sigma2", sigma2_ca,
-		gsw_sigma2(sa,ct), 33.609842926904093e0);
-	report("gsw_sigma3", sigma3_ca,
-		gsw_sigma3(sa,ct), 37.695147569371784e0);
-	report("gsw_sigma4", sigma4_ca,
-		gsw_sigma4(sa,ct), 41.693064726656303e0);
-	report("gsw_sound_speed", sound_speed_ca,
-		gsw_sound_speed(sa,ct,p), 1527.2011773569989e0 );
-	report("gsw_kappa", kappa_ca,
-		gsw_kappa(sa,ct,p), 4.177024873349404e-010);
-	report("gsw_cabbeling", cabbeling_ca,
-		gsw_cabbeling(sa,ct,p), 9.463053321129075e-6);
-	report("gsw_thermobaric", thermobaric_ca,
-		gsw_thermobaric(sa,ct,p), 1.739078662082863e-12);
-	report("gsw_internal_energy", internal_energy_ca,
-		gsw_internal_energy(sa,ct,p), 79740.482561720783e0 );
-	report("gsw_enthalpy", enthalpy_ca,
-		gsw_enthalpy(sa,ct,p), 82761.872939932495e0 );
-	report("gsw_dynamic_enthalpy", dynamic_enthalpy_ca,
-		gsw_dynamic_enthalpy(sa,ct,p),  2924.5137975399025e0 );
-	rho	= gsw_rho(sa,ct,p);
-	report("gsw_sa_from_rho", rho_ca,
-		gsw_sa_from_rho(rho,ct,p), sa);
-	printf(
-  "\nWater column properties, based on the 48-term expression for density:\n\n"
-	);
-	gsw_nsquared(sa_profile,ct_profile,p_profile,lat_profile,nz,n2,
-			p_mid_n2);
-	n2_error[0] = fabs(n2[0] + 0.070960392693051e-3);
-	n2_error[1] = fabs(n2[1] - 0.175435821615983e-3);
-	p_mid_n2_error[0] = fabs(p_mid_n2[0] - 25e0);
-	p_mid_n2_error[1] = fabs(p_mid_n2[1] - 75e0);
-	printf("\t%-32.32s  ........  ", "gsw_nsquared");
-	if (n2_error[0] < n2_ca && n2_error[1] < n2_ca &&
-	    p_mid_n2_error[0] < p_mid_n2_ca && p_mid_n2_error[1] < p_mid_n2_ca)
-            printf("passed\n");
-        else {
-            printf("failed\n");
-            gsw_error_flag      = 1;
- 	}
-	gsw_turner_rsubrho(sa_profile,ct_profile,p_profile,nz,tu,
-				rsubrho,p_mid_tursr);
-	tu_error[0] = fabs(tu[0] + 1.187243981606485e2);
-	tu_error[1] = fabs(tu[1] - 0.494158257088517e2);
-	rsubrho_error[0] = fabs(rsubrho[0] - 3.425146897090065e0);
-	rsubrho_error[1] = fabs(rsubrho[1] - 12.949399443139164e0);
-	p_mid_tursr_error[0] = fabs(p_mid_tursr[0] - 25e0);
-	p_mid_tursr_error[1] = fabs(p_mid_tursr[1] - 75e0);
-	printf("\t%-32.32s  ........  ", "gsw_turner_rsubrho");
-	if (tu_error[0] < tu_ca && tu_error[1] < tu_ca &&  
-	    rsubrho_error[0] < rsubrho_ca && rsubrho_error[1] < rsubrho_ca &&  
-	    p_mid_tursr_error[0] < p_mid_tursr_ca &&
-	    p_mid_tursr_error[1] < p_mid_tursr_ca)
-            printf("passed\n");
-        else {
-            printf("failed\n");
-            gsw_error_flag      = 1;
- 	}
-	gsw_ipv_vs_fnsquared_ratio(sa_profile,ct_profile,p_profile,0.0,nz,
-					ipvfn2,p_mid_ipvfn2);
-	ipvfn2_error[0] = fabs(ipvfn2[0] - 0.996783975249010e0);
-	ipvfn2_error[1] = fabs(ipvfn2[1] - 0.992112251478320e0);
-	p_mid_ipvfn2_error[0] = fabs(p_mid_ipvfn2[0] - 25e0);
-	p_mid_ipvfn2_error[1] = fabs(p_mid_ipvfn2[1] - 75e0);
-	printf("\t%-32.32s  ........  ", "gsw_ipv_vs_fnsquared_ratio");
-	if (ipvfn2_error[0] < ipvfn2_ca && 
-	    ipvfn2_error[1] < ipvfn2_ca && 
-	    p_mid_ipvfn2_error[0] < p_mid_ipvfn2_ca && 
-	    p_mid_ipvfn2_error[1] < p_mid_ipvfn2_ca)
-            printf("passed\n");
-        else {
-            printf("failed\n");
-            gsw_error_flag      = 1;
- 	}
-	printf(
-	"\nFreezing temperatures:\n\n"
-	);
-	report("gsw_ct_freezing", ct_freezing_ca,
-		gsw_ct_freezing(sa,p,saturation_fraction), -2.1801450326174852e0);
-	report("gsw_t_freezing", t_freezing_ca,
-		gsw_t_freezing(sa,p,saturation_fraction), -2.1765521998023516e0);
-	printf(
-"\nIsobaric melting enthalpy and isobaric evaporation enthalpy:\n\n"
-	);
-	report("gsw_latentheat_melting", latentheat_melting_ca,
-		gsw_latentheat_melting(sa,p), 329330.54839618353e0);
-	report("gsw_latentheat_evap_ct", latentheat_evap_ct_ca,
-		gsw_latentheat_evap_ct(sa,ct), 2450871.0228523901e0);
-	report("gsw_latentheat_evap_t", latentheat_evap_t_ca,
-		gsw_latentheat_evap_t(sa,t), 2462848.2895522709e0);
-	printf(
-"\nBasic thermodynamic properties in terms of in-situ t, based on\n"
-"the exact Gibbs function:\n\n"
-	);
-	report("gsw_rho_t_exact", rho_t_exact_ca,
-		gsw_rho_t_exact(sa,t,p), 1027.7128170207150e0);
-	report("gsw_pot_rho_t_exact", pot_rho_t_exact_ca,
-		gsw_pot_rho_t_exact(sa,t,p,p_ref), 1026.8362655887486e0);
-	report("gsw_alpha_wrt_t_exact", alpha_wrt_t_exact_ca,
-		gsw_alpha_wrt_t_exact(sa,t,p), 2.19066952410728916e-4);
-	report("gsw_beta_const_t_exact", beta_const_t_exact_ca,
-		gsw_beta_const_t_exact(sa,t,p),  7.44744841648729426e-4);
-	report("gsw_specvol_t_exact", specvol_t_exact_ca,
-		gsw_specvol_t_exact(sa,t,p), 9.73034473676164815e-4);
-	report("gsw_sound_speed_t_exact", sound_speed_t_exact_ca,
-		gsw_sound_speed_t_exact(sa,t,p), 1512.2053940303056e0);
-	report("gsw_kappa_t_exact", kappa_t_exact_ca,
-		gsw_kappa_t_exact(sa,t,p), 4.25506953386609075e-010);
-	report("gsw_enthalpy_t_exact", enthalpy_t_exact_ca,
-		gsw_enthalpy_t_exact(sa,t,p), 62520.680485510929e0);
-	report("gsw_cp_t_exact", cp_t_exact_ca,
-		gsw_cp_t_exact(sa,t,p), 3982.7832563441461e0);
-	printf(
-"\nLibrary functions of the GSW toolbox:\n\n"
-	);
-	report("gsw_deltasa_atlas", deltasa_atlas_ca,
-		gsw_deltasa_atlas(p,lon,lat), 3.87660373016291727e-3);
-	report("gsw_fdelta", fdelta_ca,
-		gsw_fdelta(p,lon,lat), 1.49916256924158942e-004);
-	report("gsw_sa_from_sp_baltic", sa_from_sp_ca,
-		gsw_sa_from_sp_baltic(sp,long_bs,lat_bs) , 35.666154857142850e0);
-	report("gsw_sp_from_sa_baltic", sp_from_sa_ca,
-		gsw_sp_from_sa_baltic(sa,long_bs,lat_bs), 35.533769845749660e0);
-	printf(
-"\nSpiciness functions of the GSW toolbox:\n\n"
-	);
-	report("gsw_spiciness0", sp_from_sa_ca,
-		gsw_spiciness0(sa,ct), 3.909833210457435e0);
-	report("gsw_spiciness1", sp_from_sa_ca,
-		gsw_spiciness1(sa,ct), 4.368103663398628e0);
-	report("gsw_spiciness2", sp_from_sa_ca,
-		gsw_spiciness2(sa,ct), 4.811233077656070e0);
+" of TEOS-10 (version 3.05).\n");
 
+	check_count = 1;
+
+	section_title("Practical Salinity, PSS-78");
+
+	test_func(c_from_sp, (sp[i],t[i],p[i]), c,c_from_sp);
+	test_func(sp_from_c, (c[i],t[i],p[i]), value,sp_from_c);
+	test_func(sp_from_sk, (sk[i]), value,sp_from_sk);
+
+	section_title(
+	  "Absolute Salinity, Preformed Salinity and Conservative Temperature");
+
+	test_func(sa_from_sp, (sp[i],p[i],lon[i],lat[i]), value,sa_from_sp);
+	test_func(sstar_from_sp,(sp[i],p[i],lon[i],lat[i]),value,sstar_from_sp);
+	test_func(ct_from_t, (sa[i],t[i],p[i]), value,ct_from_t);
+
+	section_title(
+	  "Other conversions between Temperatures, Salinities, Entropy, "
+	  "Pressure and Height");
+
+	test_func(deltasa_from_sp, (sp[i],p[i],lon[i],lat[i]), value,
+	    deltasa_from_sp);
+	test_func(sr_from_sp, (sp[i]), sr,sr_from_sp);
+	test_func(sp_from_sr, (sr[i]), value,sp_from_sr);
+	test_func(sp_from_sa, (sa[i],p[i],lon[i],lat[i]), value,sp_from_sa);
+	test_func(sstar_from_sa,(sa[i],p[i],lon[i],lat[i]),sstar,sstar_from_sa);
+	test_func(sa_from_sstar, (sstar[i],p[i],lon[i],lat[i]), value,
+	    sa_from_sstar);
+	test_func(sp_from_sstar, (sstar[i],p[i],lon[i],lat[i]), value,
+	    sp_from_sstar);
+	test_func(pt_from_ct, (sa[i],ct[i]), pt,pt_from_ct);
+	test_func(t_from_ct, (sa[i],ct[i],p[i]), value,t_from_ct);
+	test_func(ct_from_pt, (sa[i],pt[i]), value,ct_from_pt);
+	test_func(pt0_from_t, (sa[i],t[i],p[i]), value,pt0_from_t);
+	test_func(pt_from_t, (sa[i],t[i],p[i],pref[0]), value,pt_from_t);
+	test_func(z_from_p, (p[i],lat[i]), value,z_from_p);
+	test_func(entropy_from_pt, (sa[i],pt[i]), entropy,entropy_from_pt);
+	test_func(pt_from_entropy, (sa[i],entropy[i]), value,pt_from_entropy);
+	test_func(ct_from_entropy, (sa[i],entropy[i]), value,ct_from_entropy);
+	test_func(entropy_from_t, (sa[i],t[i],p[i]), value,entropy_from_t);
+	test_func(adiabatic_lapse_rate_from_ct, (sa[i],ct[i],p[i]), value,
+	    adiabatic_lapse_rate_from_ct);
+
+	section_title("Specific Volume, Density and Enthalpy");
+
+	test_func(specvol, (sa[i],ct[i],p[i]), value,specvol);
+	test_func(alpha, (sa[i],ct[i],p[i]), value,alpha);
+	test_func(beta, (sa[i],ct[i],p[i]), value,beta);
+	test_func(alpha_on_beta, (sa[i],ct[i],p[i]), value,alpha_on_beta);
+	test_sub3(specvol_alpha_beta, (sa[i],ct[i],p[i],VALS3),
+	    val1,v_vab,val2,alpha_vab,val3,beta_vab);
+	test_sub3(specvol_first_derivatives,(sa[i],ct[i],p[i],VALS3),
+	    val1,v_sa, val2,v_ct, val3,v_p);
+	test_sub5(specvol_second_derivatives, (sa[i],ct[i],p[i],VALS5),
+	    val1,v_sa_sa,val2,v_sa_ct,val3,v_ct_ct,val4,v_sa_p,val5,v_ct_p);
+	test_sub2(specvol_first_derivatives_wrt_enthalpy,
+	    (sa[i],ct[i],p[i],VALS2),val1,v_sa_wrt_h, val2,v_h);
+	test_sub3(specvol_second_derivatives_wrt_enthalpy,
+	    (sa[i],ct[i],p[i],VALS3),
+	    val1,v_sa_sa_wrt_h, val2,v_sa_h, val3,v_h_h);
+	test_func(specvol_anom_standard, (sa[i],ct[i],p[i]), value,
+	    specvol_anom_standard);
+	test_func(rho, (sa[i],ct[i],p[i]), rho,rho);
+	test_sub3(rho_alpha_beta, (sa[i],ct[i],p[i],VALS3),
+	    val1,rho_rab,val2,alpha_rab,val3,beta_rab);
+	test_sub3(rho_first_derivatives,(sa[i],ct[i],p[i],VALS3),
+	    val1,rho_sa,val2,rho_ct,val3,rho_p);
+	test_sub5(rho_second_derivatives,
+	    (sa[i],ct[i],p[i],VALS5),val1,rho_sa_sa,val2,rho_sa_ct,
+	    val3,rho_ct_ct,val4,rho_sa_p,val5, rho_ct_p);
+	test_sub2(rho_first_derivatives_wrt_enthalpy,
+	    (sa[i],ct[i],p[i],VALS2),val1,rho_sa_wrt_h,val2,rho_h);
+	test_sub3(rho_second_derivatives_wrt_enthalpy,
+		(sa[i],ct[i],p[i],VALS3),val1,rho_sa_sa_wrt_h,
+		val2,rho_sa_h, val3,rho_h_h);
+	test_func(sigma0, (sa[i],ct[i]), value,sigma0);
+	test_func(sigma1, (sa[i],ct[i]), value,sigma1);
+	test_func(sigma2, (sa[i],ct[i]), value,sigma2);
+	test_func(sigma3, (sa[i],ct[i]), value,sigma3);
+	test_func(sigma4, (sa[i],ct[i]), value,sigma4);
+	test_func(sound_speed, (sa[i],ct[i],p[i]), value,sound_speed);
+	test_func(kappa, (sa[i],ct[i],p[i]), value,kappa);
+	test_func(cabbeling, (sa[i],ct[i],p[i]), value,cabbeling);
+	test_func(thermobaric, (sa[i],ct[i],p[i]), value,thermobaric);
+	test_func(sa_from_rho, (rho[i],ct[i],p[i]), value,sa_from_rho);
+	test_sub1(ct_from_rho, (rho[i],sa[i],p[i],VALS1,NULL),val1,ct_from_rho);
+	test_func(ct_maxdensity, (sa[i],p[i]), value,ct_maxdensity);
+	test_func(internal_energy, (sa[i],ct[i],p[i]), value,internal_energy);
+	test_func(enthalpy, (sa[i],ct[i],p[i]), h,enthalpy);
+	test_func(enthalpy_diff,
+	    (sa[i],ct[i],p_shallow[i],p_deep[i]), value,enthalpy_diff);
+	test_func(ct_from_enthalpy, (sa[i],h[i],p[i]), value,ct_from_enthalpy);
+	test_func(dynamic_enthalpy, (sa[i],ct[i],p[i]), value,dynamic_enthalpy);
+	test_sub2(enthalpy_first_derivatives, (sa[i],ct[i],p[i],VALS2),
+	    val1,h_sa, val2,h_ct);
+	test_sub3(enthalpy_second_derivatives,(sa[i],ct[i],p[i],VALS3),
+	    val1,h_sa_sa,val2,h_sa_ct, val3,h_ct_ct);
+
+	section_title("Derivatives of entropy, CT and pt");
+
+	test_sub2(ct_first_derivatives, (sa[i],pt[i],VALS2),
+	    val1,ct_sa, val2,ct_pt);
+	test_sub3(ct_second_derivatives, (sa[i],pt[i],VALS3),
+	    val1,ct_sa_sa, val2,ct_sa_pt, val3,ct_pt_pt);
+	test_sub2(entropy_first_derivatives, (sa[i],ct[i],VALS2),
+	    val1,eta_sa, val2,eta_ct);
+	test_sub3(entropy_second_derivatives, (sa[i],ct[i],VALS3),
+	    val1,eta_sa_sa, val2,eta_sa_ct, val3,eta_ct_ct);
+	test_sub2(pt_first_derivatives, (sa[i],ct[i],VALS2),
+	    val1,pt_sa, val2,pt_ct);
+	test_sub3(pt_second_derivatives, (sa[i],ct[i],VALS3),
+	    val1,pt_sa_sa,val2,pt_sa_ct,val3,pt_ct_ct);
+
+	section_title("Freezing temperatures");
+
+	saturation_fraction = 0.5;
+
+	test_func(ct_freezing_exact,(sa[i],p[i],saturation_fraction),
+	    ctf,ct_freezing);
+	test_func(ct_freezing_poly, (sa[i],p[i],saturation_fraction), ctf_poly,
+	    ct_freezing_poly);
+	test_func(t_freezing_exact, (sa[i],p[i],saturation_fraction), tf,
+	    t_freezing);
+	test_func(t_freezing_poly, (sa[i],p[i],saturation_fraction, 0), tf_poly,
+	    t_freezing_poly);
+	test_func(pot_enthalpy_ice_freezing, (sa[i],p[i]), value,
+	    pot_enthalpy_ice_freezing);
+	test_func(pot_enthalpy_ice_freezing_poly, (sa[i],p[i]), value,
+	    pot_enthalpy_ice_freezing_poly);
+	test_func(sa_freezing_from_ct, (ctf[i],p[i],saturation_fraction),value,
+	    sa_freezing_from_ct);
+	test_func(sa_freezing_from_ct_poly,
+	    (ctf_poly[i],p[i],saturation_fraction),value,
+	    sa_freezing_from_ct_poly);
+	test_func(sa_freezing_from_t, (tf[i],p[i],saturation_fraction),value,
+	    sa_freezing_from_t);
+	test_func(sa_freezing_from_t_poly,
+	    (tf_poly[i],p[i],saturation_fraction),value,
+	    sa_freezing_from_t_poly);
+	test_sub2(ct_freezing_first_derivatives,
+	    (sa[i],p[i],saturation_fraction,VALS2),
+		val1,ctfreezing_sa,val2,ctfreezing_p);
+	test_sub2(ct_freezing_first_derivatives_poly,
+	    (sa[i],p[i],saturation_fraction,VALS2),val1,ctfreezing_sa_poly,
+		val2,ctfreezing_p_poly);
+	test_sub2(t_freezing_first_derivatives,
+	    (sa[i],p[i],saturation_fraction,VALS2),
+	    val1,tfreezing_sa,val2,tfreezing_p);
+	test_sub2(t_freezing_first_derivatives_poly,
+	    (sa[i],p[i],saturation_fraction,VALS2),
+	    val1,tfreezing_sa_poly,val2,tfreezing_p_poly);
+	test_sub2(pot_enthalpy_ice_freezing_first_derivatives,
+		(sa[i],p[i],VALS2),
+		val1, pot_enthalpy_ice_freezing_sa,
+		val2, pot_enthalpy_ice_freezing_p);
+	test_sub2(pot_enthalpy_ice_freezing_first_derivatives_poly,
+		(sa[i],p[i],VALS2),
+		val1, pot_enthalpy_ice_freezing_sa_poly,
+		val2, pot_enthalpy_ice_freezing_p_poly);
+
+	section_title(
+	    "Isobaric Melting Enthalpy and Isobaric Evaporation Enthalpy");
+
+	test_func(latentheat_melting, (sa[i],p[i]), value,latentheat_melting);
+	test_func(latentheat_evap_ct, (sa[i],ct[i]), value,latentheat_evap_ct);
+	test_func(latentheat_evap_t, (sa[i],t[i]), value,latentheat_evap_t);
+
+	section_title("Planet Earth properties");
+
+	test_func(grav, (lat[i],p[i]), value,grav);
+
+	section_title(
+	    "Density and enthalpy in terms of CT, derived from the "
+	    "exact Gibbs function");
+
+	test_func(enthalpy_ct_exact,(sa[i],ct[i],p[i]),value,enthalpy_ct_exact);
+	test_sub2(enthalpy_first_derivatives_ct_exact, (sa[i],ct[i],p[i],VALS2),
+	    val1,h_sa_ct_exact,val2,h_ct_ct_exact);
+	test_sub3(enthalpy_second_derivatives_ct_exact, (sa[i],ct[i],p[i],VALS3),
+	    val1,h_sa_sa_ct_exact, val2,h_sa_ct_ct_exact,val3,h_ct_ct_ct_exact);
+
+	section_title(
+	    "Basic thermodynamic properties in terms of in-situ t,\n"
+	    "based on the exact Gibbs function");
+
+	test_func(rho_t_exact, (sa[i],t[i],p[i]),value,rho_t_exact);
+	test_func(pot_rho_t_exact, (sa[i],t[i],p[i],pref[0]),value,
+	    pot_rho_t_exact);
+	test_func(alpha_wrt_t_exact, (sa[i],t[i],p[i]),value,alpha_wrt_t_exact);
+	test_func(beta_const_t_exact, (sa[i],t[i],p[i]),value,
+	    beta_const_t_exact);
+	test_func(specvol_t_exact, (sa[i],t[i],p[i]),value,specvol_t_exact);
+	test_func(sound_speed_t_exact, (sa[i],t[i],p[i]),value,
+	    sound_speed_t_exact);
+	test_func(kappa_t_exact, (sa[i],t[i],p[i]),value,kappa_t_exact);
+	test_func(enthalpy_t_exact, (sa[i],t[i],p[i]),value,enthalpy_t_exact);
+	test_sub3(ct_first_derivatives_wrt_t_exact, (sa[i],t[i],p[i],VALS3),
+	    val1,ct_sa_wrt_t, val2,ct_t_wrt_t,val3,ct_p_wrt_t);
+	test_func(chem_potential_water_t_exact, (sa[i],t[i],p[i]),value,
+	    chem_potential_water_t_exact);
+	test_func(t_deriv_chem_potential_water_t_exact, (sa[i],t[i],p[i]),
+	    value,t_deriv_chem_potential_water_t_exact);
+	test_func(dilution_coefficient_t_exact, (sa[i],t[i],p[i]),value,
+	    dilution_coefficient_t_exact);
+
+	section_title("Library functions of the GSW Toolbox");
+
+	test_func(deltasa_atlas, (p[i],lon[i],lat[i]),value,deltasa_atlas);
+	test_func(fdelta, (p[i],lon[i],lat[i]),value,fdelta);
+
+	section_title(
+	    "Water column properties, based on the 75-term polynomial "
+	    "for specific volume");
+
+	count	= cast_mpres_m*cast_mpres_n;
+	for (j = 0; j<cast_mpres_n; j++) {
+	    k = j*cast_m; l = j*cast_mpres_m;
+    	    gsw_nsquared(&sa[k],&ct[k],&p[k],&lat[k],cast_m,&val1[l],&val2[l]);
+	}
+	check_accuracy("nsquared",n2_ca,"n2",count, val1, n2);
+	check_accuracy("nsquared",p_mid_n2_ca,"p_mid_n2",count, val2, p_mid_n2);
+
+	for (j = 0; j<cast_mpres_n; j++) {
+	    k = j*cast_m; l = j*cast_mpres_m;
+	    gsw_turner_rsubrho(&sa[k],&ct[k],&p[k],cast_m,&val1[l],&val2[l],
+				&val3[l]);
+	}
+	check_accuracy("turner_rsubrho",tu_ca,"tu",count, val1, tu);
+	check_accuracy("rsubrhorner_rsubrho",rsubrho_ca,"rsubrho",count, val2,
+		rsubrho);
+	check_accuracy("p_mid_tursrrner_rsubrho",p_mid_tursr_ca,"p_mid_tursr",
+		count, val3, p_mid_tursr);
+
+	for (j = 0; j<cast_mpres_n; j++) {
+	    k = j*cast_m; l = j*cast_mpres_m;
+	    gsw_ipv_vs_fnsquared_ratio(&sa[k],&ct[k],&p[k],pref[0],cast_m,
+		&val1[l], &val2[l]);
+	}
+	check_accuracy("ipv_vs_fnsquared_ratio",ipvfn2_ca,"ipvfn2",count,
+		val1, ipvfn2);
+	check_accuracy("ipv_vs_fnsquared_ratio",p_mid_ipvfn2_ca,"p_mid_ipvfn2",
+		count, val2, p_mid_ipvfn2);
+
+	section_title("Themodynamic properties of ice Ih");
+
+	count = cast_ice_m*cast_ice_n;
+
+	test_func(rho_ice, (t_seaice[i],p_arctic[i]),value,rho_ice);
+	test_func(alpha_wrt_t_ice, (t_seaice[i],p_arctic[i]),value,
+	    alpha_wrt_t_ice);
+	test_func(specvol_ice, (t_seaice[i],p_arctic[i]),value,specvol_ice);
+	test_func(pressure_coefficient_ice, (t_seaice[i],p_arctic[i]),value,
+	    pressure_coefficient_ice);
+	test_func(sound_speed_ice, (t_seaice[i],p_arctic[i]),value,
+	    sound_speed_ice);
+	test_func(kappa_ice, (t_seaice[i],p_arctic[i]),value,kappa_ice);
+	test_func(kappa_const_t_ice, (t_seaice[i],p_arctic[i]),value,
+	    kappa_const_t_ice);
+	test_func(internal_energy_ice, (t_seaice[i],p_arctic[i]),value,
+	    internal_energy_ice);
+	test_func(enthalpy_ice, (t_seaice[i],p_arctic[i]),value,enthalpy_ice);
+	test_func(entropy_ice, (t_seaice[i],p_arctic[i]),value,entropy_ice);
+	test_func(cp_ice, (t_seaice[i],p_arctic[i]),value,cp_ice);
+	test_func(chem_potential_water_ice,
+	    (t_seaice[i],p_arctic[i]),value,chem_potential_water_ice);
+	test_func(helmholtz_energy_ice, (t_seaice[i],p_arctic[i]),value,
+	    helmholtz_energy_ice);
+	test_func(adiabatic_lapse_rate_ice,
+	    (t_seaice[i],p_arctic[i]),value,adiabatic_lapse_rate_ice);
+	test_func(pt0_from_t_ice,(t_seaice[i],p_arctic[i]),pt0, pt0_from_t_ice);
+	test_func(pt_from_t_ice, (t_seaice[i],p_arctic[i],pref[0]),value,
+	    pt_from_t_ice);
+	test_func(t_from_pt0_ice, (pt0[i],p_arctic[i]),value,t_from_pt0_ice);
+	test_func(pot_enthalpy_from_pt_ice, (pt0[i]), h,
+	    pot_enthalpy_from_pt_ice);
+	test_func(pt_from_pot_enthalpy_ice, (h[i]), value,
+	    pt_from_pot_enthalpy_ice);
+	test_func(pot_enthalpy_from_pt_ice_poly, (pt0[i]), h,
+	    pot_enthalpy_from_pt_ice_poly);
+	test_func(pt_from_pot_enthalpy_ice_poly, (h[i]),value,
+	    pt_from_pot_enthalpy_ice_poly);
+
+	saturation_fraction = 0.5;
+
+	test_func(pressure_freezing_ct,
+	    (sa_arctic[i],ct_arctic[i]-1.0,saturation_fraction),value,
+	    pressure_freezing_ct);
+
+	section_title("Thermodynamic interaction between ice and seawater");
+
+	test_func(melting_ice_sa_ct_ratio,
+	    (sa_arctic[i],ct_arctic[i],p_arctic[i],t_ice[i]),value,
+	    melting_ice_sa_ct_ratio);
+	test_func(melting_ice_sa_ct_ratio_poly,
+	    (sa_arctic[i],ct_arctic[i],p_arctic[i],t_ice[i]),value,
+	    melting_ice_sa_ct_ratio_poly);
+	test_func(melting_ice_equilibrium_sa_ct_ratio,
+	    (sa_arctic[i],p_arctic[i]),value,
+	    melting_ice_equilibrium_sa_ct_ratio);
+	test_func(melting_ice_equilibrium_sa_ct_ratio_poly,
+	    (sa_arctic[i],p_arctic[i]),value,
+	    melting_ice_equilibrium_sa_ct_ratio_poly);
+	test_sub2(melting_ice_into_seawater,
+	    (sa_arctic[i],ct_arctic[i]+0.1,p_arctic[i],w_ice[i],t_ice[i],VALS3),
+	    val1, melting_ice_into_seawater_sa_final,
+	    val2, melting_ice_into_seawater_ct_final);
+	    /*val3, melting_ice_into_seawater_w_ih);*/
+	test_sub3(ice_fraction_to_freeze_seawater,
+	    (sa_arctic[i],ct_arctic[i],p_arctic[i],t_ice[i],VALS3),
+	    val1, ice_fraction_to_freeze_seawater_sa_freeze,
+	    val2, ice_fraction_to_freeze_seawater_ct_freeze,
+	    val3, ice_fraction_to_freeze_seawater_w_ih);
+	test_sub3(frazil_ratios_adiabatic,
+	    (sa_arctic[i],p_arctic[i],w_ice[i],VALS3),
+	    val1,dsa_dct_frazil, val2,dsa_dp_frazil,
+	    val3,dct_dp_frazil);
+	test_sub3(frazil_ratios_adiabatic_poly,
+	    (sa_arctic[i],p_arctic[i],w_ice[i],VALS3),
+	    val1,dsa_dct_frazil_poly, val2,dsa_dp_frazil_poly,
+	    val3,dct_dp_frazil_poly);
+	test_sub3(frazil_properties_potential,
+	    (sa_bulk[i],h_pot_bulk[i],p_arctic[i], VALS3),
+	    val1, frazil_properties_potential_sa_final,
+	    val2, frazil_properties_potential_ct_final,
+	    val3, frazil_properties_potential_w_ih_final);
+	test_sub3(frazil_properties_potential_poly,
+	    (sa_bulk[i],h_pot_bulk[i], p_arctic[i],VALS3),
+	    val1, frazil_properties_potential_poly_sa_final,
+	    val2, frazil_properties_potential_poly_ct_final,
+	    val3, frazil_properties_potential_poly_w_ih_final);
+	test_sub3(frazil_properties,
+	    (sa_bulk[i],h_bulk[i],p_arctic[i],VALS3),
+	    val1,frazil_properties_sa_final,
+	    val2,frazil_properties_ct_final,
+	    val3,frazil_properties_w_ih_final);
+
+	section_title("Thermodynamic interaction between seaice and seawater");
+
+	test_func(melting_seaice_sa_ct_ratio,
+	    (sa_arctic[i],ct_arctic[i],p_arctic[i], sa_seaice[i],t_seaice[i]),
+	    value,melting_seaice_sa_ct_ratio);
+	test_func(melting_seaice_sa_ct_ratio_poly,
+	    (sa_arctic[i],ct_arctic[i],p_arctic[i], sa_seaice[i],t_seaice[i]),
+	    value,melting_seaice_sa_ct_ratio_poly);
+	test_func(melting_seaice_equilibrium_sa_ct_ratio,
+	    (sa_arctic[i],p_arctic[i]),value,
+	    melting_seaice_equilibrium_sa_ct_ratio);
+	test_func(melting_seaice_equilibrium_sa_ct_ratio_poly,
+	    (sa_arctic[i],p_arctic[i]),value,
+	    melting_seaice_equilibrium_sa_ct_ratio_poly);
+	test_sub2(melting_seaice_into_seawater, (sa_arctic[i],ct_arctic[i],
+	    p_arctic[i], w_seaice[i],sa_seaice[i],t_seaice[i],VALS2),
+	    val1, melting_seaice_into_seawater_sa_final,
+	    val2, melting_seaice_into_seawater_ct_final);
+	test_sub3(seaice_fraction_to_freeze_seawater,(sa_arctic[i],ct_arctic[i],
+	    p_arctic[i], sa_seaice[i],t_seaice[i],VALS3),
+	    val1, seaice_fraction_to_freeze_seawater_sa_freeze,
+	    val2, seaice_fraction_to_freeze_seawater_ct_freeze,
+	    val3, seaice_fraction_to_freeze_seawater_w_ih);
 
 	if (gsw_error_flag)
 	    printf("\nYour installation of the Gibbs SeaWater (GSW) "
 		"Oceanographic Toolbox has errors !\n");
 	else
-	    printf("\nWell done! The gsw_check_fuctions confirms that the\n"
+	    printf("\nWell done! The gsw_check_functions confirms that the\n"
 		"Gibbs SeaWater (GSW) Oceanographic Toolbox is "
 		"installed correctly.\n");
 
 	return (0);
 }
 
-static void
-report(char *what, double acceptable, double actual, double expected)
+void
+section_title(char *title)
 {
-	double	diff=fabs(actual-expected);
+	printf("\n------------------------------------------------"
+               "----------------------------\n%s\n\n",title);
+}
 
-	printf("\t%-32.32s  ........  ", what);
-	if (diff < acceptable)
-	    printf("passed\n");
-	else {
-	    printf("failed\n");
-	    gsw_error_flag	= 1;
-	    if (debug)
-		printf("actual=%g\texpected=%g\tdiff=%g\n",actual,expected,
-			diff);
+void
+report(char *funcname, char *varname, gsw_error_info *errs)
+{
+	int	msglen = strlen(funcname)+((varname==NULL)?0:strlen(varname)),
+		k, ndots;
+	char	message[81], *dots, infoflg[8];
+
+	dots ="...............................................................";
+	strcpy(message, funcname);
+	if (strcmp(funcname, varname)) {
+	    msglen += 5;
+	    if (msglen > 62) {
+		k = strlen(varname) - (msglen - 62);
+		strcat(message, " (..");
+		strncat(message, varname, k); strcat(message, ")");
+	    } else {
+		strcat(message, " (");
+		strcat(message, varname); strcat(message, ")");
+	    }
+	}
+	sprintf(infoflg,"(%s %3d)",(errs->flags & GSW_ERROR_LIMIT_FLAG)?"*":" ",
+		errs->ncomp);
+	ndots = 65 - strlen(message);
+	if (errs->flags & GSW_ERROR_ERROR_FLAG) {
+	    gsw_error_flag = 1;
+	    if (ndots > 3)
+	        strncat(message, dots, ndots-3);
+	    printf("%s << failed >>\n",message);
+	    printf("\n  Max difference = %.17g, limit = %.17g\n",
+		errs->max,errs->limit);
+	    printf("  Max diff (rel) = %.17g, limit = %.17g\n",
+		errs->rel,errs->rlimit);
+	} else {
+	    if (ndots > 0)
+		strncat(message, dots, ndots);
+	    printf("%s passed %s\n",message,infoflg);
 	}
 }
 
+void
+check_accuracy(char *funcname, double accuracy, char *varname, int count,
+	double *calcval, double *refval)
+{
+	int		i;
+	double		diff;
+	gsw_error_info	errs;
+
+	memset(&errs, 0, sizeof (errs));
+	for (i=0; i<count; i++) {
+	    if (fabs(refval[i]) >= GSW_ERROR_LIMIT || isnan(refval[i]))
+		continue;
+	    if (isnan(calcval[i])) {
+		printf("NaN @ %d: %.17g\n",i,refval[i]);
+		continue;
+	    }
+	    errs.ncomp++;
+	    diff	= fabs(calcval[i] - refval[i]);
+	    if (calcval[i] >= GSW_ERROR_LIMIT)
+		errs.flags	|= GSW_ERROR_LIMIT_FLAG;
+	    else if (diff >= accuracy) {
+		errs.flags	|= GSW_ERROR_ERROR_FLAG;
+		if (diff > errs.max) {
+		    errs.max	= diff;
+		    errs.limit = accuracy;
+		    errs.rel = diff*100.0/fabs(calcval[i]);
+		    errs.rlimit = accuracy*100.0/fabs(calcval[i]);
+		}
+	    }
+	}
+	report(funcname, varname, &errs);
+}
 /*
 **  The End.
 */

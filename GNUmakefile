@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v a91011fbbc27 2015/01/07 20:39:03 fdelahoyde $
+#  $Id: GNUmakefile,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
 #  $Version: 3.0.3 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -10,7 +10,7 @@
 			head -1 | awk '{if ($$3 >= 3.76) printf "%.2f\n",$$3}')
   ifeq (,$(_makeVersion))
 	@echo "This Makefile requires GNU make version 3.76 or greater."; \
-	echo "Please read the file README in this directory"; \
+	echo "Please read the file README-developer in this directory"; \
 	echo "for details."; exit 1; \
 	fi;
   endif
@@ -40,39 +40,54 @@
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
 			awk -F . '{printf "%d.%d\n",$$1,$$2}')
-              Program:=	gsw_check_functions
+              Program:=	gsw_check
       $(Program)_SRCS:=	gsw_check_functions.c
       $(Program)_LIBS:=	-L. -lgswteos-10 -lm
       $(Library)_SRCS:=	gsw_oceanographic_toolbox.c \
 			gsw_saar.c
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
 			gsw_saar.o
-             INCLUDES:=	gswteos-10.h
+         Toolbox_SRCS:=	gsw_oceanographic_toolbox-head \
+			$(sort $(wildcard toolbox/*.c)) \
+			gsw_oceanographic_toolbox-tail
+             INCLUDES:=	gswteos-10.h gsw_internal_const.h
               DESTDIR:=	/usr
            DESTBINDIR:=	$(DESTDIR)/bin
            DESTINCDIR:=	$(DESTDIR)/include
            DESTLIBDIR:= $(DESTDIR)/$(libdirname)
-             TARFILES:=	README LICENSE gsw_check_functions.c \
+             TARFILES:=	README LICENSE gsw_check_functions.c gsw_check_data.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
-			gsw_saar_data.c gswteos-10.h GNUmakefile \
-			html
-             ZIPFILES:= README LICENSE gsw_check_functions.c \
+			gsw_saar_data.c gswteos-10.h gsw_internal_const.h \
+			GNUmakefile html
+             ZIPFILES:= README LICENSE gsw_check_functions.c gsw_check_data.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
-			gsw_saar_data.c gswteos-10.h Makefile
+			gsw_saar_data.c gswteos-10.h gsw_internal_const.h \
+			Makefile
               ZIPLINK:=	gsw_c_v$(shell echo $(STSVersion) | \
 				sed -e 's/\.[^.]*$$//')
 
 all:	$(Library) $(Program)
 
-$(Program):	$($(Program)_SRCS)
+$(Program):	$($(Program)_SRCS) gsw_check_data.c
 	gcc $(CFLAGS) $(CINCLUDES) -o $(Program) $($(Program)_SRCS) \
 		$($(Program)_LIBS)
 
-$(Library):	$($(Library)_SRCS)
+gsw_oceanographic_toolbox.c:	$(Toolbox_SRCS)
+	@cat $^ >$@
+
+$(Library):	$($(Library)_SRCS) gsw_saar_data.c
 	gcc -fPIC -c $(CFLAGS) $(CINCLUDES) $($(Library)_SRCS)
 	gcc -shared -o $(Library).$(LibVersion) $($(Library)_OBJS) -lm
 	rm -f $(Library)
 	ln -s $(Library).$(LibVersion) $(Library)
+
+gsw_check_data.c:	gsw_data_v3_0.nc
+			rm -f $@; \
+			./make_check_data.py
+
+gsw_saar_data.c:	gsw_data_v3_0.nc
+			rm -f $@; \
+			./make_saar_data.py
 
 install:	$(Library) $(Program)
 	mkdir -p $(INSTALL_ROOT)$(DESTLIBDIR) $(INSTALL_ROOT)$(DESTBINDIR) \
