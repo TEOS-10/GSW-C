@@ -42,7 +42,7 @@ gsw_t_freezing_first_derivatives_poly(double sa, double p,
 	    (t1 + x*(1.5*t2 + x*(2.0*t3 + x*(2.5*t4 + x*(3.0*t5
 	        + 3.5*t6*x)))) + p_r*(t10 + x*(1.5*t11 + x*(2.0*t13
 		+ x*(2.5*t16 + x*(3.0*t19 + 3.5*t22*x))))
-	        + p_r*(t12*+ x*(1.5*t14 + x*(2.0*t17 + 2.5*t20*x))
+	        + p_r*(t12 + x*(1.5*t14 + x*(2.0*t17 + 2.5*t20*x))
 	        + p_r*(t15 + x*(1.5*t18 + 2.0*t21*x)))))*1e-2
 	        + saturation_fraction*c;
 
