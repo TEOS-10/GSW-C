@@ -1,8 +1,9 @@
 
 TEOS-10 V3.05 GSW Oceanographic Toolbox in C
 
-This is a translation of the original Fortran-90 source code into C.
-You should download the documentation from http://teos-10.org.
+This is a translation of the original Fortran-90 source code into C.  Unlike
+the Fortran-90 and Matlab versions of the toolbox the C version is primarily
+scalar.  You should download the documentation from http://teos-10.org.
 The functions gsw_saar and gsw_deltasa_atlas have been modified from the
 original to not use an external data file for global absolute salinity
 anomaly and absolute salinity anomaly ratio data. The data are instead
@@ -35,7 +36,7 @@ make
 and it will attempt to build gsw_check with a statically-linked GSW library.
 Note that the Makefile assumes that your C compiler is gcc.
 
-If gsw_check builds successfully, run it:
+If gsw_check builds successfully, run it to test the toolbox:
 
 ./gsw_check
 
