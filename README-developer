@@ -7,3 +7,7 @@ major purposes:
 
 The file libgswteos-10.spec.proto is used by GNUmakefile for the "new-rpm"
 target to make libgswteos-10.spec which is the control file for rpmbuild.
+
+The file gsw_data_v3_0.nc is a part of the Fortran-90 and Matlab releases.  We
+generate gsw_saar_data.c and gsw_check_data.c from this file using the
+supplied python scripts make_saar_data.py and make_check_data.py.
