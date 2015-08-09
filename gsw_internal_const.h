@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_internal_const.h,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
+**  $Id: gsw_internal_const.h,v 74146d753a77 2015/08/09 18:29:40 fdelahoyde $
 **
 **  Internal constants for GSW-TEOS-10 V3.05.
 */
@@ -17,7 +17,7 @@ double  db2pa = 1.0e4, \
 	gamma = 2.26e-7, \
 /*\
 !  cp0  =  The "specific heat" for use                         [ J/(kg K) ]\
-!          with Conservative Temperature   
+!          with Conservative Temperature   \
 */\
 	gsw_cp0 = 3991.86795711963, \
 /*\
