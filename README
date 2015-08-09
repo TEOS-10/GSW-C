@@ -50,11 +50,6 @@ You'll probably want to build gsw_oceanographic_toolbox.c, and gsw_saar.c
 into a library. "make library" will attempt to build a shared library for
 gcc/GNU Linux platforms.
 
-The main reasons for implementing GSW TEOS-10 in C are performance and
-accessibility (you can link to it), and this is necessarily system-dependent.
-Our environment is GNU/Linux (CentOS/RHEL) and the support files are targeted
-to this platform.
-
 ChangeLog:
 
 2015-08-08	gsw-3.05 many new additions and code reorganization.
