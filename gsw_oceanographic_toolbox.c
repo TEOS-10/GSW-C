@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
-**  $Version: 3.0.3 $
+**  $Id: gsw_oceanographic_toolbox.c,v 370e5cdd9bb4 2015/08/09 21:22:21 fdelahoyde $
+**  $Version: 3.05.0-1 $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -9328,7 +9328,7 @@ gsw_t_freezing_first_derivatives_poly(double sa, double p,
 	    (t1 + x*(1.5*t2 + x*(2.0*t3 + x*(2.5*t4 + x*(3.0*t5
 	        + 3.5*t6*x)))) + p_r*(t10 + x*(1.5*t11 + x*(2.0*t13
 		+ x*(2.5*t16 + x*(3.0*t19 + 3.5*t22*x))))
-	        + p_r*(t12*+ x*(1.5*t14 + x*(2.0*t17 + 2.5*t20*x))
+	        + p_r*(t12 + x*(1.5*t14 + x*(2.0*t17 + 2.5*t20*x))
 	        + p_r*(t15 + x*(1.5*t18 + 2.0*t21*x)))))*1e-2
 	        + saturation_fraction*c;
 
