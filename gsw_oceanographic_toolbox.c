@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 370e5cdd9bb4 2015/08/09 21:22:21 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 52440f09440d 2015/08/10 16:13:09 fdelahoyde $
 **  $Version: 3.05.0-1 $
 **
 **  This is a translation of the original f90 source code into C
@@ -833,6 +833,29 @@ gsw_cp_ice(double t, double p)
 	GSW_TEOS10_CONSTANTS;
 
 	return (-(t + gsw_t0)*gsw_gibbs_ice(2,0,t,p));
+}
+/*
+!==========================================================================
+function gsw_cp_t_exact(sa,t,p)
+!==========================================================================
+
+! Calculates isobaric heat capacity of seawater
+!
+! sa     : Absolute Salinity                               [g/kg]
+! t      : in-situ temperature                             [deg C]
+! p      : sea pressure                                    [dbar]
+!
+! gsw_cp_t_exact : heat capacity                           [J/(kg K)]
+*/
+double
+gsw_cp_t_exact(double sa, double t, double p)
+{
+	int	n0, n2;
+
+	n0 = 0;
+	n2 = 2;
+
+	return (-(t+273.15e0)*gsw_gibbs(n0,n2,n0,sa,t,p));
 }
 /*
 !==========================================================================
