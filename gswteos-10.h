@@ -1,6 +1,6 @@
 /*
-**  $Id: gswteos-10.h,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
-**  $Version: 3.0.3 $
+**  $Id: gswteos-10.h,v 52440f09440d 2015/08/10 16:13:09 fdelahoyde $
+**  $Version: 3.05.0-1 $
 **
 **  GSW TEOS-10 V3.05 definitions and prototypes.
 */
@@ -41,6 +41,7 @@ extern double gsw_c_from_sp(double sp, double t, double p);
 extern double gsw_chem_potential_water_ice(double t, double p);
 extern double gsw_chem_potential_water_t_exact(double sa, double t, double p);
 extern double gsw_cp_ice(double t, double p);
+extern double gsw_cp_t_exact(double sa, double t, double p);
 extern void   gsw_ct_first_derivatives (double sa, double pt, double *ct_sa,
 		double *ct_pt);
 extern void   gsw_ct_first_derivatives_wrt_t_exact(double sa, double t,
