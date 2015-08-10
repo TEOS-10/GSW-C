@@ -30,20 +30,20 @@ gswteos-10.h			-- GSW function prototype definitions
 libgswteos-10.spec.proto	-- template used to create libgswteos-10.spec,
 				   the configuration file for rpmbuild on RedHat
 				   Linux platforms.
-LICENSE				-- GSW C software license
+LICENSE				-- GSW C software license.
 make_check_data.py		-- Utility to generate gsw_check_data.c from
-				   gsw_data_v3_0.nc,
+				   gsw_data_v3_0.nc.
 Makefile			-- makefile supplied in the teos-10.org
 				   distribution.
 make_saar_data.py		-- Utility to generate gsw_saar_data.c from
-				   gsw_data_v3_0.nc,
+				   gsw_data_v3_0.nc.
 README				-- The README file distributed with the
 				   teos-10.org distribution.
-README-developer		-- This file
+README-developer		-- This file.
 toolbox				-- The actual source for GSW-C.
 				   gsw_oceanographic_toolbox.c is generated from
-				   the contents of this directory by the supplied
-				   GNUmakefile.
+				   the contents of this directory by the
+				   supplied GNUmakefile.
 
 The file GNUmakefile is supplied for use on Linux/GNU systems. It has three
 major purposes:
