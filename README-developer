@@ -1,13 +1,59 @@
-The file GNUmakefile is supplied for use on Linux/GNU systems. It has two
+This document describes the organization of TEOS-10/GSW-C on github.
+
+Manifest:
+
+GNUmakefile			-- GNU make makefile used to manage the building
+				   and maintenance of the gsw_c_v3.05.zip file on
+				   teos-10.org, as well as RPMs for RedHat Linux
+				   systems.
+gsw_check_data.c		-- static check data used by
+				   gsw_ check functions.c
+gsw_check_functions.c		-- C implementation of the check functions used
+				   to validate the correct building of the GSW-C
+				   Oceanographic Toolbox.
+gsw_data_v3_0.nc		-- A redundant and hopefully current version of
+				   the netcdf file hosted on github as
+				   TEOS-10/datafile. gsw_check_data.c and
+				   gsw_saar_data.c are generated from this file
+				   using the supplied utilities
+				   make_check_data.py and make_saar_data.py.
+gsw_internal_const.h		-- Common parameters used to compile the GSW-C
+				   library.
+gsw_oceanographic_toolbox.c	-- The distribution source code for the GSW-C
+				   library less gsw_saar.
+gsw_oceanographic_toolbox-head	-- Used to build gsw_oceanographic_toolbox.c.
+gsw_oceanographic_toolbox-tail	-- Used to build gsw_oceanographic_toolbox.c.
+gsw_saar.c			   gsw_saar and gsw_deltasa_atlas (modified).
+gsw_saar_data.c			-- static global absolute salinity anomaly data
+				   used by gsw_saar.c
+gswteos-10.h			-- GSW function prototype definitions
+libgswteos-10.spec.proto	-- template used to create libgswteos-10.spec,
+				   the configuration file for rpmbuild on RedHat
+				   Linux platforms.
+LICENSE				-- GSW C software license
+make_check_data.py		-- Utility to generate gsw_check_data.c from
+				   gsw_data_v3_0.nc,
+Makefile			-- makefile supplied in the teos-10.org
+				   distribution.
+make_saar_data.py		-- Utility to generate gsw_saar_data.c from
+				   gsw_data_v3_0.nc,
+README				-- The README file distributed with the
+				   teos-10.org distribution.
+README-developer		-- This file
+toolbox				-- The actual source for GSW-C.
+				   gsw_oceanographic_toolbox.c is generated from
+				   the contents of this directory by the supplied
+				   GNUmakefile.
+
+The file GNUmakefile is supplied for use on Linux/GNU systems. It has three
 major purposes:
 
+    * To rebuild gsw_oceanographic_toolbox.c from toolbox/*.c in the event of a
+      change;
     * To build a zip archive of the distribution suitable for TEOS-10.org; and
     * To set up a versioned source distribution suitable for building source
-      and binary RPMs on RedHat Enterprise and CentOS Linux systems.
+      and binary RPMs on RedHat-like Linux systems.
 
-The file libgswteos-10.spec.proto is used by GNUmakefile for the "new-rpm"
-target to make libgswteos-10.spec which is the control file for rpmbuild.
-
-The file gsw_data_v3_0.nc is a part of the Fortran-90 and Matlab releases.  We
-generate gsw_saar_data.c and gsw_check_data.c from this file using the
-supplied python scripts make_saar_data.py and make_check_data.py.
+Please note that the current distribution on teos-10.org
+(http://teos-10.org/software/gsw_c_v3.03.zip) is a subset of this github
+directory and is accurately described by the supplied README file.
