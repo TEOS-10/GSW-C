@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#  $id$
+#  $Id: make_check_data.py,v ef9f5adeaae0 2015/08/10 02:40:58 fdelahoyde $
 """
 Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
@@ -341,7 +341,7 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_check_data.py,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
+out.write("/*\n**  $Id: make_check_data.py,v ef9f5adeaae0 2015/08/10 02:40:58 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
 out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
 out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)
 
