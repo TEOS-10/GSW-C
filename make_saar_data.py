@@ -3,9 +3,9 @@
 """
 Make gsw_saar_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
-Note that it generates newgsw_saar_data.c and you need to explicitly
-overwrite gsw_saar_data.c with it.  General concept: we don't want end-users
-of this distribution to require having netcdf installed, nor do we want to incur
+Note that it generates gsw_saar_data.c and will not overwite an existing
+instance.  General concept: we don't want end-users of this distribution to
+require having netcdf installed, nor do we want to incur
 the I/O overhead every time this library is used.  So we simply generate static
 data from the netcdf file that the C-gsw library uses directly.
 """
@@ -94,7 +94,7 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_saar_data.py,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
+out.write("/*\n**  $Id: make_saar_data.py,v 517a0e58f3a3 2015/08/10 02:52:35 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
 out.write("static int\tgsw_nx = %d, gsw_ny = %d, gsw_nz = %d;\n" % (nx,ny,nz))
 out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
 out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)
