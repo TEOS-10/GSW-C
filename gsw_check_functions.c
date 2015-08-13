@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_check_functions.c,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
-**  $Version: 3.0.3 $
+**  $Id: gsw_check_functions.c,v cc2f7b7e3697 2015/08/13 00:52:15 fdelahoyde $
+**  $Version: 3.05.0-1 $
 */
 #include <stdio.h>
 #include <stdarg.h>
@@ -517,7 +517,7 @@ report(char *funcname, char *varname, gsw_error_info *errs)
 		strcat(message, varname); strcat(message, ")");
 	    }
 	}
-	sprintf(infoflg,"(%s %3d)",(errs->flags & GSW_ERROR_LIMIT_FLAG)?"*":" ",
+	sprintf(infoflg,"(%s%3d)",(errs->flags & GSW_ERROR_LIMIT_FLAG)?"*":"",
 		errs->ncomp);
 	ndots = 65 - strlen(message);
 	if (errs->flags & GSW_ERROR_ERROR_FLAG) {
@@ -548,15 +548,11 @@ check_accuracy(char *funcname, double accuracy, char *varname, int count,
 	for (i=0; i<count; i++) {
 	    if (fabs(refval[i]) >= GSW_ERROR_LIMIT || isnan(refval[i]))
 		continue;
-	    if (isnan(calcval[i])) {
-		printf("NaN @ %d: %.17g\n",i,refval[i]);
-		continue;
-	    }
 	    errs.ncomp++;
 	    diff	= fabs(calcval[i] - refval[i]);
 	    if (calcval[i] >= GSW_ERROR_LIMIT)
 		errs.flags	|= GSW_ERROR_LIMIT_FLAG;
-	    else if (diff >= accuracy) {
+	    else if (isnan(diff) || diff >= accuracy) {
 		errs.flags	|= GSW_ERROR_ERROR_FLAG;
 		if (diff > errs.max) {
 		    errs.max	= diff;
