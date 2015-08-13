@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v cc2f7b7e3697 2015/08/13 00:52:15 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 01ae106ee996 2015/08/13 01:00:42 fdelahoyde $
 **  $Version: 3.05.0-1 $
 */
 #include <stdio.h>
@@ -554,7 +554,7 @@ check_accuracy(char *funcname, double accuracy, char *varname, int count,
 		errs.flags	|= GSW_ERROR_LIMIT_FLAG;
 	    else if (isnan(diff) || diff >= accuracy) {
 		errs.flags	|= GSW_ERROR_ERROR_FLAG;
-		if (diff > errs.max) {
+		if (isnan(diff) || diff > errs.max) {
 		    errs.max	= diff;
 		    errs.limit = accuracy;
 		    errs.rel = diff*100.0/fabs(calcval[i]);
