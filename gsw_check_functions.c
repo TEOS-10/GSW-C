@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v 01ae106ee996 2015/08/13 01:00:42 fdelahoyde $
+**  $Id: gsw_check_functions.c,v fd0cbbe936fc 2015/08/14 15:32:41 fdelahoyde $
 **  $Version: 3.05.0-1 $
 */
 #include <stdio.h>
@@ -362,7 +362,7 @@ main(int argc, char **argv)
 	check_accuracy("ipv_vs_fnsquared_ratio",p_mid_ipvfn2_ca,"p_mid_ipvfn2",
 		count, val2, p_mid_ipvfn2);
 
-	section_title("Themodynamic properties of ice Ih");
+	section_title("Thermodynamic properties of ice Ih");
 
 	count = cast_ice_m*cast_ice_n;
 
@@ -511,11 +511,12 @@ report(char *funcname, char *varname, gsw_error_info *errs)
 	    if (msglen > 62) {
 		k = strlen(varname) - (msglen - 62);
 		strcat(message, " (..");
-		strncat(message, varname, k); strcat(message, ")");
+		strncat(message, varname, k);
 	    } else {
 		strcat(message, " (");
-		strcat(message, varname); strcat(message, ")");
+		strcat(message, varname);
 	    }
+	    strcat(message, ")");
 	}
 	sprintf(infoflg,"(%s%3d)",(errs->flags & GSW_ERROR_LIMIT_FLAG)?"*":"",
 		errs->ncomp);
