@@ -2,8 +2,10 @@
 TEOS-10 V3.05 GSW Oceanographic Toolbox in C
 
 This is a translation of the original Fortran-90 source code into C.  Unlike
-the Fortran-90 and Matlab versions of the toolbox the C version is primarily
-scalar.  You should download the documentation from http://teos-10.org.
+the Fortran-90 and Matlab versions of the toolbox, functions in the C version
+are primarily scalar.  You should download the documentation from
+http://teos-10.org, but should look at gswteos-10.h for the C API.
+.
 The functions gsw_saar and gsw_deltasa_atlas have been modified from the
 original to not use an external data file for global absolute salinity
 anomaly and absolute salinity anomaly ratio data. The data are instead
@@ -53,6 +55,8 @@ gcc/GNU Linux platforms.
 
 ChangeLog:
 
+2015-08-26	gsw-3.05.1 added gsw_geo_strf_dyn_height,
+		gsw_geo_strf_dyn_height_pc and support functions.
 2015-08-08	gsw-3.05 many new additions and code reorganization.
 2015-04-13:     gsw-3.03 new additions: gsw_spiciness functions.
 2015-01-07:     gsw-3.03 Bug fixes, new additions.

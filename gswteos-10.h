@@ -1,5 +1,5 @@
 /*
-**  $Id: gswteos-10.h,v 52440f09440d 2015/08/10 16:13:09 fdelahoyde $
+**  $Id: gswteos-10.h,v 6eb35717b8e3 2015/08/26 22:02:27 fdelahoyde $
 **  $Version: 3.05.0-1 $
 **
 **  GSW TEOS-10 V3.05 definitions and prototypes.
@@ -111,6 +111,11 @@ extern void   gsw_frazil_ratios_adiabatic(double sa, double p, double w_ih,
 extern void   gsw_frazil_ratios_adiabatic_poly(double sa, double p,
 		double w_ih, double *dsa_dct_frazil, double *dsa_dp_frazil,
 		double *dct_dp_frazil);
+extern double *gsw_geo_strf_dyn_height(double *sa, double *ct, double *p,
+		double p_ref, int n_levels, double *dyn_height);
+extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct,
+		double *delta_p, int n_levels, double *geo_strf_dyn_height_pc,
+		double *p_mid);
 extern double gsw_gibbs_ice (int nt, int np, double t, double p);
 extern double gsw_gibbs_ice_part_t(double t, double p);
 extern double gsw_gibbs_ice_pt0(double pt0);
@@ -135,6 +140,8 @@ extern double gsw_kappa_t_exact(double sa, double t, double p);
 extern double gsw_latentheat_evap_ct(double sa, double ct);
 extern double gsw_latentheat_evap_t(double sa, double t);
 extern double gsw_latentheat_melting(double sa, double p);
+extern void   gsw_linear_interp_sa_ct(double *sa, double *ct, double *p, int np,
+		double *p_i, int npi, double *sa_i, double *ct_i);
 extern double gsw_melting_ice_equilibrium_sa_ct_ratio(double sa, double p);
 extern double gsw_melting_ice_equilibrium_sa_ct_ratio_poly(double sa, double p);
 extern void   gsw_melting_ice_into_seawater(double sa, double ct, double p,
@@ -198,6 +205,8 @@ extern void   gsw_rho_second_derivatives(double sa, double ct, double p,
 extern void   gsw_rho_second_derivatives_wrt_enthalpy(double sa, double ct,
 		double p, double *rho_sa_sa, double *rho_sa_h, double *rho_h_h);
 extern double gsw_rho_t_exact(double sa, double t, double p);
+extern void   gsw_rr68_interp_sa_ct(double *sa, double *ct, double *p, int mp,
+		double *p_i, int mp_i, double *sa_i, double *ct_i);
 extern double gsw_saar(double p, double lon, double lat);
 extern double gsw_sa_freezing_estimate(double p, double saturation_fraction,
 		double *ct, double *t);
@@ -272,6 +281,9 @@ extern double gsw_thermobaric(double sa, double ct, double p);
 extern void   gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
 		double *tu, double *rsubrho, double *p_mid);
 extern int    gsw_util_indx(double *x, int n, double z);
+extern double *gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi,
+		double *x_i, double *y_i);
+extern void   gsw_util_sort_real(double *rarray, int nx, int *iarray);
 extern double gsw_util_xinterp1(double *x, double *y, int n, double x0);
 extern double gsw_z_from_p(double p, double lat);
 

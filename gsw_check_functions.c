@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_check_functions.c,v fd0cbbe936fc 2015/08/14 15:32:41 fdelahoyde $
+**  $Id: gsw_check_functions.c,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
 **  $Version: 3.05.0-1 $
 */
 #include <stdio.h>
@@ -96,7 +96,7 @@ double		h[cast_m*cast_n];
 int
 main(int argc, char **argv)
 {
-	int	count = cast_m*cast_n, i, j, k, l;
+	int	count = cast_m*cast_n, i, j, k, l, n;
 	double	saturation_fraction, value[count], lat[count],
 		lon[count], val1[count], val2[count], val3[count],
 		val4[count], val5[count];
@@ -361,6 +361,32 @@ main(int argc, char **argv)
 		val1, ipvfn2);
 	check_accuracy("ipv_vs_fnsquared_ratio",p_mid_ipvfn2_ca,"p_mid_ipvfn2",
 		count, val2, p_mid_ipvfn2);
+
+	for (j = 0; j<cast_mpres_n; j++) {
+	    k = j*cast_m;
+	    for (n=0; n<cast_m; n++)
+		if (isnan(sa[k+n]) || fabs(sa[k+n]) >= GSW_ERROR_LIMIT)
+		    break;
+	    if (gsw_geo_strf_dyn_height(&sa[k],&ct[k],&p[k],pref[0],n,
+		&val1[k]) == NULL)
+		printf("geo_strf_dyn_height returned NULL.\n");
+	}
+	check_accuracy("geo_strf_dyn_height",geo_strf_dyn_height_ca,
+		"geo_strf_dyn_height",count, val1, geo_strf_dyn_height);
+
+	for (j = 0; j<cast_mpres_n; j++) {
+	    k = j*cast_m;
+	    for (n=0; n<cast_m; n++)
+		if (isnan(sa[k+n]) || fabs(sa[k+n]) >= GSW_ERROR_LIMIT)
+		    break;
+	    gsw_geo_strf_dyn_height_pc(&sa[k],&ct[k],&delta_p[k],n,
+		&val1[k], &val2[k]);
+	}
+	check_accuracy("geo_strf_dyn_height_pc",geo_strf_dyn_height_pc_ca,
+		"geo_strf_dyn_height_pc",count, val1, geo_strf_dyn_height_pc);
+	check_accuracy("geo_strf_dyn_height_pc",geo_strf_dyn_height_pc_p_mid_ca,
+		"geo_strf_dyn_height_pc_p_mid",count, val2,
+		geo_strf_dyn_height_pc_p_mid);
 
 	section_title("Thermodynamic properties of ice Ih");
 

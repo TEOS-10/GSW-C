@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#  $Id: make_check_data.py,v 517a0e58f3a3 2015/08/10 02:52:35 fdelahoyde $
+#  $Id: make_check_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
 """
 Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
@@ -12,7 +12,7 @@ the C-gsw library uses directly.
 import math, os, sys
 from netCDF4 import Dataset
 
-nan = -9e90
+nan = 9e90
 
 def write_variable_ca(var_name, v):
     val = v.computation_accuracy
@@ -99,6 +99,7 @@ work_vars = [
     ["sp", "SP_chck_cast"],
     ["t", "t_chck_cast"],
     ["p", "p_chck_cast"],
+    ["delta_p", "delta_p_chck_cast"],
     ["p_shallow", "p_chck_cast_shallow"],
     ["p_deep", "p_chck_cast_deep"],
     ["lat_cast", "lat_chck_cast"],
@@ -272,6 +273,9 @@ vars = [
     ['p_mid_TuRsr', ""],
     ['IPVfN2', ""],
     ['p_mid_IPVfN2', ""],
+    ['geo_strf_dyn_height', ""],
+    ['geo_strf_dyn_height_pc', ""],
+    ['geo_strf_dyn_height_pc_p_mid', ""],
     ['rho_ice', ""],
     ['alpha_wrt_t_ice', ""],
     ['specvol_ice', ""],
@@ -341,7 +345,7 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_check_data.py,v 517a0e58f3a3 2015/08/10 02:52:35 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
+out.write("/*\n**  $Id: make_check_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
 out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
 out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)
 

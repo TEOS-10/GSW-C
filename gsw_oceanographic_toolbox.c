@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 52440f09440d 2015/08/10 16:13:09 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
 **  $Version: 3.05.0-1 $
 **
 **  This is a translation of the original f90 source code into C
@@ -3632,6 +3632,371 @@ gsw_frazil_ratios_adiabatic_poly(double sa, double p, double w_ih,
 }
 /*
 !==========================================================================
+pure function gsw_geo_strf_dyn_height (sa, ct, p, p_ref)
+!==========================================================================
+!
+!  Calculates dynamic height anomaly as the integral of specific volume
+!  anomaly from the pressure p of the bottle to the reference pressure
+!  p_ref.
+!
+!  Hence, geo_strf_dyn_height is the dynamic height anomaly with respect
+!  to a given reference pressure.  This is the geostrophic streamfunction 
+!  for the difference between the horizontal velocity at the pressure 
+!  concerned, p, and the horizontal velocity at p_ref.  Dynamic height 
+!  anomaly is the geostrophic streamfunction in an isobaric surface.  The 
+!  reference values used for the specific volume anomaly are 
+!  SSO = 35.16504 g/kg and CT = 0 deg C.  This function calculates 
+!  specific volume anomaly using the computationally efficient 
+!  expression for specific volume of Roquet et al. (2015). 
+!
+!  This function evaluates the pressure integral of specific volume using 
+!  SA and CT interpolated with respect to pressure using the method of 
+!  Reiniger and Ross (1968).  It uses a weighted mean of (i) values 
+!  obtained from linear interpolation of the two nearest data points, and 
+!  (ii) a linear extrapolation of the pairs of data above and below.  This 
+!  "curve fitting" method resembles the use of cubic splines.  
+!
+!  SA    =  Absolute Salinity                                      [ g/kg ]
+!  CT    =  Conservative Temperature (ITS-90)                     [ deg C ]
+!  p     =  sea pressure                                           [ dbar ]
+!           ( i.e. absolute pressure - 10.1325 dbar )
+!  p_ref =  reference pressure                                     [ dbar ]
+!           ( i.e. reference absolute pressure - 10.1325 dbar )
+!
+!  geo_strf_dyn_height  =  dynamic height anomaly               [ m^2/s^2 ]
+!   Note. If p_ref exceeds the pressure of the deepest bottle on a 
+!     vertical profile, the dynamic height anomaly for each bottle 
+!     on the whole vertical profile is returned as NaN.
+!--------------------------------------------------------------------------
+*/
+static void p_sequence(double p1,double p2,double max_dp_i,double *pseq,
+	int *nps);	/* forward reference */
+
+double	*	/* Returns NULL on error, dyn_height if okay */
+gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
+	int n_levels, double *dyn_height)
+{
+	GSW_TEOS10_CONSTANTS;
+	int	m_levels = (n_levels <= 0) ? 1 : n_levels,
+		p_cnt, top_pad, i, nz, ibottle, ipref, np_max, np, ibpr,
+		*iidata;
+	double	dp_min, dp_max, p_min, p_max, max_dp_i,
+		*b, *b_av, *dp, *dp_i, *sa_i=NULL, *ct_i, *p_i,
+		*geo_strf_dyn_height0;
+
+/*
+!--------------------------------------------------------------------------
+!  This max_dp_i is the limit we choose for the evaluation of specific
+!  volume in the pressure integration.  That is, the vertical integration
+!  of specific volume with respect to pressure is perfomed with the pressure
+!  increment being no more than max_dp_i (the default value being 1 dbar).
+!--------------------------------------------------------------------------
+*/
+	max_dp_i = 1.0;
+
+	if ((nz = m_levels) <= 1)
+	    return (NULL);
+
+	dp = malloc(nz*sizeof (double));
+	dp_min = 11000.0;
+	dp_max = -11000.0;
+	for (i=0; i<nz-1; i++) {
+	    if ((dp[i] = p[i+1] - p[i]) < dp_min)
+		dp_min = dp[i];
+	    if (dp[i] > dp_max)
+		dp_max = dp[i];
+	}
+
+	if (dp_min <= 0.0) {
+	    /* pressure must be monotonic */
+	    free(dp);
+	    return (NULL);
+	}
+	p_min = p[0];
+	p_max = p[nz-1];
+
+	if (p_ref > p_max)
+	    /*the reference pressure p_ref is deeper than all bottles*/
+	    return (NULL);
+
+	/* Determine if there is a "bottle" at exactly p_ref */
+	ipref = -1;
+	for (ibottle = 0; ibottle < nz; ibottle++) {
+	    if (p[ibottle] == p_ref) {
+	        ipref = ibottle;
+		break;
+	    }
+	}
+	if ((dp_max <= max_dp_i) && (p[0] == 0.0) && (ipref >= 0)) {
+	    /*
+	    !vertical resolution is good (bottle gap is no larger than max_dp_i)
+	    ! & the vertical profile begins at the surface (i.e. at p = 0 dbar)
+	    ! & the profile contains a "bottle" at exactly p_ref.
+ 	    */
+	    b = malloc(3*nz*sizeof (double));
+	    b_av = b+nz; geo_strf_dyn_height0 = b_av+nz;
+	    for (i=0; i<nz; i++) {
+		b[i] = gsw_specvol_anom_standard(sa[i],ct[i],p[i]);
+		if (i > 0)
+		    b_av[i-1] = 0.5*(b[i] + b[i-1]);
+	    }
+	    /*
+	    ! "geo_strf_dyn_height0" is the dynamic height anomaly with respect
+	    ! to p_ref = 0 (the surface).
+	    */
+	    geo_strf_dyn_height0[0] = 0.0;
+	    for (i=1; i<nz; i++)
+		geo_strf_dyn_height0[i] = b_av[i]*dp[i]*db2pa;
+	    for (i=1; i<nz; i++) /* cumulative sum */
+		geo_strf_dyn_height0[i] = geo_strf_dyn_height0[i-1]
+		                          - geo_strf_dyn_height0[i];
+	    for (i=0; i<nz; i++)
+		dyn_height[i] = geo_strf_dyn_height0[i]
+				- geo_strf_dyn_height0[ipref];
+	    free(b);
+	} else {
+	/*
+	! Test if there are vertical gaps between adjacent "bottles" which are
+	! greater than max_dp_i, and that there is a "bottle" exactly at the
+	! reference pressure.
+	*/
+	    iidata = malloc((nz+1)*sizeof (int));
+
+	    if ((dp_max <= max_dp_i) && (ipref >= 0)) {
+	    /*
+	    ! Vertical resolution is already good (no larger than max_dp_i), and
+	    ! there is a "bottle" at exactly p_ref.
+	    */
+		sa_i = malloc(3*(nz+1)*sizeof (double));
+		ct_i = sa_i+nz+1; p_i = ct_i+nz+1;
+	        if (p_min > 0.0) {
+		/*
+	        ! resolution is fine and there is a bottle at p_ref, but
+	        ! there is not a bottle at p = 0. So add an extra bottle.
+		*/
+		    for (i=0; i<nz; i++) {
+			sa_i[i+1]	= sa[i];
+			ct_i[i+1]	= ct[i];
+			p_i[i+1]	= p[i];
+		    }
+		    sa_i[0] = sa[0];
+		    ct_i[0] = ct[0];
+		    p_i[0] = 0.0;
+		    ibpr = ipref+1;
+		    p_cnt = nz+1;
+		    for (i=0; i<p_cnt; i++)
+			iidata[i] = i;
+	        } else {
+		/*
+	        ! resolution is fine, there is a bottle at p_ref, and
+	        ! there is a bottle at p = 0
+		*/
+		    memmove(sa_i, sa, nz*sizeof (double));
+		    memmove(ct_i, ct, nz*sizeof (double));
+		    memmove(p_i, p, nz*sizeof (double));
+		    ibpr = ipref;
+		    for (i=0; i<nz; i++)
+			iidata[i] = i;
+		    p_cnt = nz;
+	        }
+
+	    } else {
+	    /*
+	    ! interpolation is needed.
+	    */
+		np_max = 2*rint(p[nz-1]/max_dp_i+0.5);
+		p_i = malloc(np_max*sizeof (double));
+
+	        if (p_min > 0.0) {
+		/*
+	        ! there is not a bottle at p = 0.
+		*/
+	            if (p_ref < p_min) {
+		    /*
+	            ! p_ref is shallower than the minimum bottle pressure.
+		    */
+			p_i[0] = 0.0;
+			p_sequence(p_i[0],p_ref,max_dp_i, p_i+1,&np);
+			ibpr = p_cnt = np; p_cnt++;
+			p_sequence(p_ref,p_min,max_dp_i, p_i+p_cnt,&np);
+	                p_cnt += np;
+	                top_pad = p_cnt;
+	            } else {
+		    /*
+	            ! p_ref is deeper than the minimum bottle pressure.
+		    */
+			p_i[0] = 0.0;
+			p_i[1] = p_min;
+	                top_pad = 2;
+	                p_cnt = 2;
+	            }
+	        } else {
+		/*
+	        ! there is a bottle at p = 0.
+		*/
+	            p_i[0] = p_min;
+	            top_pad = 1;
+	            p_cnt = 1;
+	        }
+
+		for (ibottle=0; ibottle < nz-1; ibottle++) {
+
+		    iidata[ibottle] = p_cnt-1;
+	            if (p[ibottle] == p_ref) ibpr = p_cnt-1;
+
+	            if (p[ibottle] < p_ref && p[ibottle+1] > p_ref) {
+		    /*
+	            ! ... reference pressure is spanned by bottle pairs -
+	            ! need to include p_ref as an interpolated pressure.
+		    */
+	                p_sequence(p[ibottle],p_ref,max_dp_i, p_i+p_cnt,&np);
+	                p_cnt += np; ibpr = p_cnt-1;
+	                p_sequence(p_ref,p[ibottle+1],max_dp_i,p_i+p_cnt,&np);
+	                p_cnt += np;
+	            } else {
+		    /*
+	            ! ... reference pressure is not spanned by bottle pairs.
+		    */
+	                p_sequence(p[ibottle],p[ibottle+1],max_dp_i,
+				p_i+p_cnt,&np);
+	                p_cnt += np;
+	            }
+
+	        }
+
+		iidata[nz-1] = p_cnt-1;
+	        if (p[nz-1] == p_ref) ibpr = p_cnt-1;
+
+		sa_i = malloc(2*p_cnt*sizeof (double));
+		ct_i = sa_i+p_cnt;
+
+		if (top_pad > 1)
+	            gsw_linear_interp_sa_ct(sa,ct,p,nz,
+			p_i,top_pad-1,sa_i,ct_i);
+	        gsw_rr68_interp_sa_ct(sa,ct,p,nz,p_i+top_pad-1,p_cnt-top_pad+1,
+		                      sa_i+top_pad-1,ct_i+top_pad-1);
+	    }
+
+	    b = malloc(4*p_cnt*sizeof (double));
+	    b_av = b+p_cnt; dp_i = b_av+p_cnt;
+	    geo_strf_dyn_height0 = dp_i+p_cnt;
+	    for (i=0; i<p_cnt; i++) {
+		b[i] = gsw_specvol_anom_standard(sa_i[i],ct_i[i],p_i[i]);
+		if (i > 0) {
+		    dp_i[i-1] = p_i[i]-p_i[i-1];
+		    b_av[i-1] = 0.5*(b[i] + b[i-1]);
+		}
+	    }
+	    /*
+	    ! "geo_strf_dyn_height0" is the dynamic height anomaly with respect
+	    ! to p_ref = 0 (the surface).
+	    */
+	    geo_strf_dyn_height0[0] = 0.0;
+	    for (i=1; i<p_cnt; i++)
+		geo_strf_dyn_height0[i] = b_av[i-1]*dp_i[i-1];
+	    for (i=1; i<p_cnt; i++) /* cumulative sum */
+		geo_strf_dyn_height0[i] = geo_strf_dyn_height0[i-1]
+		                          - geo_strf_dyn_height0[i];
+	    for (i=0; i<nz; i++)
+		dyn_height[i] = (geo_strf_dyn_height0[iidata[i]]
+				- geo_strf_dyn_height0[ibpr])*db2pa;
+
+	    free(b); free(iidata);
+	    if (sa_i != NULL)
+		free(sa_i);
+	}
+	free(dp);
+	return (dyn_height);
+}
+
+static void
+p_sequence(double p1, double p2, double max_dp_i, double *pseq, int *nps)
+{
+	double	dp, pstep;
+	int		n, i;
+
+	dp = p2 - p1;
+	n = ceil(dp/max_dp_i);
+	pstep = dp/n;
+
+	if (nps != NULL) *nps = n;
+
+	for (i=1; i<=n; i++)
+	    pseq[i-1] = p1+pstep*i;
+}
+/*
+!==========================================================================
+pure subroutine gsw_geo_strf_dyn_height_pc (sa, ct, delta_p, &
+                                            geo_strf_dyn_height_pc, p_mid)
+!==========================================================================
+!
+!  Calculates dynamic height anomaly as the integral of specific volume 
+!  anomaly from the the sea surface pressure (0 Pa) to the pressure p.
+!  This function, gsw_geo_strf_dyn_height_pc, is to used when the 
+!  Absolute Salinity and Conservative Temperature are piecewise constant in 
+!  the vertical over sucessive pressure intervals of delta_p (such as in
+!  a forward "z-coordinate" ocean model).  "geo_strf_dyn_height_pc" is
+!  the dynamic height anomaly with respect to the sea surface.  That is, 
+!  "geo_strf_dyn_height_pc" is the geostrophic streamfunction for the 
+!  difference between the horizontal velocity at the pressure concerned, p,
+!  and the horizontal velocity at the sea surface.  Dynamic height anomaly 
+!  is the geostrophic streamfunction in an isobaric surface.  The reference
+!  values used for the specific volume anomaly are SA = SSO = 35.16504 g/kg
+!  and CT = 0 deg C.  The output values of geo_strf_dyn_height_pc are 
+!  given at the mid-point pressures, p_mid, of each layer in which SA and 
+!  CT are vertically piecewice constant (pc).  This function calculates 
+!  enthalpy using the computationally-efficient 75-term expression for 
+!  specific volume of Roquet et al., (2015). 
+!
+!  SA       =  Absolute Salinity                                   [ g/kg ]
+!  CT       =  Conservative Temperature (ITS-90)                  [ deg C ]
+!  delta_p  =  difference in sea pressure between the deep and     [ dbar ]
+!              shallow extents of each layer in which SA and CT
+!              are vertically constant. delta_p must be positive.
+!              
+!  Note. sea pressure is absolute pressure minus 10.1325 dbar.
+!
+!  geo_strf_dyn_height_pc =  dynamic height anomaly             [ m^2/s^2 ]
+!  p_mid                  =  mid-point pressure in each layer      [ dbar ]
+!--------------------------------------------------------------------------
+*/
+double *
+gsw_geo_strf_dyn_height_pc(double *sa, double *ct, double *delta_p, int n_levels,
+	double *geo_strf_dyn_height_pc, double *p_mid)
+{
+	int	i, np;
+	double	*delta_h, delta_h_half, dyn_height_deep, prv_dyn_height_deep,
+		*p_deep, *p_shallow;
+
+	for (i=0; i<n_levels; i++)
+	    if (delta_p[i] < 0.0)
+		return (NULL);
+
+	np = n_levels;
+	delta_h = malloc(3*np*sizeof (double));
+	p_deep = delta_h+np; p_shallow = p_deep+np;
+
+	for (i=0; i<np; i++) {
+	    p_deep[i] = (i==0)? delta_p[0] : p_deep[i-1] + delta_p[i];
+	    p_shallow[i] = p_deep[i] - delta_p[i];
+	    delta_h[i] = gsw_enthalpy_diff(sa[i],ct[i],p_shallow[i],p_deep[i]);
+	}
+
+	for (i=0; i<np; i++) {
+	    prv_dyn_height_deep = (i==0)? -delta_h[0]: dyn_height_deep;
+	    dyn_height_deep = prv_dyn_height_deep - delta_h[i];
+		/* This is Phi minus Phi_0 of Eqn. (3.32.2) of IOC et al. (2010).*/
+	    p_mid[i] = 0.5*(p_shallow[i]  + p_deep[i]);
+	    delta_h_half = gsw_enthalpy_diff(sa[i],ct[i],p_mid[i],p_deep[i]);
+
+	    geo_strf_dyn_height_pc[i] = gsw_enthalpy_sso_0(p_mid[i]) + 
+	                           dyn_height_deep + delta_h_half;
+	}
+	free(delta_h);
+	return (geo_strf_dyn_height_pc);
+}
+/*
+!==========================================================================
 function gsw_gibbs(ns,nt,np,sa,t,p)
 !==========================================================================
 !
@@ -4868,6 +5233,87 @@ gsw_latentheat_melting(double sa, double p)
 	return (1000.0*(gsw_chem_potential_water_t_exact(sa,tf,p)
            - (gsw_t0 + tf)*gsw_t_deriv_chem_potential_water_t_exact(sa,tf,p))
            - gsw_enthalpy_ice(tf,p));
+}
+/*
+!==========================================================================
+pure subroutine gsw_linear_interp_sa_ct (sa, ct, p, p_i, sa_i, ct_i)
+!==========================================================================
+! This function interpolates the cast with respect to the interpolating 
+! variable p. This function finds the values of SA, CT at p_i on this cast.
+!
+! VERSION NUMBER: 3.05 (27th January 2015)
+!
+! This function was adapted from Matlab's interp1q.
+!==========================================================================
+*/
+void
+gsw_linear_interp_sa_ct(double *sa, double *ct, double *p, int np,
+	double *p_i, int npi, double *sa_i, double *ct_i)
+{
+	char	*in_rng;
+	int	*j, *k, *r, *jrev, *ki, imax_p, imin_p, i, n, m, ii;
+	double	*xi, *xxi, u, max_p, min_p;
+
+	min_p = max_p = p[0];
+	imin_p = imax_p = 0;
+	for (i=1; i<np; i++) {
+	    if (p[i] < min_p) {
+		min_p = p[i];
+		imin_p = i;
+	    } else if (p[i] > max_p) {
+		max_p = p[i];
+		imax_p = i;
+	    }
+	}
+	in_rng = malloc(npi*sizeof (char));
+	memset(in_rng, 0, npi*sizeof (char));
+	for (i=n=0; i<npi; i++) {
+	    if (p_i[i] <= min_p) {
+		sa_i[i] = sa[imin_p];
+		ct_i[i] = ct[imin_p];
+	    } else if (p_i[i] >= max_p) {
+		sa_i[i] = sa[imax_p];
+		ct_i[i] = ct[imax_p];
+	    } else {
+		in_rng[i] = 1;
+		n++;
+	    }
+	}
+
+	xi = malloc((n+1)*sizeof (double));
+	k  = malloc(3*(n+1)*sizeof (int)); ki = k+n+1; r = ki+n+1;
+	m  = np + n;
+	xxi = malloc(m*sizeof (double));
+	j = malloc(2*m*sizeof (int)); jrev = j+m;
+
+	ii = 0;
+	for (i = 0; i<npi; i++) {
+	    if (in_rng[i]) {
+	        xi[ii] = p_i[i];
+	        ki[ii] = i;
+	        ii++;
+	    }
+	}
+	free(in_rng);
+
+	gsw_util_sort_real(xi, n, k);
+	for (i = 0; i<np; i++)
+	    xxi[i] = p[i];
+	for (i = 0; i<n; i++)
+	    xxi[np+i] = xi[k[i]];
+	gsw_util_sort_real(xxi, m, j);
+
+	for (i = 0; i<m; i++)
+	    jrev[j[i]] = i;
+	for (i = 0; i<n; i++)
+	    r[k[i]] = jrev[np+i]-i-1;
+
+	for (i = 0; i<n; i++) {
+	    u = (xi[i]-p[r[i]])/(p[r[i]+1]-p[r[i]]);
+	    sa_i[ki[i]] = sa[r[i]] + (sa[r[i]+1]-sa[r[i]])*u;
+	    ct_i[ki[i]] = ct[r[i]] + (ct[r[i]+1]-ct[r[i]])*u;
+	}
+	free(j); free(xxi); free(k); free(xi);
 }
 /*
 !==========================================================================
@@ -7182,6 +7628,373 @@ gsw_rho_t_exact(double sa, double t, double p)
 	int	n0=0, n1=1;
 
 	return (1.0/gsw_gibbs(n0,n0,n1,sa,t,p));
+}
+/*
+!==========================================================================
+pure subroutine gsw_rr68_interp_sa_ct (sa, ct, p, p_i, sa_i, ct_i)
+!==========================================================================
+!
+!  Interpolate Absolute Salinity and Conservative Temperature values to
+!  arbitrary pressures using the Reiniger and Ross (1968) interpolation
+!  scheme.
+!  Note that this interpolation scheme requires at least four observed
+!  bottles on the cast.
+!
+!  SA   =  Absolute Salinity                                  [ g/kg ]
+!  CT   =  Conservative Temperature (ITS-90)                 [ deg C ]
+!  p    =  sea pressure                                       [ dbar ]
+!           ( i.e. absolute pressure - 10.1325 dbar )
+!  p_i  =  pressures to interpolate to.
+!
+!  SA_i = interpolated SA values at pressures p_i.
+!  CT_i = interpolated CT values at pressures p_i.
+!--------------------------------------------------------------------------
+*/
+static void rr68_interp_section(int sectnum, double *sa, double *ct, double *p,
+	int mp, int nsect, double *ip_sect,
+	int *ip_isect, double *p_i, double *sa_i, double *ct_i);
+/* forward reference */
+
+void
+gsw_rr68_interp_sa_ct(double *sa, double *ct, double *p, int mp, double *p_i,
+	int mp_i, double *sa_i, double *ct_i)
+{
+	int	i, j, nshallow, ncentral, ndeep,
+		*ip, *ip_i, *ip_ishallow, *ip_icentral, *ip_ideep;
+	char	*shallow, *central, *deep;
+	double	*ip_shallow, *ip_central, *ip_deep, *dp, *p_ii;
+
+	if (mp < 4) {
+	    /* need at least four bottles to perform this interpolation */
+	    ct_i[0] = sa_i[0] = GSW_INVALID_VALUE;
+	    return;
+	}
+
+	dp = malloc(mp*sizeof (double));
+	for (i=1; i<mp; i++) {
+	    if ((dp[i-1] = (p[i] - p[i-1])) <= 0.0) {
+		free(dp);
+		ct_i[0] = sa_i[0] = GSW_INVALID_VALUE;
+		return;
+	    }
+	}
+
+	shallow = malloc(3*mp_i*sizeof (char));
+	central = shallow+mp_i; deep = central+mp_i;
+	nshallow=ncentral=ndeep=0;
+	memset(shallow, 0, 3*mp_i*sizeof (char));
+	for (i=0; i<mp_i; i++) {
+	    if (p_i[i] >= p[0] && p_i[i] <= p[1]) {
+		nshallow++;
+		shallow[i] = 1;
+	    }
+	    if (p_i[i] >= p[1] && p_i[i] <= p[mp-2]) {
+		ncentral++;
+		central[i] = 1;
+	    }
+	    if (p_i[i] >= p[mp-2] && p_i[i] <= p[mp-1]) {
+		ndeep++;
+		deep[i] = 1;
+	    }
+	}
+	    
+	if ((nshallow == 0) || (ncentral == 0) || (ndeep == 0)) {
+	    free(shallow); free(dp);
+	    ct_i[0] = sa_i[0] = GSW_INVALID_VALUE;
+	    return;
+	}
+
+	ip = malloc((mp+mp_i)*sizeof (int)); ip_i = ip+mp;
+	for (i=0; i<mp; i++)
+	    ip[i] = i;
+	for (i=0; i<mp_i; i++)
+	    ip_i[i] = i;
+
+	ip_ishallow = malloc((nshallow+ncentral+ndeep)*sizeof (int));
+	ip_icentral = ip_ishallow+nshallow; ip_ideep = ip_icentral+ncentral;
+	ip_shallow = malloc(2*(nshallow+ncentral+ndeep)*sizeof (double));
+	ip_central = ip_shallow+nshallow; ip_deep = ip_central+ncentral;
+	p_ii = ip_deep+ndeep;
+	/*
+	! Calculate the 2 outer extrapolated values and the inner
+	! interpolated values
+	*/
+	for (i=j=0; i<mp_i; i++) {
+	    if (central[i]) {
+		ip_icentral[j] = ip_i[i];
+		j++;
+	    }
+	}
+	for (i=0; i<ncentral; i++)
+	    p_ii[i] = p_i[ip_icentral[i]];
+	gsw_util_interp1q_int(mp,p,ip,ncentral,p_ii,ip_central);
+	rr68_interp_section(0,sa,ct,p,mp,ncentral,ip_central,ip_icentral,
+				p_i,sa_i,ct_i);
+
+	for (i=j=0; i<mp_i; i++) {
+	    if (shallow[i]) {
+		ip_ishallow[j] = ip_i[i];
+		j++;
+	    }
+	}
+	for (i=0; i<nshallow; i++)
+	    p_ii[i] = p_i[ip_ishallow[i]];
+	gsw_util_interp1q_int(mp,p,ip,nshallow,p_ii,ip_shallow);
+	rr68_interp_section(-1,sa,ct,p,mp,nshallow,ip_shallow,ip_ishallow,
+				p_i,sa_i,ct_i);
+
+	for (i=j=0; i<mp_i; i++) {
+	    if (deep[i]) {
+		ip_ideep[j] = ip_i[i];
+		j++;
+	    }
+	}
+	for (i=0; i<ndeep; i++)
+	    p_ii[i] = p_i[ip_ideep[i]];
+	gsw_util_interp1q_int(mp,p,ip,ndeep,p_ii,ip_deep);
+	rr68_interp_section(1,sa,ct,p,mp,ndeep,ip_deep,ip_ideep,p_i,sa_i,ct_i);
+
+	/*
+	! Insert any observed bottles that are at the required interpolated
+	! pressures
+	*/
+	for (i=0; i<mp_i; i++) {
+	    for (j=0; j<mp; j++) {
+	        if (p_i[i] == p[j]) {
+	            sa_i[i] = sa[j];
+	            ct_i[i] = ct[j];
+	        }
+	    }
+	}
+	free(ip_shallow); free(ip_ishallow); free(ip); free(shallow); free(dp);
+}
+
+/*
+pure subroutine rr68_interp_section (sectnum, ip_sect, ip_isect, sa_i, ct_i)
+*/
+static void
+rr68_interp_section(int sectnum, double *sa, double *ct, double *p, int mp,
+	int nsect, double *ip_sect, int *ip_isect, double *p_i, double *sa_i,
+	double *ct_i)
+{
+	int	i, *ip_1, *ip_2, *ip_3, *ip_4;
+	double	m, *ct_12, *ct_13, *ct_23, *ct_34, ctp1,
+		ctp2, *ct_ref, ctref_denom,
+		ct_ref_minus_ctp1, ct_ref_minus_ctp2,
+		ctref_num,
+		gamma1_23, gamma1_24, gamma2_31,
+		gamma2_34, gamma2_41, gamma3_12,
+		gamma3_42, gamma4_12, gamma4_23,
+		*sa_12, *sa_13, *sa_23, *sa_34, sap1,
+		sap2, *sa_ref, saref_denom,
+		sa_ref_minus_sap1, sa_ref_minus_sap2,
+		saref_num, *p_ii;
+
+	ip_1 = malloc(4*nsect*sizeof (int)); ip_2 = ip_1+nsect;
+	ip_3 = ip_2+nsect; ip_4 = ip_3+nsect;
+
+	ct_12 = malloc(12*nsect*sizeof (double));
+	sa_12	= ct_12 +  1*nsect;
+	sa_13	= ct_12 +  2*nsect;
+	sa_23	= ct_12 +  3*nsect;
+	sa_34	= ct_12 +  4*nsect;
+	sa_ref	= ct_12 +  5*nsect;
+	ct_13	= ct_12 +  6*nsect;
+	ct_23	= ct_12 +  7*nsect;
+	ct_34	= ct_12 +  8*nsect;
+	ct_ref	= ct_12 +  9*nsect;
+	p_ii	= ct_12 + 10*nsect;
+
+	if (sectnum < 0) {       /* shallow */
+	    for (i=0; i<nsect; i++) {
+		ip_1[i] = floor(ip_sect[i]);
+		ip_2[i] = ceil(ip_sect[i]);
+		ip_3[i] = ip_2[i] + 1;
+		ip_4[i] = ip_3[i] + 1;
+	    }
+	} else if (sectnum == 0) {  /* central */
+	    for (i=0; i<nsect; i++) {
+		ip_2[i] = floor(ip_sect[i]);
+		ip_1[i] = ip_2[i] - 1;
+		ip_3[i] = ceil(ip_sect[i]);
+		ip_4[i] = ip_3[i] + 1;
+	    }
+	} else if (sectnum > 0) {  /* deep */
+	    for (i=0; i<nsect; i++) {
+		ip_1[i] = ceil(ip_sect[i]);
+		ip_2[i] = floor(ip_sect[i]);
+		ip_3[i] = ip_2[i] - 1;
+		ip_4[i] = ip_3[i] - 1;
+	    }
+	}
+
+	for (i=0; i<nsect; i++)
+	    p_ii[i] = p_i[ip_isect[i]];
+
+	/* eqn (3d) */
+	for (i=0; i<nsect; i++) {
+	    sa_34[i] = sa[ip_3[i]] + ((sa[ip_4[i]] - sa[ip_3[i]])
+		*(p_ii[i] - p[ip_3[i]])/ (p[ip_4[i]] - p[ip_3[i]]));
+	    ct_34[i] = ct[ip_3[i]] + ((ct[ip_4[i]] - ct[ip_3[i]])
+		*(p_ii[i] - p[ip_3[i]])/ (p[ip_4[i]] - p[ip_3[i]]));
+	}
+	/*
+	! Construct the Reiniger & Ross reference curve equation.
+	! m = the power variable
+	*/
+	m = 1.7;
+
+	if (sectnum == 0) {
+
+	    gsw_linear_interp_sa_ct(sa,ct,p,mp,p_ii,nsect,sa_23,ct_23);
+
+	    /* eqn (3a) */
+	    for (i=0; i<nsect; i++) {
+		sa_12[i] = sa[ip_1[i]] + ((sa[ip_2[i]] - sa[ip_1[i]])
+			*(p_ii[i] - p[ip_1[i]])/ (p[ip_2[i]] - p[ip_1[i]]));
+		ct_12[i] = ct[ip_1[i]] + ((ct[ip_2[i]] - ct[ip_1[i]])
+			*(p_ii[i] - p[ip_1[i]])/ (p[ip_2[i]] - p[ip_1[i]]));
+
+		saref_num = (pow(fabs(sa_23[i]-sa_34[i]),m))*sa_12[i]
+			  + (pow(fabs(sa_12[i]-sa_23[i]),m))*sa_34[i];
+		ctref_num = (pow(fabs(ct_23[i]-ct_34[i]),m))*ct_12[i]
+			  + (pow(fabs(ct_12[i]-ct_23[i]),m))*ct_34[i];
+
+		saref_denom = pow(fabs(sa_23[i]-sa_34[i]),m)
+			    + pow(fabs(sa_12[i]-sa_23[i]),m);
+		ctref_denom = pow(fabs(ct_23[i]-ct_34[i]),m)
+			    + pow(fabs(ct_12[i]-ct_23[i]),m);
+
+		if (saref_denom == 0.0) {
+		    sa_23[i] = sa_23[i] + 1.0e-6;
+		    saref_num = (pow(fabs(sa_23[i]-sa_34[i]),m))*sa_12[i]
+			      + (pow(fabs(sa_12[i]-sa_23[i]),m))*sa_34[i];
+		    saref_denom = pow(fabs(sa_23[i]-sa_34[i]),m)
+			 	+ pow(fabs(sa_12[i]-sa_23[i]),m);
+		}
+		if (ctref_denom == 0.0) {
+		    ct_23[i] = ct_23[i] + 1.0e-6;
+		    ctref_num = (pow(fabs(ct_23[i]-ct_34[i]),m))*ct_12[i]
+			      + (pow(fabs(ct_12[i]-ct_23[i]),m))*ct_34[i];
+		    ctref_denom = pow(fabs(ct_23[i]-ct_34[i]),m)
+				+ pow(fabs(ct_12[i]-ct_23[i]),m);
+		}
+
+		sa_ref[i] = 0.5*(sa_23[i] + (saref_num/saref_denom));
+		ct_ref[i] = 0.5*(ct_23[i] + (ctref_num/ctref_denom));
+	    }
+
+	} else {
+
+	    gsw_linear_interp_sa_ct(sa,ct,p,mp,p_ii,nsect,sa_12,ct_12);
+
+	    for (i=0; i<nsect; i++) {
+		sa_13[i] = sa[ip_1[i]] + ((sa[ip_3[i]] - sa[ip_1[i]])
+			*(p_ii[i] - p[ip_1[i]])/ (p[ip_3[i]] - p[ip_1[i]]));
+		ct_13[i] = ct[ip_1[i]] + ((ct[ip_3[i]] - ct[ip_1[i]])
+			*(p_ii[i] - p[ip_1[i]])/ (p[ip_3[i]] - p[ip_1[i]]));
+
+		sa_23[i] = sa[ip_2[i]] + ((sa[ip_3[i]] - sa[ip_2[i]])
+			*(p_ii[i] - p[ip_2[i]])/ (p[ip_3[i]] - p[ip_2[i]]));
+		ct_23[i] = ct[ip_2[i]] + ((ct[ip_3[i]] - ct[ip_2[i]])
+			*(p_ii[i] - p[ip_2[i]])/ (p[ip_3[i]] - p[ip_2[i]]));
+
+		/* eqn (3a') */
+		saref_num = (pow(fabs(sa_12[i]-sa_23[i]),m))*sa_34[i]
+			  + (pow(fabs(sa_12[i]-sa_13[i]),m))*sa_23[i];
+		ctref_num = (pow(fabs(ct_12[i]-ct_23[i]),m))*ct_34[i]
+			  + (pow(fabs(ct_12[i]-ct_13[i]),m))*ct_23[i];
+
+		saref_denom = pow(fabs(sa_12[i]-sa_23[i]),m)
+			    + pow(fabs(sa_12[i]-sa_13[i]),m);
+		ctref_denom = pow(fabs(ct_12[i]-ct_23[i]),m)
+			    + pow(fabs(ct_12[i]-ct_13[i]),m);
+
+		if (saref_denom == 0.0) {
+		    sa_23[i] = sa_23[i] + 1.0e-6;
+		    saref_num = (pow(fabs(sa_12[i]-sa_23[i]),m))*sa_34[i]
+			      + (pow(fabs(sa_12[i]-sa_13[i]),m))*sa_23[i];
+		    saref_denom = pow(fabs(sa_12[i]-sa_23[i]),m)
+			        + pow(fabs(sa_12[i]-sa_13[i]),m);
+		}
+		if (ctref_denom == 0.0) {
+		    ct_23[i] = ct_23[i] + 1.0e-6;
+		    ctref_num = (pow(fabs(ct_12[i]-ct_23[i]),m))*ct_34[i]
+			      + (pow(fabs(ct_12[i]-ct_13[i]),m))*ct_23[i];
+		    ctref_denom = pow(fabs(ct_12[i]-ct_23[i]),m)
+			        + pow(fabs(ct_12[i]-ct_13[i]),m);
+		}
+
+		sa_ref[i] = 0.5*(sa_12[i] + (saref_num/saref_denom));
+		ct_ref[i] = 0.5*(ct_12[i] + (ctref_num/ctref_denom));
+	    }
+	}
+
+	for (i=0; i<nsect; i++) {
+	    /* eqn (3c) */
+	    gamma1_23 = ((p_ii[i] - p[ip_2[i]])*(p_ii[i] - p[ip_3[i]]))/
+			((p[ip_1[i]] - p[ip_2[i]])*(p[ip_1[i]] - p[ip_3[i]]));
+	    gamma2_31 = ((p_ii[i] - p[ip_3[i]])*(p_ii[i] - p[ip_1[i]]))/
+	    		((p[ip_2[i]] - p[ip_3[i]])*(p[ip_2[i]] - p[ip_1[i]]));
+	    gamma3_12 = ((p_ii[i] - p[ip_1[i]])*(p_ii[i] - p[ip_2[i]]))/
+	    		((p[ip_3[i]] - p[ip_1[i]])*(p[ip_3[i]] - p[ip_2[i]]));
+
+	    if (sectnum == 0) {
+	        gamma2_34 = ((p_ii[i] - p[ip_3[i]])*(p_ii[i] - p[ip_4[i]]))/
+	    		((p[ip_2[i]] - p[ip_3[i]])*(p[ip_2[i]] - p[ip_4[i]]));
+	        gamma3_42 = ((p_ii[i] - p[ip_4[i]])*(p_ii[i] - p[ip_2[i]]))/
+	    		((p[ip_3[i]] - p[ip_4[i]])*(p[ip_3[i]] - p[ip_2[i]]));
+	        gamma4_23 = ((p_ii[i] - p[ip_2[i]])*(p_ii[i] - p[ip_3[i]]))/
+	    		((p[ip_4[i]] - p[ip_2[i]])*(p[ip_4[i]] - p[ip_3[i]]));
+	    } else {
+	        gamma1_24 = ((p_ii[i] - p[ip_2[i]])*(p_ii[i] - p[ip_4[i]]))/
+	   		((p[ip_1[i]] - p[ip_2[i]])*(p[ip_1[i]] - p[ip_4[i]]));
+	        gamma2_41 = ((p_ii[i] - p[ip_4[i]])*(p_ii[i] - p[ip_1[i]]))/
+	    		((p[ip_2[i]] - p[ip_4[i]])*(p[ip_2[i]] - p[ip_1[i]]));
+	        gamma4_12 = ((p_ii[i] - p[ip_1[i]])*(p_ii[i] - p[ip_2[i]]))/
+	    		((p[ip_4[i]] - p[ip_1[i]])*(p[ip_4[i]] - p[ip_2[i]]));
+	    }
+
+	    /* eqn (3b/3b') */
+	    sap1 = gamma1_23*sa[ip_1[i]] + gamma2_31*sa[ip_2[i]]
+			+ gamma3_12*sa[ip_3[i]];
+	    ctp1 = gamma1_23*ct[ip_1[i]] + gamma2_31*ct[ip_2[i]]
+			+ gamma3_12*ct[ip_3[i]];
+	    if (sectnum == 0) {
+	        sap2 = gamma2_34*sa[ip_2[i]] + gamma3_42*sa[ip_3[i]]
+			+ gamma4_23*sa[ip_4[i]];
+	        ctp2 = gamma2_34*ct[ip_2[i]] + gamma3_42*ct[ip_3[i]]
+			+ gamma4_23*ct[ip_4[i]];
+	    } else {
+	        sap2 = gamma1_24*sa[ip_1[i]] + gamma2_41*sa[ip_2[i]]
+			+ gamma4_12*sa[ip_4[i]];
+	        ctp2 = gamma1_24*ct[ip_1[i]] + gamma2_41*ct[ip_2[i]]
+			+ gamma4_12*ct[ip_4[i]];
+	    }
+
+	    /* eqn (3) */
+	    sa_ref_minus_sap1 = fabs(sa_ref[i] - sap1);
+	    sa_ref_minus_sap2 = fabs(sa_ref[i] - sap2);
+	    if (sa_ref_minus_sap1 == 0.0 && sa_ref_minus_sap2 == 0.0) {
+	        sa_ref[i] = sa_ref[i] + 1.0e-6;
+	        sa_ref_minus_sap1 = fabs(sa_ref[i] - sap1);
+	        sa_ref_minus_sap2 = fabs(sa_ref[i] - sap2);
+	    }
+
+	    ct_ref_minus_ctp1 = fabs(ct_ref[i] - ctp1);
+	    ct_ref_minus_ctp2 = fabs(ct_ref[i] - ctp2);
+	    if (ct_ref_minus_ctp1 == 0.0 && ct_ref_minus_ctp2 == 0.0) {
+	        ct_ref[i] = ct_ref[i] + 1.0e-6;
+	        ct_ref_minus_ctp1 = fabs(ct_ref[i] - ctp1);
+	        ct_ref_minus_ctp2 = fabs(ct_ref[i] - ctp2);
+	    }
+
+	    sa_i[ip_isect[i]] = (sa_ref_minus_sap1*sap2+sa_ref_minus_sap2*sap1)/
+	                        (sa_ref_minus_sap1 + sa_ref_minus_sap2);
+	    ct_i[ip_isect[i]] = (ct_ref_minus_ctp1*ctp2+ct_ref_minus_ctp2*ctp1)/
+	                        (ct_ref_minus_ctp1 + ct_ref_minus_ctp2);
+	}
+	free(ct_12); free(ip_1);
 }
 /*
 !==========================================================================
@@ -9579,6 +10392,114 @@ gsw_util_indx(double *x, int n, double z)
 	    k	= n-2;
 
 	return (k);
+}
+/*
+!==========================================================================
+pure function gsw_util_interp1q_int (x, iy, x_i) result(y_i)
+!==========================================================================
+! Returns the value of the 1-D function iy (integer) at the points of column
+! vector x_i using linear interpolation. The vector x specifies the
+! coordinates of the underlying interval.
+!==========================================================================
+*/
+double *
+gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi, double *x_i,
+	double *y_i)
+{
+	char	*in_rng;
+	int	*j, *k, *r, *jrev, *ki, imax_x, imin_x, i, n, m, ii;
+	double	*xi, *xxi, u, max_x, min_x;
+
+	if (nx <= 0 || nxi <= 0)
+	    return (NULL);
+
+	min_x = max_x = x[0];
+	imin_x = imax_x = 0;
+	for (i=0; i<nx; i++) {
+	    if (x[i] < min_x) {
+	        min_x = x[i];
+	        imin_x = i;
+	    } else if (x[i] > max_x) {
+	        max_x = x[i];
+	        imax_x = i;
+	    }
+	}
+        in_rng = malloc(nxi*sizeof (char));
+	memset(in_rng, 0, nxi*sizeof (char));
+
+	for (i=n=0; i<nxi; i++) {
+	    if (x_i[i] <= min_x) {
+	        y_i[i] = iy[imin_x];
+	    } else if (x_i[i] >= max_x) {
+	        y_i[i] = iy[imax_x];
+	    } else {
+	        in_rng[i] = 1;
+	        n++;
+	    }
+	}
+
+	xi = malloc((n+1)*sizeof (double));
+	k  = malloc(3*(n+1)*sizeof (int)); ki = k+n+1; r = ki+n+1;
+	m  = nx + n;
+	xxi = malloc(m*sizeof (double));
+	j = malloc(2*m*sizeof (int)); jrev = j+m;
+
+	ii = 0;
+	for (i = 0; i<nxi; i++) {
+	    if (in_rng[i]) {
+	        xi[ii] = x_i[i];
+	        ki[ii] = i;
+	        ii++;
+	    }
+	}
+	free(in_rng);
+
+	gsw_util_sort_real(xi, n, k);
+	for (i = 0; i<nx; i++)
+	    xxi[i] = x[i];
+	for (i = 0; i<n; i++)
+	    xxi[nx+i] = xi[k[i]];
+	gsw_util_sort_real(xxi, nx+n, j);
+
+	for (i = 0; i<nx+n; i++)
+	    jrev[j[i]] = i;
+	for (i = 0; i<n; i++)
+	    r[k[i]] = jrev[nx+i] - i-1;
+
+	for (i = 0; i<n; i++) {
+	    u = (xi[i]-x[r[i]])/(x[r[i]+1]-x[r[i]]);
+	    y_i[ki[i]] = iy[r[i]] + (iy[r[i]+1]-iy[r[i]])*u;
+	}
+	free(j); free(xxi); free(k); free(xi);
+	return (y_i);
+}
+/*
+pure function gsw_util_sort_real (rarray) result(iarray)
+*/
+
+static double *rdata;
+
+static int
+compare(const void *p1, const void *p2)
+{
+	if (rdata[*(int *)p1] < rdata[*(int *)p2])
+	    return (-1);
+	if (rdata[*(int *)p1] > rdata[*(int *)p2])
+	    return (1);
+	if (*(int *)p1 < *(int *)p2)
+	    return (1);
+	return (0);
+}
+
+void
+gsw_util_sort_real(double *rarray, int nx, int *iarray)
+{
+	int	i;
+
+	for (i=0; i<nx; i++)
+	    iarray[i] = i;
+	rdata = rarray;
+	qsort(iarray,nx,sizeof (int),compare);
 }
 /*
 !==========================================================================
