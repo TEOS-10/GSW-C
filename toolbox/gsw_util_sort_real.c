@@ -1,0 +1,28 @@
+/*
+pure function gsw_util_sort_real (rarray) result(iarray)
+*/
+
+static double *rdata;
+
+static int
+compare(const void *p1, const void *p2)
+{
+	if (rdata[*(int *)p1] < rdata[*(int *)p2])
+	    return (-1);
+	if (rdata[*(int *)p1] > rdata[*(int *)p2])
+	    return (1);
+	if (*(int *)p1 < *(int *)p2)
+	    return (1);
+	return (0);
+}
+
+void
+gsw_util_sort_real(double *rarray, int nx, int *iarray)
+{
+	int	i;
+
+	for (i=0; i<nx; i++)
+	    iarray[i] = i;
+	rdata = rarray;
+	qsort(iarray,nx,sizeof (int),compare);
+}

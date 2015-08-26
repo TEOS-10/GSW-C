@@ -20,7 +20,7 @@ def write_variable(var_name, dims, v):
     out.write("static double	%s[%d] = {\n" % (var_name, length))
     buf = ""
     maxlen = 80
-    nan = -9e90
+    nan = 9e90
     if ndims == 1:
         lastx = dims[0]-1
 #
@@ -94,7 +94,7 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_saar_data.py,v 517a0e58f3a3 2015/08/10 02:52:35 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
+out.write("/*\n**  $Id: make_saar_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
 out.write("static int\tgsw_nx = %d, gsw_ny = %d, gsw_nz = %d;\n" % (nx,ny,nz))
 out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
 out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)

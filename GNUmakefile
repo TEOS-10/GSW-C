@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 9ab24815eb12 2015/08/09 00:29:39 fdelahoyde $
+#  $Id: GNUmakefile,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
 #  $Version: 3.05.0-1 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -42,7 +42,7 @@
 			awk -F . '{printf "%d.%d\n",$$1,$$2}')
               Program:=	gsw_check
       $(Program)_SRCS:=	gsw_check_functions.c
-      $(Program)_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./
+      $(Program)_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./ -lmcheck
       $(Library)_SRCS:=	gsw_oceanographic_toolbox.c \
 			gsw_saar.c
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
