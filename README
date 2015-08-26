@@ -5,7 +5,7 @@ This is a translation of the original Fortran-90 source code into C.  Unlike
 the Fortran-90 and Matlab versions of the toolbox, functions in the C version
 are primarily scalar.  You should download the documentation from
 http://teos-10.org, but should look at gswteos-10.h for the C API.
-.
+
 The functions gsw_saar and gsw_deltasa_atlas have been modified from the
 original to not use an external data file for global absolute salinity
 anomaly and absolute salinity anomaly ratio data. The data are instead
