@@ -58,7 +58,13 @@ gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi, double *x_i,
 	    }
 	}
 	free(in_rng);
-
+    /*
+    **  Note that the following operations on the index
+    **  vectors jrev and r depend on the sort utility
+    **  gsw_util_sort_real() having the special property
+    **  of sorting indecies in reverse sequence for
+    **  equal real values in the vector being sorted.
+    */
 	gsw_util_sort_real(xi, n, k);
 	for (i = 0; i<nx; i++)
 	    xxi[i] = x[i];

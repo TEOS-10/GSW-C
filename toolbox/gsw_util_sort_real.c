@@ -11,6 +11,11 @@ compare(const void *p1, const void *p2)
 	    return (-1);
 	if (rdata[*(int *)p1] > rdata[*(int *)p2])
 	    return (1);
+    /*
+    **  Note that the library functions using this utility
+    **  depend on the fact that for equal values in rdata the
+    **  indecies are returned in descending sequence.
+    */
 	if (*(int *)p1 < *(int *)p2)
 	    return (1);
 	return (0);
