@@ -1,5 +1,5 @@
 /*
-**  $Id: gswteos-10.h,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
+**  $Id: gswteos-10.h,v 6eb35717b8e3 2015/08/26 22:02:27 fdelahoyde $
 **  $Version: 3.05.0-1 $
 **
 **  GSW TEOS-10 V3.05 definitions and prototypes.
@@ -113,8 +113,9 @@ extern void   gsw_frazil_ratios_adiabatic_poly(double sa, double p,
 		double *dct_dp_frazil);
 extern double *gsw_geo_strf_dyn_height(double *sa, double *ct, double *p,
 		double p_ref, int n_levels, double *dyn_height);
-extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct, double *delta_p,
-		int n_levels, double *geo_strf_dyn_height_pc, double *p_mid);
+extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct,
+		double *delta_p, int n_levels, double *geo_strf_dyn_height_pc,
+		double *p_mid);
 extern double gsw_gibbs_ice (int nt, int np, double t, double p);
 extern double gsw_gibbs_ice_part_t(double t, double p);
 extern double gsw_gibbs_ice_pt0(double pt0);
