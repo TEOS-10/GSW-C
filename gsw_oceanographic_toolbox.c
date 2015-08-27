@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
-**  $Version: 3.05.0-1 $
+**  $Id: gsw_oceanographic_toolbox.c,v 8d86798c800a 2015/08/26 23:16:25 fdelahoyde $
+**  $Version: 3.05.0-2 $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -5295,7 +5295,13 @@ gsw_linear_interp_sa_ct(double *sa, double *ct, double *p, int np,
 	    }
 	}
 	free(in_rng);
-
+    /*
+    **  Note that the following operations on the index
+    **  vectors jrev and r depend on the sort utility
+    **  gsw_util_sort_real() having the special property
+    **  of sorting indecies in reverse sequence for
+    **  equal real values in the vector being sorted.
+    */ 
 	gsw_util_sort_real(xi, n, k);
 	for (i = 0; i<np; i++)
 	    xxi[i] = p[i];
@@ -10453,7 +10459,13 @@ gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi, double *x_i,
 	    }
 	}
 	free(in_rng);
-
+    /*
+    **  Note that the following operations on the index
+    **  vectors jrev and r depend on the sort utility
+    **  gsw_util_sort_real() having the special property
+    **  of sorting indecies in reverse sequence for
+    **  equal real values in the vector being sorted.
+    */
 	gsw_util_sort_real(xi, n, k);
 	for (i = 0; i<nx; i++)
 	    xxi[i] = x[i];
@@ -10486,6 +10498,11 @@ compare(const void *p1, const void *p2)
 	    return (-1);
 	if (rdata[*(int *)p1] > rdata[*(int *)p2])
 	    return (1);
+    /*
+    **  Note that the library functions using this utility
+    **  depend on the fact that for equal values in rdata the
+    **  indecies are returned in descending sequence.
+    */
 	if (*(int *)p1 < *(int *)p2)
 	    return (1);
 	return (0);

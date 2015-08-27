@@ -14,7 +14,7 @@ compare(const void *p1, const void *p2)
     /*
     **  Note that the library functions using this utility
     **  depend on the fact that for equal values in rdata the
-    **  indecies are returned in descending sequence.
+    **  indexes are returned in descending sequence.
     */
 	if (*(int *)p1 < *(int *)p2)
 	    return (1);
