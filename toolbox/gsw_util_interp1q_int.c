@@ -42,9 +42,11 @@ gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi, double *x_i,
 	        n++;
 	    }
 	}
+	if (n==0)
+	    return (y_i);
 
-	xi = malloc((n+1)*sizeof (double));
-	k  = malloc(3*(n+1)*sizeof (int)); ki = k+n+1; r = ki+n+1;
+	xi = malloc(n*sizeof (double));
+	k  = malloc(3*n*sizeof (int)); ki = k+n; r = ki+n;
 	m  = nx + n;
 	xxi = malloc(m*sizeof (double));
 	j = malloc(2*m*sizeof (int)); jrev = j+m;
@@ -61,9 +63,9 @@ gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi, double *x_i,
     /*
     **  Note that the following operations on the index
     **  vectors jrev and r depend on the sort utility
-    **  gsw_util_sort_real() having the special property
-    **  of sorting indexes in descending sequence for
-    **  equal values in the real vector being sorted.
+    **  gsw_util_sort_real() consistently ordering the
+    **  sorting indexes either in ascending or descending
+    **  sequence for replicate values in the real vector.
     */
 	gsw_util_sort_real(xi, n, k);
 	for (i = 0; i<nx; i++)
