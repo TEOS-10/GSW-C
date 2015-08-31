@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v b0cf9b8c58bc 2015/08/30 19:48:41 fdelahoyde $
+#  $Id: GNUmakefile,v 83b6cc07b928 2015/08/31 15:35:12 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -56,7 +56,7 @@
            DESTINCDIR:=	$(DESTDIR)/include
            DESTLIBDIR:= $(DESTDIR)/$(libdirname)
              TARFILES:=	README LICENSE gsw_check_functions.c gsw_check_data.c \
-			gsw_oceanographic_toolbox.c gsw_saar.c \
+			gsw_oceanographic_toolbox.c $(Toolbox_SRCS) gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h gsw_internal_const.h \
 			GNUmakefile html
              ZIPFILES:= README LICENSE gsw_check_functions.c gsw_check_data.c \
