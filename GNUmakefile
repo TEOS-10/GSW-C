@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 83b6cc07b928 2015/08/31 15:35:12 fdelahoyde $
+#  $Id: GNUmakefile,v 47b69889d9c2 2015/08/31 15:53:37 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -47,6 +47,7 @@
 			gsw_saar.c
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
 			gsw_saar.o
+           GSW_3_DATA:=	gsw_data_v3_0.nc
          Toolbox_SRCS:=	gsw_oceanographic_toolbox-head \
 			$(sort $(wildcard toolbox/*.c)) \
 			gsw_oceanographic_toolbox-tail
@@ -81,11 +82,11 @@ $(Library):	$($(Library)_SRCS) gsw_saar_data.c
 	rm -f $(Library)
 	ln -s $(Library).$(LibVersion) $(Library)
 
-gsw_check_data.c:	gsw_data_v3_0.nc
+gsw_check_data.c:	$(GSW_3_DATA)
 			rm -f $@; \
 			./make_check_data.py
 
-gsw_saar_data.c:	gsw_data_v3_0.nc
+gsw_saar_data.c:	$(GSW_3_DATA)
 			rm -f $@; \
 			./make_saar_data.py
 
