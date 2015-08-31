@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 9a49f02fd035 2015/08/31 15:58:50 fdelahoyde $
+#  $Id: GNUmakefile,v 5902c1092b54 2015/08/31 18:28:55 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -51,7 +51,7 @@
          Toolbox_SRCS:=	gsw_oceanographic_toolbox-head \
 			$(sort $(wildcard toolbox/*.c)) \
 			gsw_oceanographic_toolbox-tail
-             INCLUDES:=	gswteos-10.h gsw_internal_const.h
+             INCLUDES:=	gswteos-10.h
               DESTDIR:=	/usr
            DESTBINDIR:=	$(DESTDIR)/bin
            DESTINCDIR:=	$(DESTDIR)/include
