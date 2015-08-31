@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 6837feeed284 2015/08/31 15:55:03 fdelahoyde $
+#  $Id: GNUmakefile,v 9a49f02fd035 2015/08/31 15:58:50 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -39,7 +39,7 @@
             CINCLUDES:=	-I.
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
-			awk -F . '{printf "%d.%d\n",$$1,$$2}')
+			awk -F . '{printf "%s.%s\n",$$1,$$2}')
               Program:=	gsw_check
       $(Program)_SRCS:=	gsw_check_functions.c
       $(Program)_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./
