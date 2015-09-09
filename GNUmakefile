@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v b0cf9b8c58bc 2015/08/30 19:48:41 fdelahoyde $
+#  $Id: GNUmakefile,v 5902c1092b54 2015/08/31 18:28:55 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -39,7 +39,7 @@
             CINCLUDES:=	-I.
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
-			awk -F . '{printf "%d.%d\n",$$1,$$2}')
+			awk -F . '{printf "%s.%s\n",$$1,$$2}')
               Program:=	gsw_check
       $(Program)_SRCS:=	gsw_check_functions.c
       $(Program)_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./
@@ -47,18 +47,19 @@
 			gsw_saar.c
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
 			gsw_saar.o
+           GSW_3_DATA:=	gsw_data_v3_0.nc
          Toolbox_SRCS:=	gsw_oceanographic_toolbox-head \
 			$(sort $(wildcard toolbox/*.c)) \
 			gsw_oceanographic_toolbox-tail
-             INCLUDES:=	gswteos-10.h gsw_internal_const.h
+             INCLUDES:=	gswteos-10.h
               DESTDIR:=	/usr
            DESTBINDIR:=	$(DESTDIR)/bin
            DESTINCDIR:=	$(DESTDIR)/include
            DESTLIBDIR:= $(DESTDIR)/$(libdirname)
              TARFILES:=	README LICENSE gsw_check_functions.c gsw_check_data.c \
-			gsw_oceanographic_toolbox.c gsw_saar.c \
+			gsw_oceanographic_toolbox.c $(Toolbox_SRCS) gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h gsw_internal_const.h \
-			GNUmakefile html
+			GNUmakefile html $(GSW_3_DATA)
              ZIPFILES:= README LICENSE gsw_check_functions.c gsw_check_data.c \
 			gsw_oceanographic_toolbox.c gsw_saar.c \
 			gsw_saar_data.c gswteos-10.h gsw_internal_const.h \
@@ -81,11 +82,11 @@ $(Library):	$($(Library)_SRCS) gsw_saar_data.c
 	rm -f $(Library)
 	ln -s $(Library).$(LibVersion) $(Library)
 
-gsw_check_data.c:	gsw_data_v3_0.nc
+gsw_check_data.c:	$(GSW_3_DATA)
 			rm -f $@; \
 			./make_check_data.py
 
-gsw_saar_data.c:	gsw_data_v3_0.nc
+gsw_saar_data.c:	$(GSW_3_DATA)
 			rm -f $@; \
 			./make_saar_data.py
 
