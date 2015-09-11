@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v c4753012ba34 2015/08/29 18:36:36 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 80df4204b186 2015/09/11 14:57:25 fdelahoyde $
 **  $Version: 3.05.0-2 $
 **
 **  This is a translation of the original f90 source code into C
@@ -3715,9 +3715,11 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	p_min = p[0];
 	p_max = p[nz-1];
 
-	if (p_ref > p_max)
+	if (p_ref > p_max) {
 	    /*the reference pressure p_ref is deeper than all bottles*/
+	    free(dp);
 	    return (NULL);
+	}
 
 	/* Determine if there is a "bottle" at exactly p_ref */
 	ipref = -1;
@@ -10557,6 +10559,16 @@ gsw_util_linear_interp(int nx, double *x, int ny, double *y, int nxi,
 	}
 	free(in_rng);
     /*
+    **  This algorithm mimics the Matlab interp1q function.
+    **
+    **  An explaination of this algorithm:
+    **  We have points we are interpolating from (x) and
+    **  points that we are interpolating to (xi).  We
+    **  sort the interpolating from points, concatenate
+    **  them with the interpolating to points and sort the result.
+    **  We then construct index r, the interpolation index in x for
+    **  each point in xi.
+    **
     **  Note that the following operations on the index
     **  vectors jrev and r depend on the sort utility
     **  gsw_util_sort_real() consistently ordering the
@@ -10572,6 +10584,7 @@ gsw_util_linear_interp(int nx, double *x, int ny, double *y, int nxi,
 	    jrev[j[i]] = i;
 	for (i = 0; i<n; i++)
 	    r[k[i]] = jrev[nx+i] - i - 1;
+	    /* this is now the interpolation index in x for a point in xi */
 
 	for (jy=jy0=jyi0=0; jy < ny; jy++, jy0+=nx, jyi0+=nxi) {
 	    for (i = 0; i<n; i++) {
