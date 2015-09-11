@@ -83,9 +83,11 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	p_min = p[0];
 	p_max = p[nz-1];
 
-	if (p_ref > p_max)
+	if (p_ref > p_max) {
 	    /*the reference pressure p_ref is deeper than all bottles*/
+	    free(dp);
 	    return (NULL);
+	}
 
 	/* Determine if there is a "bottle" at exactly p_ref */
 	ipref = -1;
