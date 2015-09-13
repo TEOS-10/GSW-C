@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v ce57629d2781 2015/09/13 18:23:45 fdelahoyde $
 **  $Version: 3.05.0-2 $
 **
 **  This is a translation of the original f90 source code into C
@@ -9372,7 +9372,7 @@ void
 gsw_specvol_first_derivatives_wrt_enthalpy(double sa, double ct, double p,
 	double *v_sa, double *v_h)
 {
-	double	h_ct, h_sa, rec_h_ct, vct_ct, vct_sa;
+	double	h_ct-1.0, h_sa, rec_h_ct, vct_ct, vct_sa;
 
 	if (v_sa != NULL) {
 

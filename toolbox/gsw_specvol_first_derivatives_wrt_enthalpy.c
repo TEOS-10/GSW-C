@@ -23,7 +23,7 @@ void
 gsw_specvol_first_derivatives_wrt_enthalpy(double sa, double ct, double p,
 	double *v_sa, double *v_h)
 {
-	double	h_ct, h_sa, rec_h_ct, vct_ct, vct_sa;
+	double	h_ct=1.0, h_sa, rec_h_ct, vct_ct, vct_sa;
 
 	if (v_sa != NULL) {
 
