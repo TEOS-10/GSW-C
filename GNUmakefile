@@ -1,4 +1,4 @@
-#  $Id: GNUmakefile,v 5902c1092b54 2015/08/31 18:28:55 fdelahoyde $
+#  $Id: GNUmakefile,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
 #  $Version: 3.05.0-2 $
 #  Makefile for libgswteos-10 on Linux/GNU.
 
@@ -35,7 +35,7 @@
   else
            libdirname:=	lib
   endif
-               CFLAGS:=	-O3
+               CFLAGS:=	-O3 -Wall
             CINCLUDES:=	-I.
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \

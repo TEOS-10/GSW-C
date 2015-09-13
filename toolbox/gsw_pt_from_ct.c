@@ -17,7 +17,7 @@ gsw_pt_from_ct(double sa, double ct)
 {
 	GSW_TEOS10_CONSTANTS;
 	double	a5ct, b3ct, ct_factor, pt_num, pt_recden, ct_diff;
-	double	ct0, pt, pt_old, ptm, dct, dpt_dct, s1;
+	double	pt, pt_old, ptm, dpt_dct, s1;
 	double	a0	= -1.446013646344788e-2,    
 		a1	= -3.305308995852924e-3,    
 		a2	=  1.062415929128982e-4,     

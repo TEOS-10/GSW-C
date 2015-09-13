@@ -31,7 +31,7 @@ gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
 {
 	GSW_TEOS10_CONSTANTS;
 	int	k;
-	double	dsa, sa_mid, dct, ct_mid, dp, alpha_mid, beta_mid;
+	double	dsa, sa_mid, dct, ct_mid, alpha_mid, beta_mid;
 
 	if (nz < 2)
 	    return;
@@ -41,7 +41,6 @@ gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
 	    sa_mid	= 0.5e0*(sa[k] + sa[k+1]);
 	    dct		= (ct[k] - ct[k+1]);
 	    ct_mid	= 0.5e0*(ct[k] + ct[k+1]);
-	    dp		= (p[k] - p[k+1]);
 	    p_mid[k]	= 0.5e0*(p[k] + p[k+1]);
 	    gsw_specvol_alpha_beta(sa_mid,ct_mid,p_mid[k],NULL,&alpha_mid,
 					&beta_mid);

@@ -28,7 +28,7 @@ double
 gsw_t_freezing_exact (double sa, double p, double saturation_fraction)
 {
 	GSW_TEOS10_CONSTANTS;
-	double	df_dt, p_r, sa_r, tf, tfm, tf_old, x, f, return_value;
+	double	df_dt, tf, tfm, tf_old, f, return_value;
 	int	polynomial=1;
 
 	/* The initial value of t_freezing_exact (for air-free seawater) */

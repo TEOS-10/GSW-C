@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_saar.c,v 9461075b3458 2015/08/09 16:38:20 fdelahoyde $
-**  $Version: 3.05.0-1 $
+**  $Id: gsw_saar.c,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
+**  $Version: 3.05.0-2 $
 **
 **  GSW TEOS-10 V3.05
 */
@@ -39,11 +39,10 @@ gsw_saar(double p, double lon, double lat)
 {
 	GSW_SAAR_DATA;
 	int	nx=gsw_nx, ny=gsw_ny, nz=gsw_nz;
-	int	indx0, indy0, indz0, i, j, k;
-	int	nmean, flag_saar, ndepth_index;
+	int	indx0, indy0, indz0, k, ndepth_index;
 	double	saar[4], saar_old[4];
-	double	lon0_in, sa_upper, sa_lower, dlong, dlat;
-	double	r1, s1, t1, saar_mean, ndepth_max, return_value;
+	double	sa_upper, sa_lower, dlong, dlat;
+	double	r1, s1, t1, ndepth_max, return_value;
 
 
 	return_value	 = GSW_INVALID_VALUE;
@@ -145,12 +144,11 @@ gsw_deltasa_atlas(double p, double lon, double lat)
 {
 	GSW_SAAR_DATA;
 	int	nx=gsw_nx, ny=gsw_ny, nz=gsw_nz;
-	int	indx0, indy0, indz0, i, j, k, ndepth_index;
-	int	nmean, flag_dsar;
+	int	indx0, indy0, indz0, k, ndepth_index;
 	double	dsar[4], dsar_old[4];
 	double	dlong, dlat;
-	double	return_value, lon0_in, sa_upper, sa_lower;
-	double	r1, s1, t1, dsar_mean, ndepth_max;
+	double	return_value, sa_upper, sa_lower;
+	double	r1, s1, t1, ndepth_max;
 
 	return_value	= GSW_INVALID_VALUE;
 
