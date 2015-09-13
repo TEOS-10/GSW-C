@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#  $Id: make_check_data.py,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
+#  $Id: make_check_data.py,v bf06c40f0e3a 2015/09/13 23:17:15 fdelahoyde $
 """
 Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
@@ -347,14 +347,20 @@ except:
 out = os.fdopen(fd, "w")
 out.write("""
 /*
-**  $Id: make_check_data.py,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
+**  $Id: make_check_data.py,v bf06c40f0e3a 2015/09/13 23:17:15 fdelahoyde $
 **  Extracted from gsw_data_v3_0.ncxxi
+*/
+
+/*
+** The following hack ensures that gcc (and gcc emulating compilers such as
+** Macosx clang) don't emit warnings about unused variables.
 */
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
 #else
 #define UNUSED
 #endif
+
 """)
 
 for dim_label, dim_name in [dim for dim in work_dims]:
