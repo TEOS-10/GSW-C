@@ -80,7 +80,7 @@ gsw_c_from_sp(double sp, double t, double p)
 		u18 = 6.797409608973845e-7,	u19 = 3.345074990451475e-10,
 		u20 = 8.285687652694768e-13;
 
-	double	t68, ft68, x, rtx, dsp_drtx, sqrty,
+	double	t68, ft68, x, rtx=0.0, dsp_drtx, sqrty,
 		part1, part2, hill_ratio, sp_est,
 		rtx_old, rt, aa, bb, cc, dd, ee, ra,r, rt_lc, rtxm,
 		sp_hill_raw;

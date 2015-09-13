@@ -3,11 +3,11 @@
 """
 Make gsw_saar_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
-Note that it generates gsw_saar_data.c and will not overwite an existing
-instance.  General concept: we don't want end-users of this distribution to
-require having netcdf installed, nor do we want to incur
-the I/O overhead every time this library is used.  So we simply generate static
-data from the netcdf file that the C-gsw library uses directly.
+Note that it generates gsw_saar_data.c but will not overwrite it if it exists.
+General concept: we don't want end-users of this distribution to require having
+netcdf installed, nor do we want to incur the I/O overhead every time this
+library is used.  So we simply generate static data from the netcdf file that
+the C-gsw library uses directly.
 """
 import math, os, sys
 from netCDF4 import Dataset
@@ -94,10 +94,15 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_saar_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
+out.write("/*\n**  $Id: make_saar_data.py,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
 out.write("static int\tgsw_nx = %d, gsw_ny = %d, gsw_nz = %d;\n" % (nx,ny,nz))
 out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
 out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)
+out.write("""void gsw_get_version(char **version_date, char **version_number)
+{
+\t*version_date = gsw_version_date;
+\t*version_number = gsw_version_number;
+}\n""")
 
 for var_label, var_name, dims in [var for var in vars]:
     if not var_name:

@@ -34,8 +34,8 @@ gsw_sa_freezing_from_t_poly(double t, double p, double saturation_fraction)
 	/*
 	! Find t > t_freezing_zero_SA.  If this is the case, the input values
 	! represent seawater that is not frozen (at any positive SA).
-	t_freezing_zero_sa = gsw_t_freezing_poly(0.0,p,saturation_fraction)
 	*/
+	t_freezing_zero_sa = gsw_t_freezing_poly(0.0,p,saturation_fraction,0);
 	if (t > t_freezing_zero_sa)
 	    return (GSW_INVALID_VALUE);
 	/*

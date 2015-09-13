@@ -39,8 +39,8 @@ gsw_geo_strf_dyn_height_pc(double *sa, double *ct, double *delta_p, int n_levels
 	double *geo_strf_dyn_height_pc, double *p_mid)
 {
 	int	i, np;
-	double	*delta_h, delta_h_half, dyn_height_deep, prv_dyn_height_deep,
-		*p_deep, *p_shallow;
+	double	*delta_h, delta_h_half, dyn_height_deep=0.0,
+		prv_dyn_height_deep, *p_deep, *p_shallow;
 
 	for (i=0; i<n_levels; i++)
 	    if (delta_p[i] < 0.0)

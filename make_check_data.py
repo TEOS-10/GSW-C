@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#  $Id: make_check_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
+#  $Id: make_check_data.py,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
 """
 Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
@@ -26,7 +26,7 @@ def write_variable(var_name, dims, v):
     for d in dims[1:]:
         length *= d
     ndims = len(dims)
-    out.write("static double	%s[%d] = {\n" % (var_name, length))
+    out.write("static UNUSED double	%s[%d] = {\n" % (var_name, length))
     buf = ""
     maxlen = 80
     if ndims == 1:
@@ -345,9 +345,17 @@ except:
     print "Will not overwrite gsw_check_data.c. Exiting."
     sys.exit(1)
 out = os.fdopen(fd, "w")
-out.write("/*\n**  $Id: make_check_data.py,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
-out.write("static char\t*gsw_version_date = \"%s\";\n" % version_date)
-out.write("static char\t*gsw_version_number = \"%s\";\n\n" % version_number)
+out.write("""
+/*
+**  $Id: make_check_data.py,v b04abca68ac0 2015/09/13 17:47:28 fdelahoyde $
+**  Extracted from gsw_data_v3_0.ncxxi
+*/
+#ifdef __GNUC__
+#define UNUSED __attribute__ ((unused))
+#else
+#define UNUSED
+#endif
+""")
 
 for dim_label, dim_name in [dim for dim in work_dims]:
     if not dim_name:
