@@ -9,7 +9,7 @@
 /*
 ** The following hack is used to ensure that gcc (and gcc emulating compilers
 ** such as Macosx clang) do not emit unused variable warning messages.
-*/)
+*/
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
 #else
