@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_internal_const.h,v bf06c40f0e3a 2015/09/13 23:17:15 fdelahoyde $
+**  $Id: gsw_internal_const.h,v a1406e71e2a9 2016/01/08 08:01:43 fdelahoyde $
 **
 **  Internal constants for GSW-TEOS-10 V3.05.
 */
@@ -9,7 +9,7 @@
 /*
 ** The following hack is used to ensure that gcc (and gcc emulating compilers
 ** such as Macosx clang) do not emit unused variable warning messages.
-*/)
+*/
 #ifdef __GNUC__
 #define UNUSED __attribute__ ((unused))
 #else
