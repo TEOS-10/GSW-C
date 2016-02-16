@@ -4,7 +4,7 @@ elemental subroutine gsw_t_freezing_first_derivatives (sa, p, &
                             saturation_fraction, tfreezing_sa, tfreezing_p)
 !==========================================================================
 !
-!  Calculates the frist derivatives of the in-situ temperature at which 
+!  Calculates the first derivatives of the in-situ temperature at which 
 !  seawater freezes with respect to Absolute Salinity SA and pressure P (in
 !  Pa).  These expressions come from differentiating the expression that
 !  defines the freezing temperature, namely the equality between the 
