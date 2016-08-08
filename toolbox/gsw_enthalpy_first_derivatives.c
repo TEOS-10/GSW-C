@@ -43,7 +43,7 @@ gsw_enthalpy_first_derivatives(double sa, double ct, double p, double *h_sa,
 		+ xs*(2.0*h211 + xs*(3.0*h311 + xs*(4.0*h411
 		+ 5.0*h511*xs))) + ys*(h121 + xs*(2.0*h221 + xs*(3.0*h321
 	        + 4.0*h421*xs)) + ys*(h131 + xs*(2.0*h231 + 3.0*h331*xs)
-		+ ys*(h141 + 2.0*h241*xs + h151*pow(ys,5.0))))) + z*(h102
+		+ ys*(h141 + 2.0*h241*xs + h151*ys)))) + z*(h102
 		+ xs*(2.0*h202 + xs*(3.0*h302 + xs*(4.0*h402
 		+ 5.0*h502*xs))) + ys*(h112 + xs*(2.0*h212 + xs*(3.0*h312
 	        + 4.0*h412*xs)) + ys*(h122 + xs*(2.0*h222 + 3.0*h322*xs)
