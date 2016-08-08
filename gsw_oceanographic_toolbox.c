@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v ff74fd981dc9 2015/09/13 18:29:10 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 32eb90d55e78 2016/08/08 06:35:05 fdelahoyde $
 **  $Version: 3.05.0-2 $
 **
 **  This is a translation of the original f90 source code into C
@@ -2060,7 +2060,7 @@ gsw_enthalpy_first_derivatives(double sa, double ct, double p, double *h_sa,
 		+ xs*(2.0*h211 + xs*(3.0*h311 + xs*(4.0*h411
 		+ 5.0*h511*xs))) + ys*(h121 + xs*(2.0*h221 + xs*(3.0*h321
 	        + 4.0*h421*xs)) + ys*(h131 + xs*(2.0*h231 + 3.0*h331*xs)
-		+ ys*(h141 + 2.0*h241*xs + h151*pow(ys,5.0))))) + z*(h102
+		+ ys*(h141 + 2.0*h241*xs + h151*ys)))) + z*(h102
 		+ xs*(2.0*h202 + xs*(3.0*h302 + xs*(4.0*h402
 		+ 5.0*h502*xs))) + ys*(h112 + xs*(2.0*h212 + xs*(3.0*h312
 	        + 4.0*h412*xs)) + ys*(h122 + xs*(2.0*h222 + 3.0*h322*xs)
@@ -10084,7 +10084,7 @@ elemental subroutine gsw_t_freezing_first_derivatives (sa, p, &
                             saturation_fraction, tfreezing_sa, tfreezing_p)
 !==========================================================================
 !
-!  Calculates the frist derivatives of the in-situ temperature at which 
+!  Calculates the first derivatives of the in-situ temperature at which 
 !  seawater freezes with respect to Absolute Salinity SA and pressure P (in
 !  Pa).  These expressions come from differentiating the expression that
 !  defines the freezing temperature, namely the equality between the 
@@ -10135,7 +10135,7 @@ elemental subroutine gsw_t_freezing_first_derivatives_poly (sa, p, &
                             saturation_fraction, tfreezing_sa, tfreezing_p)
 !==========================================================================
 !
-!  Calculates the frist derivatives of the in-situ temperature at which 
+!  Calculates the first derivatives of the in-situ temperature at which 
 !  seawater freezes with respect to Absolute Salinity SA and pressure P (in
 !  Pa).  These expressions come from differentiating the expression that
 !  defines the freezing temperature, namely the equality between the 
