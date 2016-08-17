@@ -1,5 +1,5 @@
-#!/usr/bin/python
-#  $Id: make_check_data.py,v bf06c40f0e3a 2015/09/13 23:17:15 fdelahoyde $
+#!/usr/bin/env python
+#  $Id$
 """
 Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
@@ -347,7 +347,7 @@ except:
 out = os.fdopen(fd, "w")
 out.write("""
 /*
-**  $Id: make_check_data.py,v bf06c40f0e3a 2015/09/13 23:17:15 fdelahoyde $
+**  $Id$
 **  Extracted from gsw_data_v3_0.ncxxi
 */
 
