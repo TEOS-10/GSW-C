@@ -23,7 +23,7 @@ void
 gsw_rho_first_derivatives_wrt_enthalpy (double sa, double ct, double p,
 	double *rho_sa, double *rho_h)
 {
-	double	rec_v2, v_h, v_sa;
+	double	rec_v2, v_h=0.0, v_sa;
 
 	if ((rho_sa != NULL) && (rho_h != NULL)) {
 
