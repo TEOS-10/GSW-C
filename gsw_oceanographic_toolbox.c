@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 32eb90d55e78 2016/08/08 06:35:05 fdelahoyde $
-**  $Version: 3.05.0-2 $
+**  $Id: gsw_oceanographic_toolbox.c,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
+**  $Version: 3.05.0-3 $
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -3678,7 +3678,7 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 {
 	GSW_TEOS10_CONSTANTS;
 	int	m_levels = (n_levels <= 0) ? 1 : n_levels,
-		p_cnt, top_pad, i, nz, ibottle, ipref, np_max, np, ibpr,
+		p_cnt, top_pad, i, nz, ibottle, ipref, np_max, np, ibpr=0,
 		*iidata;
 	double	dp_min, dp_max, p_min, p_max, max_dp_i,
 		*b, *b_av, *dp, *dp_i, *sa_i=NULL, *ct_i, *p_i,
@@ -7462,7 +7462,7 @@ void
 gsw_rho_first_derivatives_wrt_enthalpy (double sa, double ct, double p,
 	double *rho_sa, double *rho_h)
 {
-	double	rec_v2, v_h, v_sa;
+	double	rec_v2, v_h=0.0, v_sa;
 
 	if ((rho_sa != NULL) && (rho_h != NULL)) {
 
@@ -10598,11 +10598,11 @@ gsw_util_linear_interp(int nx, double *x, int ny, double *y, int nxi,
 pure function gsw_util_sort_real (rarray) result(iarray)
 */
 
-static double *rdata;
 
 static int
-compare(const void *p1, const void *p2)
+compare(void *rarray, const void *p1, const void *p2)
 {
+	double	*rdata = rarray;
 	if (rdata[*(int *)p1] < rdata[*(int *)p2])
 	    return (-1);
 	if (rdata[*(int *)p1] > rdata[*(int *)p2])
@@ -10617,6 +10617,11 @@ compare(const void *p1, const void *p2)
 	return (0);
 }
 
+/*
+**  Sort the double array rarray into ascending value sequence
+**  returning an index array of the sorted result.  This function
+**  is thread-safe.
+*/
 void
 gsw_util_sort_real(double *rarray, int nx, int *iarray)
 {
@@ -10624,8 +10629,7 @@ gsw_util_sort_real(double *rarray, int nx, int *iarray)
 
 	for (i=0; i<nx; i++)
 	    iarray[i] = i;
-	rdata = rarray;
-	qsort(iarray,nx,sizeof (int),compare);
+	qsort_r(iarray, nx, sizeof (int), (void *)rarray, compare);
 }
 /*
 !==========================================================================

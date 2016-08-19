@@ -46,7 +46,7 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 {
 	GSW_TEOS10_CONSTANTS;
 	int	m_levels = (n_levels <= 0) ? 1 : n_levels,
-		p_cnt, top_pad, i, nz, ibottle, ipref, np_max, np, ibpr,
+		p_cnt, top_pad, i, nz, ibottle, ipref, np_max, np, ibpr=0,
 		*iidata;
 	double	dp_min, dp_max, p_min, p_max, max_dp_i,
 		*b, *b_av, *dp, *dp_i, *sa_i=NULL, *ct_i, *p_i,
