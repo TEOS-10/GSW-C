@@ -2,11 +2,11 @@
 pure function gsw_util_sort_real (rarray) result(iarray)
 */
 
-static double *rdata;
 
 static int
-compare(const void *p1, const void *p2)
+compare(void *rarray, const void *p1, const void *p2)
 {
+	double	*rdata = rarray;
 	if (rdata[*(int *)p1] < rdata[*(int *)p2])
 	    return (-1);
 	if (rdata[*(int *)p1] > rdata[*(int *)p2])
@@ -21,6 +21,11 @@ compare(const void *p1, const void *p2)
 	return (0);
 }
 
+/*
+**  Sort the double array rarray into ascending value sequence
+**  returning an index array of the sorted result.  This function
+**  is thread-safe.
+*/
 void
 gsw_util_sort_real(double *rarray, int nx, int *iarray)
 {
@@ -28,6 +33,5 @@ gsw_util_sort_real(double *rarray, int nx, int *iarray)
 
 	for (i=0; i<nx; i++)
 	    iarray[i] = i;
-	rdata = rarray;
-	qsort(iarray,nx,sizeof (int),compare);
+	qsort_r(iarray, nx, sizeof (int), (void *)rarray, compare);
 }
