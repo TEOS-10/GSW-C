@@ -1,6 +1,6 @@
 /*
-**  $Id: gsw_oceanographic_toolbox-head,v 15e4d4bfcf52 2015/08/08 22:04:55 fdelahoyde $
-**  $Version: 3.0.3 $
+**  $Id: gsw_oceanographic_toolbox-head,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
+**  Version: @RELEASE@
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
