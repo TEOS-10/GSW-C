@@ -35,7 +35,7 @@ directory that the toolbox was unpacked, type:
 
 make
 
-and it will attempt to build gsw_check with a statically-linked GSW library.
+and it will attempt to build gsw_check with a dynamically-linked GSW library.
 Note that the Makefile assumes that your C compiler is gcc.
 
 If gsw_check builds successfully, run it to test the toolbox:
@@ -55,6 +55,7 @@ gcc/GNU Linux platforms.
 
 ChangeLog:
 
+2016-08-19	gsw-3.05.0-3 upstream changes and minor infrastructure fixes.
 2015-08-26	gsw-3.05.1 added gsw_geo_strf_dyn_height,
 		gsw_geo_strf_dyn_height_pc and support functions.
 2015-08-08	gsw-3.05 many new additions and code reorganization.
@@ -66,8 +67,4 @@ ChangeLog:
 2012-10-07:     gsw-3.0.1 New gsw_check_functions.c based on revised f90.
 2011-09-23:     gsw-3.0 Initial creation.
 
-Frank Delahoyde <fdelahoyde@ucsd.edu>
-Shipboard Technical Support, Computing Resources <sts-cr@ucsd.edu>
-Scripps Institution of Oceanography
-Nimitz Marine Facility, Point Loma
-San Diego, Ca. 92106-3505
+Frank Delahoyde <fmdelahoyde@gmail.com>
