@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 80647eaf4f13 2016/08/29 23:37:10 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 9248219e2c8d 2016/08/29 23:43:19 fdelahoyde $
 **  Version: 3.05.0-3
 **
 **  This is a translation of the original f90 source code into C
@@ -10604,6 +10604,9 @@ pure function gsw_util_sort_real (rarray) result(iarray)
 static int
 compare(void *rarray, const void *p1, const void *p2)
 #else
+
+extern void qsort_r(void *, size_t, size_t, int (*)(const void *, const void *,
+			void *), void *);
 static int
 compare(const void *p1, const void *p2, void *rarray)
 #endif
