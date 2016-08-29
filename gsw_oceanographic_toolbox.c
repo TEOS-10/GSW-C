@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 93135e4f3133 2016/08/20 23:26:33 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox.c,v 80647eaf4f13 2016/08/29 23:37:10 fdelahoyde $
 **  Version: 3.05.0-3
 **
 **  This is a translation of the original f90 source code into C
@@ -10598,9 +10598,15 @@ gsw_util_linear_interp(int nx, double *x, int ny, double *y, int nxi,
 pure function gsw_util_sort_real (rarray) result(iarray)
 */
 
-
+#if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
+         defined __FREEBSD__ || defined __BSD__ || \
+	 defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
 static int
 compare(void *rarray, const void *p1, const void *p2)
+#else
+static int
+compare(const void *p1, const void *p2, void *rarray)
+#endif
 {
 	double	*rdata = rarray;
 	if (rdata[*(int *)p1] < rdata[*(int *)p2])
@@ -10629,7 +10635,14 @@ gsw_util_sort_real(double *rarray, int nx, int *iarray)
 
 	for (i=0; i<nx; i++)
 	    iarray[i] = i;
+#if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
+         defined __FREEBSD__ || defined __BSD__ )
 	qsort_r(iarray, nx, sizeof (int), (void *)rarray, compare);
+#elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
+	qsort_s(iarray, nx, sizeof (int), compare, (void *)rarray);
+#else
+	qsort_r(iarray, nx, sizeof (int), compare, (void *)rarray);
+#endif
 }
 /*
 !==========================================================================
