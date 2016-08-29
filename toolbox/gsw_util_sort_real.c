@@ -4,7 +4,7 @@ pure function gsw_util_sort_real (rarray) result(iarray)
 
 
 static int
-compare(void *rarray, const void *p1, const void *p2)
+compare(const void *p1, const void *p2, void *rarray)
 {
 	double	*rdata = rarray;
 	if (rdata[*(int *)p1] < rdata[*(int *)p2])
@@ -33,5 +33,5 @@ gsw_util_sort_real(double *rarray, int nx, int *iarray)
 
 	for (i=0; i<nx; i++)
 	    iarray[i] = i;
-	qsort_r(iarray, nx, sizeof (int), (void *)rarray, compare);
+	qsort_r(iarray, nx, sizeof (int), compare, (void *)rarray);
 }
