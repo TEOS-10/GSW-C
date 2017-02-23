@@ -55,6 +55,7 @@ gcc/GNU Linux platforms.
 
 ChangeLog:
 
+2017-02-23	gsw-3.05.0-3 Bug fix in gsw_geo_strf_dyn_height_pc.
 2016-08-19	gsw-3.05.0-3 upstream changes and minor infrastructure fixes.
 2015-08-26	gsw-3.05.1 added gsw_geo_strf_dyn_height,
 		gsw_geo_strf_dyn_height_pc and support functions.
