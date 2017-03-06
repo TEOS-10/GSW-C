@@ -4,9 +4,9 @@
 **
 **  GSW TEOS-10 V3.05
 */
-#include <gswteos-10.h>
-#include <gsw_internal_const.h>
-#include <gsw_saar_data.c>
+#include "gswteos-10.h"
+#include "gsw_internal_const.h"
+#include "gsw_saar_data.c"
 
 static double
 gsw_sum(double *x, int n)
@@ -29,7 +29,7 @@ function gsw_saar(p,long,lat)
 ! Calculates the Absolute Salinity Anomaly Ratio, SAAR.
 !
 ! p      : sea pressure                                    [dbar]
-! long   : longitude                                       [deg E]     
+! long   : longitude                                       [deg E]
 ! lat    : latitude                                        [deg N]
 !
 ! gsw_saar : Absolute Salinity Anomaly Ratio               [unitless]
@@ -79,7 +79,7 @@ gsw_saar(double p, double lon, double lat)
 	if (p > p_ref[(int)(ndepth_max)-1])
 	    p	= p_ref[(int)(ndepth_max)-1];
 	indz0	= gsw_util_indx(p_ref,nz,p);
-    
+
 	r1	= (lon-longs_ref[indx0])/(longs_ref[indx0+1]-longs_ref[indx0]);
 	s1	= (lat-lats_ref[indy0])/(lats_ref[indy0+1]-lats_ref[indy0]);
 	t1	= (p-p_ref[indz0])/(p_ref[indz0+1]-p_ref[indz0]);
@@ -134,7 +134,7 @@ function gsw_deltasa_atlas(p,lon,lat)
 ! Calculates the Absolute Salinity Anomaly atlas value, delta_SA_atlas.
 !
 ! p      : sea pressure                                    [dbar]
-! lon    : longiture                                       [deg E]     
+! lon    : longiture                                       [deg E]
 ! lat    : latitude                                        [deg N]
 !
 ! deltasa_atlas : Absolute Salinity Anomaly atlas value    [g/kg]
@@ -184,7 +184,7 @@ gsw_deltasa_atlas(double p, double lon, double lat)
 	if (p > p_ref[(int)(ndepth_max)-1])
 	    p	= p_ref[(int)(ndepth_max)-1];
 	indz0	= gsw_util_indx(p_ref,nz,p);
-    
+
 	r1	= (lon-longs_ref[indx0])/
 			(longs_ref[indx0+1]-longs_ref[indx0]);
 	s1	= (lat-lats_ref[indy0])/

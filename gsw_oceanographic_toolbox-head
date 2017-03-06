@@ -11,7 +11,7 @@
  Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 (Fortran)
 ==========================================================================
 
- This is a subset of functions contained in the Gibbs SeaWater (GSW) 
+ This is a subset of functions contained in the Gibbs SeaWater (GSW)
  Oceanographic Toolbox of TEOS-10.
 
  Version 1.0 written by David Jackett
@@ -46,6 +46,6 @@
 
 ==========================================================================
 */
-#include <gswteos-10.h>
-#include <gsw_internal_const.h>
+#include "gswteos-10.h"
+#include "gsw_internal_const.h"
 

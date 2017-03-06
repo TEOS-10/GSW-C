@@ -1,5 +1,5 @@
 /*
-**  $Id: gsw_oceanographic_toolbox.c,v 9248219e2c8d 2016/08/29 23:43:19 fdelahoyde $
+**  $Id: gsw_oceanographic_toolbox-head,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
 **  Version: 3.05.0-3
 **
 **  This is a translation of the original f90 source code into C
@@ -11,7 +11,7 @@
  Gibbs SeaWater (GSW) Oceanographic Toolbox of TEOS-10 (Fortran)
 ==========================================================================
 
- This is a subset of functions contained in the Gibbs SeaWater (GSW) 
+ This is a subset of functions contained in the Gibbs SeaWater (GSW)
  Oceanographic Toolbox of TEOS-10.
 
  Version 1.0 written by David Jackett
@@ -46,8 +46,8 @@
 
 ==========================================================================
 */
-#include <gswteos-10.h>
-#include <gsw_internal_const.h>
+#include "gswteos-10.h"
+#include "gsw_internal_const.h"
 
 /*
 !==========================================================================
@@ -3968,7 +3968,7 @@ gsw_geo_strf_dyn_height_pc(double *sa, double *ct, double *delta_p, int n_levels
 {
 	int	i, np;
 	double	*delta_h, delta_h_half, dyn_height_deep=0.0,
-		prv_dyn_height_deep, *p_deep, *p_shallow;
+		*p_deep, *p_shallow;
 
 	for (i=0; i<n_levels; i++)
 	    if (delta_p[i] < 0.0)
@@ -3985,8 +3985,7 @@ gsw_geo_strf_dyn_height_pc(double *sa, double *ct, double *delta_p, int n_levels
 	}
 
 	for (i=0; i<np; i++) {
-	    prv_dyn_height_deep = (i==0)? -delta_h[0]: dyn_height_deep;
-	    dyn_height_deep = prv_dyn_height_deep - delta_h[i];
+	    dyn_height_deep = dyn_height_deep - delta_h[i];
 		/* This is Phi minus Phi_0 of Eqn. (3.32.2) of IOC et al. (2010).*/
 	    p_mid[i] = 0.5*(p_shallow[i]  + p_deep[i]);
 	    delta_h_half = gsw_enthalpy_diff(sa[i],ct[i],p_mid[i],p_deep[i]);

@@ -36,7 +36,7 @@
            libdirname:=	lib
   endif
                CFLAGS:=	-O3 -Wall
-            CINCLUDES:=	-I.
+            CINCLUDES:=
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
 			awk -F . '{printf "%s.%s\n",$$1,$$2}')
@@ -104,7 +104,7 @@ dist:
 	rm -f gsw_c_v*;
 	ln -s . $(ZIPLINK)
 	zip -r $(ZIPLINK).zip $(addprefix $(ZIPLINK)/,$(ZIPFILES))
-	
+
 clean:
 	rm -f $(Program) $(Library) $(Library).$(LibVersion) $($(Library)_OBJS)
 
