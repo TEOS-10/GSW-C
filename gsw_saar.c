@@ -69,7 +69,8 @@ gsw_saar(double p, double lon, double lat)
 	ndepth_max	= -1.0;
 	for (k=0; k < 4; k++) {
 	    ndepth_index	= indy0+delj[k]+(indx0+deli[k])*ny;
-	    if (ndepth_ref[ndepth_index] > 0.0)
+	    if (ndepth_ref[ndepth_index] > 0.0 &&
+	        ndepth_ref[ndepth_index] < 1e90)
 		ndepth_max = max(ndepth_max, ndepth_ref[ndepth_index]);
 	}
 
