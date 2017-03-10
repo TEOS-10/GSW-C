@@ -180,14 +180,24 @@ gsw_deltasa_atlas(double p, double lon, double lat)
 			(lats_ref[ny-1]-lats_ref[0]));
 	if (indy0 == ny-1)
 	    indy0	= ny-2;
-
+/*
+! Look for the maximum valid "ndepth_ref" value around our point.
+! Note: invalid "ndepth_ref" values are NaNs (a hangover from the codes
+! Matlab origins), but we have replaced the NaNs with a value of "9e90",
+! hence we need an additional upper-limit check in the code below so they
+! will not be recognised as valid values.
+*/
 	ndepth_max	= -1;
 	for (k=0; k<4; k++) {
 	    ndepth_index	= indy0+delj[k]+(indx0+deli[k])*ny;
-	    if (ndepth_ref[ndepth_index] > 0.0)
+	    if (ndepth_ref[ndepth_index] > 0.0 &&
+	        ndepth_ref[ndepth_index] < 1e90)
 		ndepth_max	= max(ndepth_max, ndepth_ref[ndepth_index]);
 	}
-
+/*
+! If we are a long way from the ocean then there will be no valid "ndepth_ref"
+! values near the point (ie. surrounded by NaNs) - so deltasa_atlas = 0.0
+*/
 	if (ndepth_max == -1.0)
 	    return (0.0);
 
