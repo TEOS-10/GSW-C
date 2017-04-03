@@ -37,7 +37,7 @@ gsw_sa_freezing_from_t(double t, double p, double saturation_fraction)
 	! Find t > t_freezing_zero_SA.  If this is the case, the input values
 	! represent seawater that is not frozen (at any positive SA).
 	*/
-	t_freezing_zero_sa = gsw_t_freezing_exact(0.0,p,saturation_fraction);
+	t_freezing_zero_sa = gsw_t_freezing(0.0,p,saturation_fraction);
 	if (t > t_freezing_zero_sa)
 	    return (GSW_INVALID_VALUE);
 	/*
@@ -68,7 +68,7 @@ gsw_sa_freezing_from_t(double t, double p, double saturation_fraction)
 	*/
 	for (i_iter = 1; i_iter <= number_of_iterations; i_iter++) {
 	    sa_old = sa;
-	    f = gsw_t_freezing_exact(sa_old,p,saturation_fraction) - t;
+	    f = gsw_t_freezing(sa_old,p,saturation_fraction) - t;
 	    sa = sa_old - f/tfreezing_sa;
 	    sa_mean = 0.5*(sa + sa_old);
 	    gsw_t_freezing_first_derivatives(sa_mean,p,saturation_fraction,

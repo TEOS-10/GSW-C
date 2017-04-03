@@ -55,7 +55,7 @@ gsw_melting_seaice_into_seawater(double sa, double ct, double p,
 	double	ctf, h, h_brine, h_final, h_ih, sa_brine, tf_sa_seaice;
 	double	saturation_fraction = 0.0;
 
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	if (ct < ctf) {
 	    /*The seawater ct input is below the freezing temp*/
 	    *sa_final = GSW_INVALID_VALUE;
@@ -63,7 +63,7 @@ gsw_melting_seaice_into_seawater(double sa, double ct, double p,
 	    return;
 	}
 
-	tf_sa_seaice = gsw_t_freezing_exact(sa_seaice,p,saturation_fraction)
+	tf_sa_seaice = gsw_t_freezing(sa_seaice,p,saturation_fraction)
 			- 1e-6;
 	if (t_seaice > tf_sa_seaice) {
 	/*
@@ -92,7 +92,7 @@ gsw_melting_seaice_into_seawater(double sa, double ct, double p,
 
 	*sa_final = sa - w_seaice*(sa - sa_seaice);
 	/*
-	!ctf = gsw_ct_freezing_exact(sa_final,p,saturation_fraction)
+	!ctf = gsw_ct_freezing(sa_final,p,saturation_fraction)
 	!
 	!if (h_final .lt. gsw_enthalpy_ct_exact(sa_final,ctf,p)) then
 	!    ! Melting this much seaice is not possible as it would result in

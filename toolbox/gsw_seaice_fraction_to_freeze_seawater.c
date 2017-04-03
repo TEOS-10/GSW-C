@@ -48,14 +48,14 @@ gsw_seaice_fraction_to_freeze_seawater(double sa, double ct, double p,
 		salt_ratio, tf_sa_seaice, h_hat_sa, h_hat_ct, ctf_sa,
 		sa0 = 0.0, saturation_fraction = 0.0;
 
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	if (ct < ctf) {
 	    /*The seawater ct input is below the freezing temp*/
 	    *sa_freeze = *ct_freeze = *w_seaice = GSW_INVALID_VALUE;
 	    return;
 	}
 
-	tf_sa_seaice = gsw_t_freezing_exact(sa_seaice,p,saturation_fraction)
+	tf_sa_seaice = gsw_t_freezing(sa_seaice,p,saturation_fraction)
 						- 1e-6;
 	if (t_seaice > tf_sa_seaice) {
 	/*
@@ -79,19 +79,19 @@ gsw_seaice_fraction_to_freeze_seawater(double sa, double ct, double p,
 	h = gsw_enthalpy_ct_exact(sa,ct,p);
 	h_ih = gsw_enthalpy_ice(t_seaice,p);
 
-	ctf_plus1 = gsw_ct_freezing_exact(sa+1.0,p,saturation_fraction);
+	ctf_plus1 = gsw_ct_freezing(sa+1.0,p,saturation_fraction);
 	func_plus1 = (sa - sa_seaice)
 			*(gsw_enthalpy_ct_exact(sa+1.0,ctf_plus1,p)
 	                - h) - (h - h_ih) + salt_ratio*(h_brine - h_ih);
 
-	ctf_zero = gsw_ct_freezing_exact(sa0,p,saturation_fraction);
+	ctf_zero = gsw_ct_freezing(sa0,p,saturation_fraction);
 	func_zero = (sa - sa_seaice)
 			*(gsw_enthalpy_ct_exact(sa0,ctf_zero,p) - h)
 			+ sa*((h - h_ih) - salt_ratio*(h_brine - h_ih));
 
 	saf = -(sa+1.0)*func_zero/(func_plus1 - func_zero);
 		/*initial guess of saf*/
-	ctf = gsw_ct_freezing_exact(saf,p,saturation_fraction);
+	ctf = gsw_ct_freezing(saf,p,saturation_fraction);
 	gsw_enthalpy_first_derivatives_ct_exact(saf,ctf,p,&h_hat_sa,&h_hat_ct);
 	gsw_ct_freezing_first_derivatives(saf,p,saturation_fraction,
 	                                       &ctf_sa, NULL);
@@ -108,7 +108,7 @@ gsw_seaice_fraction_to_freeze_seawater(double sa, double ct, double p,
 		- (saf_old - sa)*((h - h_ih) - salt_ratio*(h_brine - h_ih));
 	    saf = saf_old - func/dfunc_dsaf;
 	    saf_mean = 0.5*(saf + saf_old);
-	    ctf_mean = gsw_ct_freezing_exact(saf_mean,p,saturation_fraction);
+	    ctf_mean = gsw_ct_freezing(saf_mean,p,saturation_fraction);
 	    gsw_enthalpy_first_derivatives_ct_exact(saf_mean,ctf_mean,p,
 	                                                 &h_hat_sa,&h_hat_ct);
 	    gsw_ct_freezing_first_derivatives(saf_mean,p,saturation_fraction,
@@ -116,7 +116,7 @@ gsw_seaice_fraction_to_freeze_seawater(double sa, double ct, double p,
 	    dfunc_dsaf = (sa - sa_seaice)*(h_hat_sa + h_hat_ct*ctf_sa)
 	    		- (h - h_ih) + salt_ratio*(h_brine - h_ih);
 	    saf = saf_old - func/dfunc_dsaf;
-	    ctf = gsw_ct_freezing_exact(saf,p,saturation_fraction);
+	    ctf = gsw_ct_freezing(saf,p,saturation_fraction);
 	}
 /*
 ! After these 4 iterations of this modified Newton-Raphson method, the

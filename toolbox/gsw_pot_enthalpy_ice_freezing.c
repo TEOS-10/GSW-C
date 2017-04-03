@@ -18,7 +18,7 @@ gsw_pot_enthalpy_ice_freezing(double sa, double p)
 {
 	double	pt0_ice, t_freezing;
 
-	t_freezing = gsw_t_freezing_exact(sa,p,0.0) ;
+	t_freezing = gsw_t_freezing(sa,p,0.0) ;
 
 	pt0_ice = gsw_pt0_from_t_ice(t_freezing,p);
 

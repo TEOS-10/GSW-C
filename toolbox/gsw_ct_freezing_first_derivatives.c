@@ -29,7 +29,7 @@ gsw_ct_freezing_first_derivatives(double sa, double p,
 {
 	double	tf_sa, tf_p, ct_sa_wrt_t, ct_t_wrt_t, ct_p_wrt_t, tf;
 
-	tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	tf = gsw_t_freezing(sa,p,saturation_fraction);
 
 	if (ctfreezing_sa != NULL && ctfreezing_p != NULL) {
 

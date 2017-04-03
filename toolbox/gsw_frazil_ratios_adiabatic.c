@@ -40,8 +40,8 @@ gsw_frazil_ratios_adiabatic (double sa, double p, double w_ih,
 		ctf, ctf_sa, ctf_p;
 	double	saturation_fraction = 0.0;
 
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
-	tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
+	tf = gsw_t_freezing(sa,p,saturation_fraction);
 	h = gsw_enthalpy_ct_exact(sa,ctf,p);
 	h_ih = gsw_enthalpy_ice(tf,p);
 	cp_ih = gsw_cp_ice(tf,p);
