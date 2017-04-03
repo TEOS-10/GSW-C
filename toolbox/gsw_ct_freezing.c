@@ -4,7 +4,7 @@
 !--------------------------------------------------------------------------
 
 !==========================================================================
-function gsw_ct_freezing(sa,p,saturation_fraction)  
+function gsw_ct_freezing(sa,p,saturation_fraction)
 !==========================================================================
 
 !  Calculates the Conservative Temperature at which seawater freezes.
@@ -27,5 +27,5 @@ function gsw_ct_freezing(sa,p,saturation_fraction)
 double
 gsw_ct_freezing(double sa, double p, double saturation_fraction)
 {
-	return (gsw_ct_freezing_poly(sa, p, saturation_fraction));
+	return (gsw_ct_freezing_exact(sa, p, saturation_fraction));
 }
