@@ -29,7 +29,7 @@ gsw_pot_enthalpy_ice_freezing_first_derivatives(double sa, double p,
 	double	cp_ihf, pt_icef, ratio_temp, tf, tf_p, tf_sa;
 	double	saturation_fraction = 0.0;
 
-	tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	tf = gsw_t_freezing(sa,p,saturation_fraction);
 	pt_icef = gsw_pt0_from_t_ice(tf,p);
 	ratio_temp = (gsw_t0 + pt_icef)/(gsw_t0 + tf);
 

@@ -48,7 +48,7 @@ gsw_melting_ice_into_seawater(double sa, double ct, double p, double w_ih,
 	double	ctf, h_bulk, sa_bulk, tf_ih;
 	double	saturation_fraction = 0.0;
 
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	if (ct < ctf) {
 	    /*The seawater ct input is below the freezing temp*/
 	    *sa_final = GSW_INVALID_VALUE;
@@ -57,7 +57,7 @@ gsw_melting_ice_into_seawater(double sa, double ct, double p, double w_ih,
 	    return;
 	}
 
-	tf_ih = gsw_t_freezing_exact(0.0,p,saturation_fraction) - 1e-6;
+	tf_ih = gsw_t_freezing(0.0,p,saturation_fraction) - 1e-6;
 	if (t_ih > tf_ih) {
 	    /*
 	    ! t_ih input exceeds the freezing temp.

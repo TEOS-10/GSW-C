@@ -39,8 +39,8 @@ gsw_melting_seaice_equilibrium_sa_ct_ratio(double sa, double p)
 	double	ctf, h, h_ih, t_seaice, h_hat_sa, h_hat_ct;
 	double	saturation_fraction = 0.0;
 
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
-	t_seaice = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
+	t_seaice = gsw_t_freezing(sa,p,saturation_fraction);
 
 	h = gsw_enthalpy_ct_exact(sa,ctf,p);
 	h_ih = gsw_enthalpy_ice(t_seaice,p);

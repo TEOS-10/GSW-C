@@ -60,7 +60,7 @@ gsw_frazil_properties(double sa_bulk, double h_bulk, double p,
 	! Finding func0
 	!--------------
 	*/
-	ctf = gsw_ct_freezing_exact(sa_bulk,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa_bulk,p,saturation_fraction);
 	func0 = h_bulk - gsw_enthalpy_ct_exact(sa_bulk,ctf,p);
 	/*
 	!-----------------------------------------------------------------------
@@ -106,9 +106,9 @@ gsw_frazil_properties(double sa_bulk, double h_bulk, double p,
 	! fed into the iterative Newton's Method.
 	!-----------------------------------------------------------------------
 	*/
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	hf = gsw_enthalpy_ct_exact(sa,ctf,p);
-	tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	tf = gsw_t_freezing(sa,p,saturation_fraction);
 	h_ihf = gsw_enthalpy_ice(tf,p);
 	cp_ih = gsw_cp_ice(tf,p);
 	gsw_enthalpy_first_derivatives_ct_exact(sa,ctf,p,
@@ -131,9 +131,9 @@ gsw_frazil_properties(double sa_bulk, double h_bulk, double p,
 
 	    if (number_of_iterations > 1) {
 	        /* on the first iteration these values are already known */
-	        ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	        ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	        hf = gsw_enthalpy_ct_exact(sa,ctf,p);
-	        tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	        tf = gsw_t_freezing(sa,p,saturation_fraction);
 	        h_ihf = gsw_enthalpy_ice(tf,p);
 	    }
 
@@ -152,9 +152,9 @@ gsw_frazil_properties(double sa_bulk, double h_bulk, double p,
 	    }
 
 	    sa = sa_bulk/(1.0 - w_ih_mean);
-	    ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	    ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	    hf = gsw_enthalpy_ct_exact(sa,ctf,p);
-	    tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	    tf = gsw_t_freezing(sa,p,saturation_fraction);
 	    h_ihf = gsw_enthalpy_ice(tf,p);
 	    cp_ih = gsw_cp_ice(tf,p);
 	    gsw_enthalpy_first_derivatives_ct_exact(sa,ctf,p,
@@ -182,7 +182,7 @@ gsw_frazil_properties(double sa_bulk, double h_bulk, double p,
 	}
 
 	*sa_final = sa;
-	*ct_final = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	*ct_final = gsw_ct_freezing(sa,p,saturation_fraction);
 	*w_ih_final = w_ih;
 
 	if (*w_ih_final < 0.0) {

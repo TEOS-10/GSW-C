@@ -32,7 +32,7 @@ gsw_t_freezing_first_derivatives(double sa, double p,
 	GSW_TEOS10_CONSTANTS;
 	double	rec_denom, tf, g_per_kg = 1000.0;
 
-	tf = gsw_t_freezing_exact(sa,p,saturation_fraction);
+	tf = gsw_t_freezing(sa,p,saturation_fraction);
 	rec_denom = 1.0/
 		(g_per_kg*gsw_t_deriv_chem_potential_water_t_exact(sa,tf,p)
 	        + gsw_entropy_ice(tf,p));

@@ -34,7 +34,7 @@ gsw_pressure_freezing_ct(double sa, double ct, double saturation_fraction)
 	! Find CT > CT_freezing_p0.  If this is the case, the input CT value
 	! represent seawater that will not be frozen at any positive p.
 	*/
-	ct_freezing_p0 = gsw_ct_freezing_exact(sa,0.0,saturation_fraction);
+	ct_freezing_p0 = gsw_ct_freezing(sa,0.0,saturation_fraction);
 	if (ct > ct_freezing_p0) {
 	    return (GSW_INVALID_VALUE);
 	}
@@ -42,7 +42,7 @@ gsw_pressure_freezing_ct(double sa, double ct, double saturation_fraction)
 	! Find CT < CT_freezing_p10000.  If this is the case, the input CT value
 	! represent seawater that is frozen even at p = 10,000 dbar.
 	*/
-	ct_freezing_p10000 = gsw_ct_freezing_exact(sa,1e4,saturation_fraction);
+	ct_freezing_p10000 = gsw_ct_freezing(sa,1e4,saturation_fraction);
 	if (ct < ct_freezing_p10000) {
 	    return (GSW_INVALID_VALUE);
 	}
@@ -62,7 +62,7 @@ gsw_pressure_freezing_ct(double sa, double ct, double saturation_fraction)
 	    */
 	for (i_iter = 1; i_iter <= number_of_iterations; i_iter++) {
 	    pf_old = pf;
-	    f = gsw_ct_freezing_exact(sa,pf_old,saturation_fraction) - ct;
+	    f = gsw_ct_freezing(sa,pf_old,saturation_fraction) - ct;
 	    pf = pf_old - f/dctf_dp;
 	    pfm = 0.5*(pf + pf_old);
 	    gsw_ct_freezing_first_derivatives(sa,pfm,saturation_fraction,

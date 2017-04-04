@@ -130,7 +130,7 @@ gsw_frazil_properties_potential(double sa_bulk, double h_pot_bulk, double p,
 	!-----------------------------------------------------------------------
 	*/
 	func0 = h_pot_bulk - gsw_cp0
-		*gsw_ct_freezing_exact(sa_bulk,p,saturation_fraction);
+		*gsw_ct_freezing(sa_bulk,p,saturation_fraction);
 	/*
 	!-----------------------------------------------------------------------
 	! Setting the three outputs for data points that have func0 non-negative
@@ -189,7 +189,7 @@ gsw_frazil_properties_potential(double sa_bulk, double h_pot_bulk, double p,
 	! Doing a Newton step with a separate polynomial estimate of the mean
 	! derivative dfunc_dw_Ih_mean_poly.
 	!-----------------------------------------------------------------------'	*/
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	h_pot_ihf = gsw_pot_enthalpy_ice_freezing(sa,p);
 	func = h_pot_bulk - (1.0 - w_ih)*gsw_cp0*ctf - w_ih*h_pot_ihf;
 
@@ -212,7 +212,7 @@ gsw_frazil_properties_potential(double sa_bulk, double h_pot_bulk, double p,
 	! fed into Newton's Method.
 	!-----------------------------------------------------------------------
 	*/
-	ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 
 	h_pot_ihf = gsw_pot_enthalpy_ice_freezing(sa,p);
 
@@ -238,7 +238,7 @@ gsw_frazil_properties_potential(double sa_bulk, double h_pot_bulk, double p,
 
 	    if (iterations > 1) {
 	        /*On the first iteration ctf and h_pot_ihf are both known*/
-	        ctf = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	        ctf = gsw_ct_freezing(sa,p,saturation_fraction);
 	        h_pot_ihf = gsw_pot_enthalpy_ice_freezing(sa,p);
 	    }
 
@@ -265,7 +265,7 @@ gsw_frazil_properties_potential(double sa_bulk, double h_pot_bulk, double p,
 	    *w_ih_final = 0.0;
 	} else {
 	    *sa_final = sa;
-	    *ct_final = gsw_ct_freezing_exact(sa,p,saturation_fraction);
+	    *ct_final = gsw_ct_freezing(sa,p,saturation_fraction);
 	    *w_ih_final = w_ih;
 	}
 }

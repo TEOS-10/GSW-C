@@ -21,7 +21,7 @@ gsw_ct_from_enthalpy_exact(double sa, double h, double p)
 	double	ct, ct_freezing, ct_mean, ct_old, f, h_freezing, h_ct, h_40,
 		ct_40 = 40.0;
 
-	ct_freezing = gsw_ct_freezing_exact(sa,p,0.0);
+	ct_freezing = gsw_ct_freezing(sa,p,0.0);
 
 	h_freezing = gsw_enthalpy_ct_exact(sa,ct_freezing,p);
 	if (h < (h_freezing - gsw_cp0)) {

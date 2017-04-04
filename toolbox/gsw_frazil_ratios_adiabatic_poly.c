@@ -5,28 +5,28 @@ elemental subroutine gsw_frazil_ratios_adiabatic_poly (sa, p, w_ih, &
 !==========================================================================
 !
 !  Calculates the ratios of SA, CT and P changes when frazil ice forms or
-!  melts in response to an adiabatic change in pressure of a mixture of 
-!  seawater and frazil ice crystals.  
+!  melts in response to an adiabatic change in pressure of a mixture of
+!  seawater and frazil ice crystals.
 !
-!  Note that the first output, dSA_dCT_frazil, is dSA/dCT rather than 
-!  dCT/dSA.  This is done so that when SA = 0, the output, dSA/dCT, is zero 
-!  whereas dCT/dSA would then be infinite. 
+!  Note that the first output, dSA_dCT_frazil, is dSA/dCT rather than
+!  dCT/dSA.  This is done so that when SA = 0, the output, dSA/dCT, is zero
+!  whereas dCT/dSA would then be infinite.
 !
 !  Also note that both dSA_dP_frazil and dCT_dP_frazil are the pressure
-!  derivatives with the pressure measured in Pa not dbar.  
+!  derivatives with the pressure measured in Pa not dbar.
 !
 !  SA  =  Absolute Salinity of seawater                            [ g/kg ]
 !  p   =  sea pressure of seawater at which melting occurs         [ dbar ]
-!         ( i.e. absolute pressure - 10.1325d0 dbar ) 
-!  w_Ih  =  mass fraction of ice, that is the mass of ice divided by the 
+!         ( i.e. absolute pressure - 10.1325d0 dbar )
+!  w_Ih  =  mass fraction of ice, that is the mass of ice divided by the
 !           sum of the masses of ice and seawater.  That is, the mass of
-!           ice divided by the mass of the final mixed fluid.  
+!           ice divided by the mass of the final mixed fluid.
 !           w_Ih must be between 0 and 1.                      [ unitless ]
 !
-!  dSA_dCT_frazil =  the ratio of the changes in Absolute Salinity 
-!                    to that of Conservative Temperature       [ g/(kg K) ] 
-!  dSA_dP_frazil  =  the ratio of the changes in Absolute Salinity 
-!                    to that of pressure (in Pa)              [ g/(kg Pa) ] 
+!  dSA_dCT_frazil =  the ratio of the changes in Absolute Salinity
+!                    to that of Conservative Temperature       [ g/(kg K) ]
+!  dSA_dP_frazil  =  the ratio of the changes in Absolute Salinity
+!                    to that of pressure (in Pa)              [ g/(kg Pa) ]
 !  dCT_dP_frazil  =  the ratio of the changes in Conservative Temperature
 !                    to that of pressure (in Pa)                   [ K/Pa ]
 !--------------------------------------------------------------------------
@@ -40,7 +40,7 @@ gsw_frazil_ratios_adiabatic_poly(double sa, double p, double w_ih,
 		ctf, ctf_sa, ctf_p;
 	double	saturation_fraction = 0.0;
 
-	tf = gsw_t_freezing_poly(sa,p,saturation_fraction,0);
+	tf = gsw_t_freezing_poly(sa,p,saturation_fraction);
 	ctf = gsw_ct_freezing_poly(sa,p,saturation_fraction);
 	h = gsw_enthalpy(sa,ctf,p);
 	h_ih = gsw_enthalpy_ice(tf,p);
