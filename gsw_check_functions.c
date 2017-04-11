@@ -158,6 +158,7 @@ main(int argc, char **argv)
 	test_func(entropy_from_pt, (sa[i],pt[i]), entropy,entropy_from_pt);
 	test_func(pt_from_entropy, (sa[i],entropy[i]), value,pt_from_entropy);
 	test_func(ct_from_entropy, (sa[i],entropy[i]), value,ct_from_entropy);
+	test_func(entropy_from_ct, (sa[i],ct[i]), value,entropy_from_ct);
 	test_func(entropy_from_t, (sa[i],t[i],p[i]), value,entropy_from_t);
 	test_func(adiabatic_lapse_rate_from_ct, (sa[i],ct[i],p[i]), value,
 	    adiabatic_lapse_rate_from_ct);

@@ -141,6 +141,7 @@ vars = [
     ['entropy_from_pt', ""],
     ['pt_from_entropy', ""],
     ['CT_from_entropy', ""],
+    ['entropy_from_CT', ""],
     ['entropy_from_t', ""],
     ['adiabatic_lapse_rate_from_CT', ""],
     ['specvol', ""],
