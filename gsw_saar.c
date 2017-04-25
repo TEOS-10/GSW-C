@@ -94,7 +94,7 @@ gsw_saar(double p, double lon, double lat)
 ! values near the point (ie. surrounded by NaNs) - so just return SAAR = 0.0
 */
 	if (ndepth_max == -1.0)
-	    return (0.0);
+	    return (return_value);
 
 	if (p > p_ref[(int)(ndepth_max)-1])
 	    p	= p_ref[(int)(ndepth_max)-1];
@@ -212,7 +212,7 @@ gsw_deltasa_atlas(double p, double lon, double lat)
 ! values near the point (ie. surrounded by NaNs) - so deltasa_atlas = 0.0
 */
 	if (ndepth_max == -1.0)
-	    return (0.0);
+	    return (return_value);
 
 	if (p > p_ref[(int)(ndepth_max)-1])
 	    p	= p_ref[(int)(ndepth_max)-1];

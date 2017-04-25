@@ -12,7 +12,7 @@ the C-gsw library uses directly.
 import math, os, sys
 from netCDF4 import Dataset
 
-def write_variable(var_name, dims, v):
+def write_variable(var_name, dims, v, nan = 9e90):
     length = dims[0]
     for d in dims[1:]:
         length *= d
@@ -20,7 +20,7 @@ def write_variable(var_name, dims, v):
     out.write("static double	%s[%d] = {\n" % (var_name, length))
     buf = ""
     maxlen = 80
-    nan = 9e90
+    # nan = 9e90
     if ndims == 1:
         lastx = dims[0]-1
 #
@@ -84,9 +84,10 @@ ny = len(d['ny'])
 nz = len(d['nz'])
 version_date = rootgrp.version_date
 version_number = rootgrp.version_number
-vars = [["p_ref", "", [nz]], ["lats_ref", "", [ny]], ["longs_ref", "", [nx]],
-        ["saar_ref", "SAAR_ref", [nx,ny,nz]],
-        ["delta_sa_ref", "deltaSA_ref", [nx,ny,nz]],["ndepth_ref", "", [nx,ny]]]
+nan = 9e90
+vars = [["p_ref", "", [nz], nan], ["lats_ref", "", [ny], nan], ["longs_ref", "", [nx], nan],
+        ["saar_ref", "SAAR_ref", [nx,ny,nz], nan],
+        ["delta_sa_ref", "deltaSA_ref", [nx,ny,nz], nan],["ndepth_ref", "", [nx,ny], -1]]
 try:
     fd = os.open("gsw_saar_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0644)
 except:
@@ -104,9 +105,9 @@ out.write("""void gsw_get_version(char **version_date, char **version_number)
 \t*version_number = gsw_version_number;
 }\n""")
 
-for var_label, var_name, dims in [var for var in vars]:
+for var_label, var_name, dims, vnan in [var for var in vars]:
     if not var_name:
         var_name = var_label
-    write_variable(var_label, dims, v[var_name])
+    write_variable(var_label, dims, v[var_name], vnan)
 out.close()
 sys.exit(0)
