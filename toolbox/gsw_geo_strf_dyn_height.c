@@ -301,6 +301,11 @@ p_sequence(double p1, double p2, double max_dp_i, double *pseq, int *nps)
 
 	if (nps != NULL) *nps = n;
 
-	for (i=1; i<=n; i++)
-	    pseq[i-1] = p1+pstep*i;
+	/*
+	! Generate the sequence ensuring that the value of p2 is exact to
+	! avoid round-off issues, ie. don't do "pseq = p1+pstep*(i+1)".
+	*/
+	for (i=0; i<n; i++)
+	    pseq[i] = p2-pstep*(n-1-i);
+
 }

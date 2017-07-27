@@ -538,9 +538,9 @@ report(char *funcname, char *varname, gsw_error_info *errs)
 	if (strcmp(funcname, varname)) {
 	    msglen += 5;
 	    if (msglen > 62) {
-		k = strlen(varname) - (msglen - 62);
+		k = msglen - 62;
 		strcat(message, " (..");
-		strncat(message, varname, k);
+		strcat(message, varname+k);
 	    } else {
 		strcat(message, " (");
 		strcat(message, varname);

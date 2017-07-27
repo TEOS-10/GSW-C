@@ -178,20 +178,31 @@ rr68_interp_section(int sectnum, double *sa, double *ct, double *p, int mp,
 	    for (i=0; i<nsect; i++) {
 		ip_1[i] = floor(ip_sect[i]);
 		ip_2[i] = ceil(ip_sect[i]);
+		if (ip_1[i] == ip_2[i])
+		    ip_2[i] = ip_1[i] + 1;
 		ip_3[i] = ip_2[i] + 1;
 		ip_4[i] = ip_3[i] + 1;
 	    }
 	} else if (sectnum == 0) {  /* central */
 	    for (i=0; i<nsect; i++) {
 		ip_2[i] = floor(ip_sect[i]);
-		ip_1[i] = ip_2[i] - 1;
 		ip_3[i] = ceil(ip_sect[i]);
+		if (ip_2[i] == ip_3[i])
+		    ip_2[i] = ip_3[i] - 1;
+		ip_1[i] = ip_2[i] - 1;
+		if (ip_1[i] < 0) {
+		    ip_1[i] = 0;
+		    ip_2[i] = 1;
+		    ip_3[i] = 2;
+	        }
 		ip_4[i] = ip_3[i] + 1;
 	    }
 	} else if (sectnum > 0) {  /* deep */
 	    for (i=0; i<nsect; i++) {
 		ip_1[i] = ceil(ip_sect[i]);
 		ip_2[i] = floor(ip_sect[i]);
+		if (ip_1[i] == ip_2[i])
+		    ip_2[i] = ip_1[i] - 1;
 		ip_3[i] = ip_2[i] - 1;
 		ip_4[i] = ip_3[i] - 1;
 	    }

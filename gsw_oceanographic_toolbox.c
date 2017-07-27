@@ -1,6 +1,6 @@
 /*
 **  $Id: gsw_oceanographic_toolbox-head,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
-**  Version: 3.05.0-3
+**  Version: 3
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -3923,8 +3923,13 @@ p_sequence(double p1, double p2, double max_dp_i, double *pseq, int *nps)
 
 	if (nps != NULL) *nps = n;
 
-	for (i=1; i<=n; i++)
-	    pseq[i-1] = p1+pstep*i;
+	/*
+	! Generate the sequence ensuring that the value of p2 is exact to
+	! avoid round-off issues, ie. don't do "pseq = p1+pstep*(i+1)".
+	*/
+	for (i=0; i<n; i++)
+	    pseq[i] = p2-pstep*(n-1-i);
+
 }
 /*
 !==========================================================================
@@ -7859,20 +7864,31 @@ rr68_interp_section(int sectnum, double *sa, double *ct, double *p, int mp,
 	    for (i=0; i<nsect; i++) {
 		ip_1[i] = floor(ip_sect[i]);
 		ip_2[i] = ceil(ip_sect[i]);
+		if (ip_1[i] == ip_2[i])
+		    ip_2[i] = ip_1[i] + 1;
 		ip_3[i] = ip_2[i] + 1;
 		ip_4[i] = ip_3[i] + 1;
 	    }
 	} else if (sectnum == 0) {  /* central */
 	    for (i=0; i<nsect; i++) {
 		ip_2[i] = floor(ip_sect[i]);
-		ip_1[i] = ip_2[i] - 1;
 		ip_3[i] = ceil(ip_sect[i]);
+		if (ip_2[i] == ip_3[i])
+		    ip_2[i] = ip_3[i] - 1;
+		ip_1[i] = ip_2[i] - 1;
+		if (ip_1[i] < 0) {
+		    ip_1[i] = 0;
+		    ip_2[i] = 1;
+		    ip_3[i] = 2;
+	        }
 		ip_4[i] = ip_3[i] + 1;
 	    }
 	} else if (sectnum > 0) {  /* deep */
 	    for (i=0; i<nsect; i++) {
 		ip_1[i] = ceil(ip_sect[i]);
 		ip_2[i] = floor(ip_sect[i]);
+		if (ip_1[i] == ip_2[i])
+		    ip_2[i] = ip_1[i] - 1;
 		ip_3[i] = ip_2[i] - 1;
 		ip_4[i] = ip_3[i] - 1;
 	    }
