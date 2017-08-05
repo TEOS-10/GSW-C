@@ -1,6 +1,6 @@
 /*
 **  $Id: gsw_oceanographic_toolbox-head,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
-**  Version: 3
+**  Version: 3.05.0-4
 **
 **  This is a translation of the original f90 source code into C
 **  by the Shipboard Technical Support Computing Resources group
@@ -10614,11 +10614,6 @@ gsw_util_linear_interp(int nx, double *x, int ny, double *y, int nxi,
 pure function gsw_util_sort_real (rarray) result(iarray)
 */
 
-/*
-**  Sort the double array rarray into ascending value sequence
-**  returning an index array of the sorted result.  This function
-**  is thread-safe.
-*/
 typedef struct {
     double d;
     int i;
@@ -10629,24 +10624,25 @@ int compareDI(const void *a, const void *b)
     DI *A = (DI*)a;
     DI *B = (DI*)b;
     if (A->d < B->d)
-        return(-1);
-    else if (A->d > B->d)
-        return(1);
-    else if (A->i < B->i)
-        return(-1);
-    else if (A->i > B->i)
-        return(1);
-    else 
-        return(0); // cannot occur
+        return (-1);
+    if (A->d > B->d)
+        return (1);
+    if (A->i < B->i)
+        return (1);
+    return (-1);
 }
 
-
+/*
+**  Sort the double array rarray into ascending value sequence
+**  returning an index array of the sorted result.  This function
+**  is thread-safe.
+*/
 void
 gsw_util_sort_real(double *rarray, int nx, int *iarray)
 {
 	int	i;
         DI* di = (DI*)malloc(nx*sizeof(DI));
-        for (i = 0; i < nx; i++) {
+        for (i=0; i<nx; i++) {
             di[i].d = rarray[i];
             di[i].i = i;
         }

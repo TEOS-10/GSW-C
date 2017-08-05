@@ -2,32 +2,22 @@
 pure function gsw_util_sort_real (rarray) result(iarray)
 */
 
-#if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
-         defined __FREEBSD__ || defined __BSD__ || \
-	 defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
-static int
-compare(void *rarray, const void *p1, const void *p2)
-#else
+typedef struct {
+    double d;
+    int i;
+} DI;
 
-extern void qsort_r(void *, size_t, size_t, int (*)(const void *, const void *,
-			void *), void *);
-static int
-compare(const void *p1, const void *p2, void *rarray)
-#endif
+int compareDI(const void *a, const void *b)
 {
-	double	*rdata = rarray;
-	if (rdata[*(int *)p1] < rdata[*(int *)p2])
-	    return (-1);
-	if (rdata[*(int *)p1] > rdata[*(int *)p2])
-	    return (1);
-    /*
-    **  Note that the library functions using this utility
-    **  depend on the fact that for replicate values in rdata
-    **  the indexes are returned in descending sequence.
-    */
-	if (*(int *)p1 < *(int *)p2)
-	    return (1);
-	return (0);
+    DI *A = (DI*)a;
+    DI *B = (DI*)b;
+    if (A->d < B->d)
+        return (-1);
+    if (A->d > B->d)
+        return (1);
+    if (A->i < B->i)
+        return (1);
+    return (-1);
 }
 
 /*
@@ -39,15 +29,13 @@ void
 gsw_util_sort_real(double *rarray, int nx, int *iarray)
 {
 	int	i;
-
+        DI* di = (DI*)malloc(nx*sizeof(DI));
+        for (i=0; i<nx; i++) {
+            di[i].d = rarray[i];
+            di[i].i = i;
+        }
+        qsort(di, nx, sizeof(DI), compareDI);
 	for (i=0; i<nx; i++)
-	    iarray[i] = i;
-#if (defined __APPLE__ || defined __MACH__ || defined __DARWIN__ || \
-         defined __FREEBSD__ || defined __BSD__ )
-	qsort_r(iarray, nx, sizeof (int), (void *)rarray, compare);
-#elif (defined _WIN32 || defined _WIN64 || defined __WINDOWS__)
-	qsort_s(iarray, nx, sizeof (int), compare, (void *)rarray);
-#else
-	qsort_r(iarray, nx, sizeof (int), compare, (void *)rarray);
-#endif
+	    iarray[i] = di[i].i;
+        free(di);
 }
