@@ -10636,10 +10636,8 @@ int compareDI(const void *a, const void *b)
         return(-1);
     else if (A->i > B->i)
         return(1);
-    else {
-        fprintf(stderr, "programming error in compareXI function\n");
-        exit(1);
-    }
+    else 
+        return(0); // cannot occur
 }
 
 
