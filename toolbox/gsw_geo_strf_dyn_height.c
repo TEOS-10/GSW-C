@@ -51,6 +51,7 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	double	dp_min, dp_max, p_min, p_max, max_dp_i,
 		*b, *b_av, *dp, *dp_i, *sa_i=NULL, *ct_i, *p_i=NULL,
 		*geo_strf_dyn_height0;
+	double dh_ref;
 
 /*
 !--------------------------------------------------------------------------
@@ -69,10 +70,11 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	dp_min = 11000.0;
 	dp_max = -11000.0;
 	for (i=0; i<nz-1; i++) {
-	    if ((dp[i] = p[i+1] - p[i]) < dp_min)
-		dp_min = dp[i];
+		dp[i] = p[i+1] - p[i];
+	    if (dp[i] < dp_min)
+		 	dp_min = dp[i];
 	    if (dp[i] > dp_max)
-		dp_max = dp[i];
+			dp_max = dp[i];
 	}
 
 	if (dp_min <= 0.0) {
@@ -94,7 +96,7 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	for (ibottle = 0; ibottle < nz; ibottle++) {
 	    if (p[ibottle] == p_ref) {
 	        ipref = ibottle;
-		break;
+			break;
 	    }
 	}
 	if ((dp_max <= max_dp_i) && (p[0] == 0.0) && (ipref >= 0)) {
@@ -103,27 +105,22 @@ gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
 	    ! & the vertical profile begins at the surface (i.e. at p = 0 dbar)
 	    ! & the profile contains a "bottle" at exactly p_ref.
  	    */
-	    b = malloc(3*nz*sizeof (double));
-	    b_av = b+nz; geo_strf_dyn_height0 = b_av+nz;
+	    b = malloc(nz*sizeof (double));
+	    b_av = malloc((nz-1) * sizeof(double));
 	    for (i=0; i<nz; i++) {
-		b[i] = gsw_specvol_anom_standard(sa[i],ct[i],p[i]);
-		if (i > 0)
-		    b_av[i-1] = 0.5*(b[i] + b[i-1]);
+			b[i] = gsw_specvol_anom_standard(sa[i],ct[i],p[i]);
+		}
+		for (i=0; i<(nz-1); i++) {
+			b_av[i] = 0.5*(b[i+1] + b[i]);
 	    }
-	    /*
-	    ! "geo_strf_dyn_height0" is the dynamic height anomaly with respect
-	    ! to p_ref = 0 (the surface).
-	    */
-	    geo_strf_dyn_height0[0] = 0.0;
+	    dyn_height[0] = 0.0;
 	    for (i=1; i<nz; i++)
-		geo_strf_dyn_height0[i] = b_av[i]*dp[i]*db2pa;
-	    for (i=1; i<nz; i++) /* cumulative sum */
-		geo_strf_dyn_height0[i] = geo_strf_dyn_height0[i-1]
-		                          - geo_strf_dyn_height0[i];
+			dyn_height[i] = dyn_height[i-1] - b_av[i-1]*dp[i-1]*db2pa;
+		dh_ref = dyn_height[ipref];
 	    for (i=0; i<nz; i++)
-		dyn_height[i] = geo_strf_dyn_height0[i]
-				- geo_strf_dyn_height0[ipref];
+			dyn_height[i] -= dh_ref;
 	    free(b);
+		free(b_av);
 	} else {
 	/*
 	! Test if there are vertical gaps between adjacent "bottles" which are
