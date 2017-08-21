@@ -21,6 +21,9 @@ extern "C" {
 #define	GSW_INVALID_VALUE	9e15	/* error return from gsw_saar et al. */
 #define GSW_ERROR_LIMIT		1e10
 
+#define INTERP_METHOD_LINEAR 1
+#define INTERP_METHOD_PCHIP 2
+
 /*
 **  Prototypes:
 */
@@ -112,6 +115,9 @@ extern void   gsw_frazil_ratios_adiabatic_poly(double sa, double p,
 		double *dct_dp_frazil);
 extern double *gsw_geo_strf_dyn_height(double *sa, double *ct, double *p,
 		double p_ref, int n_levels, double *dyn_height);
+extern int gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p,
+				double p_ref, int n_levels, double *dyn_height,
+			    double max_dp_i, int interp_method);
 extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct,
 		double *delta_p, int n_levels, double *geo_strf_dyn_height_pc,
 		double *p_mid);
