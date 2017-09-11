@@ -290,6 +290,8 @@ extern double *gsw_util_linear_interp(int nx, double *x, int ny, double *y,
 		int nxi, double *x_i, double *y_i);
 extern void   gsw_util_sort_real(double *rarray, int nx, int *iarray);
 extern double gsw_util_xinterp1(double *x, double *y, int n, double x0);
+extern int gsw_util_pchip_interp(double *x, double *y, int n,
+	                             double *xi, double *yi, int ni);
 extern double gsw_z_from_p(double p, double lat);
 extern double gsw_p_from_z(double z, double lat);
 
