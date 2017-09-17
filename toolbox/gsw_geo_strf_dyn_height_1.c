@@ -178,7 +178,7 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
         *dh_i;
     double dh_ref;
 
-    if (nz <= 2)
+    if (nz < 2)
         return (1);
 
     dp = malloc((nz-1) * sizeof(double));
