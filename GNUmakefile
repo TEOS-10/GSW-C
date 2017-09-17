@@ -1,6 +1,10 @@
 #  $Id: GNUmakefile,v c61271a7810d 2016/08/19 20:04:03 fdelahoyde $
 #  $Version: 3.05.0-3 $
 #  Makefile for libgswteos-10 on Linux/GNU.
+#
+# To make a debug-build, use:
+#    make DEBUG=1 -f GNUmakefile
+#
 
 .PHONY: all clean install dist new-rpm new-release
 .PHONY: show-release getdocs
@@ -35,14 +39,22 @@
   else
            libdirname:=	lib
   endif
+  		  GCC:=	gcc
+  ifdef DEBUG
+               CFLAGS:=	-O0 -g -Wall
+  else
                CFLAGS:=	-O3 -Wall
+  endif
             CINCLUDES:=
               Library:=	libgswteos-10.so
            LibVersion:=	$(shell echo $(STSVersion) | \
 			awk -F . '{printf "%s.%s\n",$$1,$$2}')
-              Program:=	gsw_check
-      $(Program)_SRCS:=	gsw_check_functions.c
-      $(Program)_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./
+	     Program1:=	gsw_check
+     $(Program1)_SRCS:=	gsw_check_functions.c
+	 Program_LIBS:=	-L. -lgswteos-10 -lm -Wl,-rpath,./
+             Program2:=	test_strf_1
+     $(Program2)_SRCS:=	test_strf_1.c
+
       $(Library)_SRCS:=	gsw_oceanographic_toolbox.c \
 			gsw_saar.c
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
@@ -66,20 +78,24 @@
               ZIPLINK:=	gsw_c_v$(shell echo $(STSVersion) | \
 				sed -e 's/\.[^.]*$$//')
 
-all:	$(Library) $(Program)
+all:	$(Library) $(Program1) $(Program2)
 
-$(Program):	$($(Program)_SRCS) gsw_check_data.c
-	gcc $(CFLAGS) $(CINCLUDES) -o $(Program) $($(Program)_SRCS) \
-		$($(Program)_LIBS)
+$(Program1):	$(Program1_SRCS) $(Library)
+	$(GCC) $(CFLAGS) $(CINCLUDES) -o $(Program1) $($(Program1)_SRCS) \
+		$(Program_LIBS)
+
+$(Program2):	$(Program2_SRCS) $(Library)
+	$(GCC) $(CFLAGS) $(CINCLUDES) -o $(Program2) $($(Program2)_SRCS) \
+		$(Program_LIBS)
 
 gsw_oceanographic_toolbox.c:	gsw_oceanographic_toolbox-head $(Toolbox_SRCS)
 	sed -e 's/@RELEASE@/$(STSRelease)/' \
 		gsw_oceanographic_toolbox-head >$@
 	cat $(Toolbox_SRCS) >>$@
 
-$(Library):	$($(Library)_SRCS) gsw_saar_data.c
-	gcc -fPIC -c $(CFLAGS) $(CINCLUDES) $($(Library)_SRCS)
-	gcc -shared -o $(Library).$(LibVersion) $($(Library)_OBJS) -lm
+$(Library):	$($(Library)_SRCS) gsw_saar_data.c $(INCLUDES)
+	$(GCC) -fPIC -c $(CFLAGS) $(CINCLUDES) $($(Library)_SRCS)
+	$(GCC) -shared -o $(Library).$(LibVersion) $($(Library)_OBJS) -lm
 	rm -f $(Library)
 	ln -s $(Library).$(LibVersion) $(Library)
 

@@ -5,9 +5,13 @@ Manifest:
 GNUmakefile			-- GNU make makefile used to manage the building
 				   and maintenance of the gsw_c_v3.05.zip file on
 				   teos-10.org, as well as RPMs for RedHat Linux
-				   systems.
+				   systems.  Unlike Makefile, it builds the library source,
+				   gsw_oceanographic_toolbox.c from the files in the toolbox
+				   subdirectory.  It can also build with debug settings.  See
+				   below.
 gsw_check_data.c		-- static check data used by
 				   gsw_ check functions.c
+test_strf_1.c      -- A simple function for testing gsw_geo_strf_dyn_height_1.c.
 gsw_check_functions.c		-- C implementation of the check functions used
 				   to validate the correct building of the GSW-C
 				   Oceanographic Toolbox.
@@ -53,6 +57,8 @@ major purposes:
     * To build a zip archive of the distribution suitable for TEOS-10.org; and
     * To set up a versioned source distribution suitable for building source
       and binary RPMs on RedHat-like Linux systems.
+	* To build for debugging, include "DEBUG=1" as an argument to make, e.g.,
+	  "make DEBUG=1 -f GNUmakefile".
 
 Please note that the current distribution on teos-10.org
 (http://teos-10.org/software/gsw_c_v3.05.zip) is a subset of this github
