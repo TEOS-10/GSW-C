@@ -40,16 +40,10 @@ make_saar_data.py		-- Utility to generate gsw_saar_data.c from
 README				-- The README file distributed with the
 				   teos-10.org distribution.
 README-developer		-- This file.
-toolbox				-- The actual source for GSW-C.
-				   gsw_oceanographic_toolbox.c is generated from
-				   the contents of this directory by the
-				   supplied GNUmakefile.
 
-The file GNUmakefile is supplied for use on Linux/GNU systems. It has three
+The file GNUmakefile is supplied for use on Linux/GNU systems. It has two
 major purposes:
 
-    * To rebuild gsw_oceanographic_toolbox.c from toolbox/*.c in the event of a
-      change;
     * To build a zip archive of the distribution suitable for TEOS-10.org; and
     * To set up a versioned source distribution suitable for building source
       and binary RPMs on RedHat-like Linux systems.

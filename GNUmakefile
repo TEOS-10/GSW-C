@@ -48,8 +48,6 @@
       $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
 			gsw_saar.o
            GSW_3_DATA:=	gsw_data_v3_0.nc
-         Toolbox_SRCS:=	$(sort $(wildcard toolbox/*.c)) \
-			gsw_oceanographic_toolbox-tail
              INCLUDES:=	gswteos-10.h
               DESTDIR:=	/usr
            DESTBINDIR:=	$(DESTDIR)/bin
@@ -71,11 +69,6 @@ all:	$(Library) $(Program)
 $(Program):	$($(Program)_SRCS) gsw_check_data.c
 	gcc $(CFLAGS) $(CINCLUDES) -o $(Program) $($(Program)_SRCS) \
 		$($(Program)_LIBS)
-
-gsw_oceanographic_toolbox.c:	gsw_oceanographic_toolbox-head $(Toolbox_SRCS)
-	sed -e 's/@RELEASE@/$(STSRelease)/' \
-		gsw_oceanographic_toolbox-head >$@
-	cat $(Toolbox_SRCS) >>$@
 
 $(Library):	$($(Library)_SRCS) gsw_saar_data.c
 	gcc -fPIC -c $(CFLAGS) $(CINCLUDES) $($(Library)_SRCS)
