@@ -1,7 +1,7 @@
 
 /*
 **  $Id$
-**  Extracted from gsw_data_v3_0.ncxxi
+**  Extracted from gsw_data_v3_0.nc
 */
 
 /*

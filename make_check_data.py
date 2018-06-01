@@ -10,78 +10,34 @@ library is used.  So we simply generate static data from the netcdf file that
 the C-gsw library uses directly.
 """
 import math, os, sys
+import textwrap
 from netCDF4 import Dataset
 
-nan = 9e90
+import numpy as np
 
-def write_variable_ca(var_name, v):
+gsw_nan = 9e90
+maxlen = 79
+
+nc_filename = 'gsw_data_v3_0.nc'
+
+def write_variable_ca(out, var_name, v):
     val = v.computation_accuracy
     if math.isnan(val):
-        val = nan
+        val = gsw_nan
     out.write("#define\t%s\t%.17g\n\n" %
                      (var_name+'_ca', val))
 
-def write_variable(var_name, dims, v):
-    length = dims[0]
-    for d in dims[1:]:
-        length *= d
-    ndims = len(dims)
+
+def write_variable(out, var_name, v):
+    arr = np.ma.masked_invalid(v[:]).filled(gsw_nan)
+    length = arr.size
     out.write("static UNUSED double	%s[%d] = {\n" % (var_name, length))
-    buf = ""
-    maxlen = 80
-    if ndims == 1:
-        lastx = dims[0]-1
-#
-#       The following construct (and variations below) transfer the
-#       netcdf variable into a memory-resident buffer all at once.
-#       Anything else is not advised.
-#
-        vv = v[:]
-        for val, x in [(vv[cx],cx) for cx in range(dims[0])]:
-            if math.isnan(val):
-                val = nan
-            sval = "%.17g" % val
-            if x != lastx:
-                sval += ", "
-            if len(buf)+len(sval) > maxlen:
-                out.write(buf.rstrip()+"\n")
-                buf = ""
-            buf += sval
-    elif ndims == 2:
-        lastx = dims[0]-1
-        lasty = dims[1]-1
-        vv = v[:][:]
-        for x in range(dims[0]):
-            for val,y in [(vv[x][cy],cy) for cy in range(dims[1])]:
-                if math.isnan(val):
-                    val = nan
-                sval = "%.17g" % val
-                if x != lastx or y != lasty:
-                    sval += ", "
-                if len(buf)+len(sval) > maxlen:
-                    out.write(buf.rstrip()+"\n")
-                    buf = ""
-                buf += sval
-    else:
-        lastx = dims[0]-1
-        lasty = dims[1]-1
-        lastz = dims[2]-1
-        vv = v[:][:][:]
-        for x in range(dims[0]):
-            for y in range(dims[1]):
-                for val,z in [(vv[x][y][cz],cz) for cz in range(dims[2])]:
-                    if math.isnan(val):
-                        val = nan
-                    sval = "%.17g" % val
-                    if x != lastx or y != lasty or z != lastz:
-                        sval += ", "
-                    if len(buf)+len(sval) > maxlen:
-                        out.write(buf.rstrip()+"\n")
-                        buf = ""
-                    buf += sval
-    if buf:
-        out.write(buf.rstrip()+"\n")
-    out.write("};\n\n")
+
+    vals = ', '.join(["%.17g" % x for x in arr.flat])
+    out.write(textwrap.fill(vals, maxlen))
+    out.write("\n};\n\n")
+
+
 
 work_dims = [
     ["cast_m", "test_cast_length"],
@@ -334,23 +290,22 @@ vars = [
     ['seaice_fraction_to_freeze_seawater_CT_freeze', ""],
     ['seaice_fraction_to_freeze_seawater_w_Ih', ""]
 ]
-rootgrp = Dataset('gsw_data_v3_0.nc', 'r')
+rootgrp = Dataset(nc_filename, 'r')
 v=rootgrp.variables
 d=rootgrp.dimensions
 
 version_date = rootgrp.version_date
 version_number = rootgrp.version_number
-try:
-    fd = os.open("gsw_check_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0o644)
-except:
-    print(sys.exc_info()[1])
-    print("Will not overwrite gsw_check_data.c. Exiting.")
+fname = "gsw_check_data.c"
+if os.path.exists(fname):
+    print("Will not overwrite existing gsw_check_data.c. Exiting.")
     sys.exit(1)
-out = os.fdopen(fd, "w")
+
+out = open(fname, "w")
 out.write("""
 /*
 **  $Id$
-**  Extracted from gsw_data_v3_0.ncxxi
+**  Extracted from %s
 */
 
 /*
@@ -363,7 +318,7 @@ out.write("""
 #define UNUSED
 #endif
 
-""")
+""" % nc_filename)
 
 for dim_label, dim_name in [dim for dim in work_dims]:
     if not dim_name:
@@ -375,14 +330,15 @@ for var_label, var_name in [var for var in work_vars]:
     if not var_name:
         var_name = var_label
     dims = [len(d[dname]) for dname in v[var_name].dimensions]
-    write_variable(var_label.lower(), dims, v[var_name])
+    write_variable(out, var_label.lower(), v[var_name])
 
 for var_label, var_name in [var for var in vars]:
     if not var_name:
         var_name = var_label
     dims = [len(d[dname]) for dname in v[var_name].dimensions]
-    write_variable(var_label.lower(), dims, v[var_name])
-    write_variable_ca(var_label.lower(), v[var_name])
+    write_variable(out, var_label.lower(), v[var_name])
+    write_variable_ca(out, var_label.lower(), v[var_name])
 
 out.close()
+os.chmod(fname, 0o644)
 sys.exit(0)
