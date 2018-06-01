@@ -44,7 +44,7 @@ def write_variable(var_name, dims, v):
             if x != lastx:
                 sval += ", "
             if len(buf)+len(sval) > maxlen:
-                out.write(buf+"\n")
+                out.write(buf.rstrip()+"\n")
                 buf = ""
             buf += sval
     elif ndims == 2:
@@ -59,7 +59,7 @@ def write_variable(var_name, dims, v):
                 if x != lastx or y != lasty:
                     sval += ", "
                 if len(buf)+len(sval) > maxlen:
-                    out.write(buf+"\n")
+                    out.write(buf.rstrip()+"\n")
                     buf = ""
                 buf += sval
     else:
@@ -76,11 +76,11 @@ def write_variable(var_name, dims, v):
                     if x != lastx or y != lasty or z != lastz:
                         sval += ", "
                     if len(buf)+len(sval) > maxlen:
-                        out.write(buf+"\n")
+                        out.write(buf.rstrip()+"\n")
                         buf = ""
                     buf += sval
     if buf:
-        out.write(buf+"\n")
+        out.write(buf.rstrip()+"\n")
     out.write("};\n\n")
 
 work_dims = [
@@ -138,6 +138,7 @@ vars = [
     ['pt0_from_t', ""],
     ['pt_from_t', ""],
     ['z_from_p', ""],
+    ['p_from_z', ""],
     ['entropy_from_pt', ""],
     ['pt_from_entropy', ""],
     ['CT_from_entropy', ""],
@@ -340,10 +341,10 @@ d=rootgrp.dimensions
 version_date = rootgrp.version_date
 version_number = rootgrp.version_number
 try:
-    fd = os.open("gsw_check_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0644)
+    fd = os.open("gsw_check_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0o644)
 except:
-    print str(sys.exc_info()[1])
-    print "Will not overwrite gsw_check_data.c. Exiting."
+    print(sys.exc_info()[1])
+    print("Will not overwrite gsw_check_data.c. Exiting.")
     sys.exit(1)
 out = os.fdopen(fd, "w")
 out.write("""

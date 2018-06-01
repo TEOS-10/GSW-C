@@ -88,10 +88,10 @@ vars = [["p_ref", "", [nz]], ["lats_ref", "", [ny]], ["longs_ref", "", [nx]],
         ["saar_ref", "SAAR_ref", [nx,ny,nz]],
         ["delta_sa_ref", "deltaSA_ref", [nx,ny,nz]],["ndepth_ref", "", [nx,ny]]]
 try:
-    fd = os.open("gsw_saar_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0644)
+    fd = os.open("gsw_saar_data.c", os.O_CREAT|os.O_EXCL|os.O_RDWR, 0o644)
 except:
-    print str(sys.exc_info()[1])
-    print "Will not overwrite gsw_check_data.c. Exiting."
+    print(sys.exc_info()[1])
+    print("Will not overwrite gsw_check_data.c. Exiting.")
     sys.exit(1)
 out = os.fdopen(fd, "w")
 out.write("/*\n**  $Id$\n**  Extracted from gsw_data_v3_0.nc\n*/\n")
