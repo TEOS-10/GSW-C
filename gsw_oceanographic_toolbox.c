@@ -3630,7 +3630,12 @@ gsw_frazil_ratios_adiabatic_poly(double sa, double p, double w_ih,
         *dsa_dp_frazil = sa*ctf_p*bracket1*rec_bracket3;
         *dct_dp_frazil = ctf_p*bracket2*rec_bracket3;
 }
+
 /*
+
+    ** The following function is buggy; users are advised to use
+    ** gsw_geo_strf_dyn_height_1 instead.
+
 !==========================================================================
 pure function gsw_geo_strf_dyn_height (sa, ct, p, p_ref)
 !==========================================================================
@@ -3941,8 +3946,9 @@ p_sequence(double p1, double p2, double max_dp_i, double *pseq, int *nps)
 
 }
 /*
-This is a replacement for gsw_geo_strf_dyn_height, with a different
-signature and interpolation algorithms.
+    ** This is a replacement for gsw_geo_strf_dyn_height, with a different
+    ** signature and interpolation algorithms.
+
 !==========================================================================
 int   (returns nonzero on error, 0 if OK)
 gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
@@ -3995,15 +4001,21 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
         3) All original p points are included.
         4) The value p_ref is included.
 
-    This function allocates memory; it is
-    the responsibility of subsequent code to free this memory.
+    Arguments:
+        p : the original grid array
+        p_ref : scalar reference pressure
+        nz : size of p
+        dp : target p interval for the output
+        p_i : an array to hold the regridded pressures
+        ni_max : size of p_i
+        p_indices : an array of size nz
+        p_ref_ind_ptr : pointer to an integer
 
-    In addition to the new p_i grid, the function returns the array
-    of indices (p_indices)
-    of the original p grid points in p_i, and a pointer to
-    the index of p_ref within p_i.
+    The function fills as much of p_i as it needs.  It returns with
+    the array of indices (p_indices) of the original p grid points in
+    p_i, and with a pointer to the index of p_ref within p_i.
 
-    Its return argument is the number of elements in p_i.
+    Its return argument is the number of elements used in p_i, or -1 on error.
 */
 static int refine_grid_for_dh(double *p, double p_ref, int nz,
     double dp,
@@ -4018,53 +4030,44 @@ static int refine_grid_for_dh(double *p, double p_ref, int nz,
     p_i[0] = p[0];
     p_indices[0] = 0;
     *p_ref_ind_ptr = -1;  /* initialize to a flag value */
-    if (p_ref <= p[0] + p_tol)
-    {
+    if (p_ref <= p[0] + p_tol) {
         *p_ref_ind_ptr = 0;
     }
-    for (i=1, iuniform=1, iorig=1; i<ni_max && iorig<nz; i++)
-    {
+    for (i=1, iuniform=1, iorig=1; i<ni_max && iorig<nz; i++) {
         /* Candidate insertion based on uniform grid: */
         p_next = p[0] + dp * iuniform;
 
         /* See if we need to insert p_ref: */
-        if (*p_ref_ind_ptr == -1 && p_ref <= p_next && p_ref <= p[iorig])
-        {
+        if (*p_ref_ind_ptr == -1 && p_ref <= p_next && p_ref <= p[iorig]) {
             p_i[i] = p_ref;
             *p_ref_ind_ptr = i;
-            if (p_ref == p[iorig])
-            {
+            if (p_ref == p[iorig]) {
                 p_indices[iorig] = i;
                 iorig++;
             }
-            if (p_ref > p_next - p_tol)
-            {
+            if (p_ref > p_next - p_tol) {
                 iuniform++;
             }
             continue;
         }
 
         /* We did not insert p_ref, so insert either p_next or p[iorig]. */
-        if (p_next < p[iorig] - p_tol)
-        {
+        if (p_next < p[iorig] - p_tol) {
             p_i[i] = p_next;
             iuniform++;
         }
-        else
-        {
+        else {
             p_i[i] = p[iorig];
             p_indices[iorig] = i;
             /* Skip this p_next if it is close to the point we just added. */
-            if (p_next < p[iorig] + p_tol)
-            {
+            if (p_next < p[iorig] + p_tol) {
                 iuniform++;
             }
             iorig++;
         }
     }
 
-    if (i == ni_max)
-    {
+    if (i == ni_max) {
         return (-1);  /* error! */
     }
     return (i);  /* number of elements in p_i */
@@ -4087,16 +4090,13 @@ static int linear_interp_SA_CT_for_dh(double *sa, double *ct, double *p, int nz,
     ct_i[0] = ct[0];
     ct_i[n_i-1] = ct[nz-1];
     i = 1;
-    for (ii=1; ii<n_i-1; ii++)
-    {
+    for (ii=1; ii<n_i-1; ii++) {
         /* Find the second point of the pair in the original grid that
            bracket the target.
         */
-        while (p[i] < p_i[ii])
-        {
+        while (p[i] < p_i[ii]) {
             i++;
-            if (i == nz)
-            {
+            if (i == nz) {
                 return -1;  /* error! */
             }
         }
@@ -4126,15 +4126,12 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
     dp = (double *)malloc((nz-1) * sizeof(double));
     dp_min = 11000.0;
     dp_max = -11000.0;
-    for (i=0; i<nz-1; i++)
-    {
+    for (i=0; i<nz-1; i++) {
         dp[i] = p[i+1] - p[i];
-        if (dp[i] < dp_min)
-        {
+        if (dp[i] < dp_min) {
              dp_min = dp[i];
-         }
-        if (dp[i] > dp_max)
-        {
+        }
+        if (dp[i] > dp_max) {
             dp_max = dp[i];
         }
     }
@@ -4155,10 +4152,8 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
 
     /* Determine if there is a sample at exactly p_ref */
     ipref = -1;
-    for (i = 0; i < nz; i++)
-    {
-        if (p[i] == p_ref)
-        {
+    for (i = 0; i < nz; i++) {
+        if (p[i] == p_ref) {
             ipref = i;
             break;
         }
@@ -4180,14 +4175,12 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
         /* First calculate dynamic height relative to the first (shallowest)
            depth. */
         dyn_height[0] = 0.0;
-        for (i=1; i<nz; i++)
-        {
+        for (i=1; i<nz; i++) {
             dyn_height[i] = dyn_height[i-1] - b_av[i-1]*dp[i-1]*db2pa;
         }
         /* Then subtract out the value at the reference pressure. */
         dh_ref = dyn_height[ipref];
-        for (i=0; i<nz; i++)
-        {
+        for (i=0; i<nz; i++) {
             dyn_height[i] -= dh_ref;
         }
         free(b);
@@ -4217,8 +4210,7 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
                              p_i, ni_max,
                              p_indices, &ipref);
     /* Reminder: if successful, this allocated p_i and p_indices. */
-    if (n_i == -1)
-    {
+    if (n_i == -1) {
         free(p_i);
         free(p_indices);
         return (4);
@@ -4227,25 +4219,21 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
     ct_i = (double *)malloc(n_i * sizeof(double));
     sa_i = (double *)malloc(n_i * sizeof(double));
 
-    if (interp_method == INTERP_METHOD_LINEAR)
-    {
+    if (interp_method == INTERP_METHOD_LINEAR) {
         err = linear_interp_SA_CT_for_dh(sa, ct, p, nz,
                                          p_i, n_i,
                                          sa_i, ct_i);
         if (err) err = 5;
     }
-    else if (interp_method == INTERP_METHOD_PCHIP)
-    {
+    else if (interp_method == INTERP_METHOD_PCHIP) {
         err = gsw_util_pchip_interp(p, sa, nz, p_i, sa_i, n_i);
         err = err || gsw_util_pchip_interp(p, ct, nz, p_i, ct_i, n_i);
         if (err) err = 6;
     }
-    else
-    {
+    else {
         err = 7;
     }
-    if (err)
-    {
+    if (err) {
         free(p_i);
         free(p_indices);
         free(ct_i);
@@ -4258,15 +4246,13 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
     b = (double *)malloc(n_i*sizeof (double));
     b_av = (double *)malloc((n_i-1) * sizeof(double));
 
-    for (i=0; i<n_i; i++)
-    {
+    for (i=0; i<n_i; i++) {
         b[i] = gsw_specvol_anom_standard(sa_i[i], ct_i[i], p_i[i]);
     }
     free(ct_i);
     free(sa_i);
 
-    for (i=0; i<(n_i-1); i++)
-    {
+    for (i=0; i<(n_i-1); i++) {
         b_av[i] = 0.5*(b[i+1] + b[i]);
         dp[i] = p_i[i+1] - p_i[i];
     }
@@ -4274,8 +4260,7 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
     /* First calculate dynamic height relative to the first (shallowest)
        depth. */
     dh_i[0] = 0.0;
-    for (i=1; i<n_i; i++)
-    {
+    for (i=1; i<n_i; i++) {
         dh_i[i] = dh_i[i-1] - b_av[i-1]*dp[i-1]*db2pa;
     }
     free(b);
@@ -4284,8 +4269,7 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
 
     dh_ref = dh_i[ipref];
 
-    for (i=0; i<nz; i++)
-    {
+    for (i=0; i<nz; i++) {
         dyn_height[i] = dh_i[p_indices[i]] - dh_ref;
     }
     free(p_indices);
