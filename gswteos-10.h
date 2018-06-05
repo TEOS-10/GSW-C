@@ -174,6 +174,8 @@ extern double gsw_melting_seaice_sa_ct_ratio_poly(double sa, double ct,
                 double p, double sa_seaice, double t_seaice);
 extern void   gsw_nsquared(double *sa, double *ct, double *p, double *lat,
                 int nz, double *n2, double *p_mid);
+extern double gsw_o2sol(double sa, double ct, double p, double lon, double lat);
+extern double gsw_o2sol_sp_pt(double sp, double pt);
 extern double gsw_pot_enthalpy_from_pt_ice(double pt0_ice);
 extern double gsw_pot_enthalpy_from_pt_ice_poly(double pt0_ice);
 extern double gsw_pot_enthalpy_ice_freezing(double sa, double p);
