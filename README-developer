@@ -75,3 +75,11 @@ Code style for C should be generally consistent with the existing code
 with respect to brackets and indentation, with the proviso that new
 code should use 4-space indentation.  There should be no trailing
 whitespace, and no tab characters.
+
+Originally, gsw_oceanographic_toolbox.c was assembled by a script from
+individual files for each exported function, and the files were sorted
+alphabetically.  When adding new exported functions, please insert them
+alphabetically so as to maintain this (arbitrary) convention.  Support
+functions, declared as "static", should be kept together with the
+exported functions in which they are used, so they typically will not
+be in alphabetic order.
