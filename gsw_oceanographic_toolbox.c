@@ -6396,8 +6396,8 @@ function gsw_o2sol(sa, ct, p, lon, lat)
 !
 ! Calculates the oxygen concentration expected at equilibrium with air at
 ! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including 
-! saturated water vapor.  This function uses the solubility coefficients 
-! derived from the data of Benson and Krause (1984), as fitted by Garcia 
+! saturated water vapor.  This function uses the solubility coefficients
+! derived from the data of Benson and Krause (1984), as fitted by Garcia
 ! and Gordon (1992, 1993).
 !
 ! Note that this algorithm has not been approved by IOC and is not work 
@@ -6416,34 +6416,34 @@ function gsw_o2sol(sa, ct, p, lon, lat)
 double
 gsw_o2sol(double sa, double ct, double p, double lon, double lat)
 {
-  GSW_TEOS10_CONSTANTS;
-  double sp, pt, pt68, x, y, o2sol,
-         a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, c0;
+    GSW_TEOS10_CONSTANTS;
+    double sp, pt, pt68, x, y, o2sol,
+           a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, c0;
 
-  sp = gsw_sp_from_sa(sa, p, lon, lat);
-  x = sp;
-  pt = gsw_pt_from_ct(sa, ct);
+    sp = gsw_sp_from_sa(sa, p, lon, lat);
+    x = sp;
+    pt = gsw_pt_from_ct(sa, ct);
 
-  pt68 = pt*1.00024;
+    pt68 = pt*1.00024;
 
-  y = log((298.15 - pt68)/(gsw_t0 + pt68));
+    y = log((298.15 - pt68)/(gsw_t0 + pt68));
 
-  a0 =  5.80871; 
-  a1 =  3.20291;
-  a2 =  4.17887;
-  a3 =  5.10006;
-  a4 = -9.86643e-2;
-  a5 =  3.80369;
-  b0 = -7.01577e-3;
-  b1 = -7.70028e-3;
-  b2 = -1.13864e-2;
-  b3 = -9.51519e-3;
-  c0 = -2.75915e-7;
+    a0 =  5.80871;
+    a1 =  3.20291;
+    a2 =  4.17887;
+    a3 =  5.10006;
+    a4 = -9.86643e-2;
+    a5 =  3.80369;
+    b0 = -7.01577e-3;
+    b1 = -7.70028e-3;
+    b2 = -1.13864e-2;
+    b3 = -9.51519e-3;
+    c0 = -2.75915e-7;
 
-  o2sol = exp(a0 + y*(a1 + y*(a2 + y*(a3 + y*(a4 + a5*y))))
-                + x*(b0 + y*(b1 + y*(b2 + b3*y)) + c0*x));
+    o2sol = exp(a0 + y*(a1 + y*(a2 + y*(a3 + y*(a4 + a5*y))))
+                  + x*(b0 + y*(b1 + y*(b2 + b3*y)) + c0*x));
 
-  return o2sol;
+    return o2sol;
 
 }
 /*
@@ -6453,8 +6453,8 @@ function gsw_o2sol_sp_pt(sp, pt)
 !
 ! Calculates the oxygen concentration expected at equilibrium with air at
 ! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including 
-! saturated water vapor.  This function uses the solubility coefficients 
-! derived from the data of Benson and Krause (1984), as fitted by Garcia 
+! saturated water vapor.  This function uses the solubility coefficients
+! derived from the data of Benson and Krause (1984), as fitted by Garcia
 ! and Gordon (1992, 1993).
 !
 ! Note that this algorithm has not been approved by IOC and is not work 
@@ -6470,32 +6470,32 @@ function gsw_o2sol_sp_pt(sp, pt)
 double
 gsw_o2sol_sp_pt(double sp, double pt)
 {
-  GSW_TEOS10_CONSTANTS;
-  double pt68, x, y, o2sol,
-         a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, c0;
+    GSW_TEOS10_CONSTANTS;
+    double pt68, x, y, o2sol,
+           a0, a1, a2, a3, a4, a5, b0, b1, b2, b3, c0;
 
-  x = sp;
+    x = sp;
 
-  pt68 = pt*1.00024;
+    pt68 = pt*1.00024;
 
-  y = log((298.15 - pt68)/(gsw_t0 + pt68));
+    y = log((298.15 - pt68)/(gsw_t0 + pt68));
 
-  a0 =  5.80871; 
-  a1 =  3.20291;
-  a2 =  4.17887;
-  a3 =  5.10006;
-  a4 = -9.86643e-2;
-  a5 =  3.80369;
-  b0 = -7.01577e-3;
-  b1 = -7.70028e-3;
-  b2 = -1.13864e-2;
-  b3 = -9.51519e-3;
-  c0 = -2.75915e-7;
+    a0 =  5.80871;
+    a1 =  3.20291;
+    a2 =  4.17887;
+    a3 =  5.10006;
+    a4 = -9.86643e-2;
+    a5 =  3.80369;
+    b0 = -7.01577e-3;
+    b1 = -7.70028e-3;
+    b2 = -1.13864e-2;
+    b3 = -9.51519e-3;
+    c0 = -2.75915e-7;
 
-  o2sol = exp(a0 + y*(a1 + y*(a2 + y*(a3 + y*(a4 + a5*y))))
-                + x*(b0 + y*(b1 + y*(b2 + b3*y)) + c0*x));
+    o2sol = exp(a0 + y*(a1 + y*(a2 + y*(a3 + y*(a4 + a5*y))))
+                  + x*(b0 + y*(b1 + y*(b2 + b3*y)) + c0*x));
 
-  return o2sol;
+    return o2sol;
 
 }
 /*
