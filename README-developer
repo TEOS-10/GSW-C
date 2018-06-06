@@ -4,47 +4,47 @@ gives instructions for contributors.
 Files for users
 ===============
 
-README					-- The README file distributed with the
-				   			teos-10.org distribution.
-LICENSE					-- GSW C software license.
-Makefile				-- makefile supplied in the teos-10.org
-				   			distribution.
-gswteos-10.h			-- GSW function prototype definitions
-gsw_internal_const.h	-- Common parameters used to compile the GSW-C
-				   			library.
+README                  -- The README file distributed with the
+                            teos-10.org distribution.
+LICENSE                 -- GSW C software license.
+Makefile                -- makefile supplied in the teos-10.org
+                            distribution.
+gswteos-10.h            -- GSW function prototype definitions
+gsw_internal_const.h    -- Common parameters used to compile the GSW-C
+                            library.
 gsw_oceanographic_toolbox.c
-						-- The distribution source code for the GSW-C
-				   			library less gsw_saar.
-gsw_saar.c			   	-- gsw_saar and gsw_deltasa_atlas (modified).
-gsw_saar_data.c			-- static global absolute salinity anomaly data
-				   			used by gsw_saar.c
-gsw_check_data.c		-- static check data used by gsw_ check functions.c
-gsw_check_functions.c	-- C implementation of the check functions used
-				   			to validate the correct building of the GSW-C
-				   			Oceanographic Toolbox.
+                        -- The distribution source code for the GSW-C
+                            library less gsw_saar.
+gsw_saar.c              -- gsw_saar and gsw_deltasa_atlas (modified).
+gsw_saar_data.c         -- static global absolute salinity anomaly data
+                            used by gsw_saar.c
+gsw_check_data.c        -- static check data used by gsw_ check functions.c
+gsw_check_functions.c   -- C implementation of the check functions used
+                            to validate the correct building of the GSW-C
+                            Oceanographic Toolbox.
 
 Files for development
 =====================
 
-README-developer		-- This file.
-GNUmakefile				-- GNU make makefile used to manage the building
-				   			and maintenance of the gsw_c_v3.05.zip file on
-				   			teos-10.org, as well as RPMs for RedHat Linux
-				   			systems.
-gsw_data_v3_0.nc		-- A redundant and hopefully current version of
-				   			the netcdf file hosted on github as
-				   			TEOS-10/datafile. gsw_check_data.c and
-				   			gsw_saar_data.c are generated from this file
-				   			using the supplied utilities
-				   			make_check_data.py and make_saar_data.py.
-make_check_data.py		-- Utility to generate gsw_check_data.c from
-				   			gsw_data_v3_0.nc.
-make_saar_data.py		-- Utility to generate gsw_saar_data.c from
-				   			gsw_data_v3_0.nc.
+README-developer        -- This file.
+GNUmakefile             -- GNU make makefile used to manage the building
+                            and maintenance of the gsw_c_v3.05.zip file on
+                            teos-10.org, as well as RPMs for RedHat Linux
+                            systems.
+gsw_data_v3_0.nc        -- A redundant and hopefully current version of
+                            the netcdf file hosted on github as
+                            TEOS-10/datafile. gsw_check_data.c and
+                            gsw_saar_data.c are generated from this file
+                            using the supplied utilities
+                            make_check_data.py and make_saar_data.py.
+make_check_data.py      -- Utility to generate gsw_check_data.c from
+                            gsw_data_v3_0.nc.
+make_saar_data.py       -- Utility to generate gsw_saar_data.c from
+                            gsw_data_v3_0.nc.
 libgswteos-10.spec.proto
-						-- template used to create libgswteos-10.spec,
-				   			the configuration file for rpmbuild on RedHat
-				   			Linux platforms.
+                        -- template used to create libgswteos-10.spec,
+                            the configuration file for rpmbuild on RedHat
+                            Linux platforms.
 
 
 The file GNUmakefile is supplied for use on Linux/GNU systems. It has two

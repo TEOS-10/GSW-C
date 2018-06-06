@@ -1,5 +1,6 @@
 
 TEOS-10 V3.05 GSW Oceanographic Toolbox in C
+============================================
 
 This is a translation of the original Fortran-90 source code into C.  Unlike
 the Fortran-90 and Matlab versions of the toolbox, functions in the C version
@@ -12,42 +13,45 @@ anomaly and absolute salinity anomaly ratio data. The data are instead
 incorporated into static variables that are used directly.
 
 Manifest:
+---------
 
 LICENSE                         -- GSW C software license
 README                          -- This file.
 gsw_check_functions.c           -- C implementation of the check functions
 gsw_check_data.c                -- static check data used by
-				   gsw_ check functions.c
+                                    gsw_ check functions.c
 gsw_oceanographic_toolbox.c     -- The C GSW library less gsw_saar
 gsw_saar.c                      -- gsw_saar and gsw_deltasa_atlas (modified)
 gsw_saar_data.c                 -- static global absolute salinity anomaly data
-                                   used by gsw_saar.c
+                                    used by gsw_saar.c
 gswteos-10.h                    -- GSW function prototypes
-gsw_internal_const.h		-- Common parameters used to compile the C GSW
-				   library.
+gsw_internal_const.h            -- Common parameters used to compile the C GSW
+                                    library.
 Makefile                        -- basic make file to build gsw_check and
-                                   libgswteos-10.so
+                                    libgswteos-10.so
 
 Usage:
+------
 
 The C GSW Oceanographic Toolbox comes with a testing program, gsw_check.  In the
 directory that the toolbox was unpacked, type:
 
-make
+    make
 
 and it will attempt to build gsw_check with a dynamically-linked GSW library.
 Note that the Makefile assumes that your C compiler is gcc.
 
 If gsw_check builds successfully, run it to test the toolbox:
 
-./gsw_check
+    ./gsw_check
 
 Notes:
+------
 
 C programs using the GSW Oceanographic Toolbox should include the
 supplied header file:
 
-#include <gswteos-10.h>
+    #include <gswteos-10.h>
 
 You'll probably want to build gsw_oceanographic_toolbox.c, and gsw_saar.c
 into a library. "make library" will attempt to build a shared library for
@@ -55,11 +59,11 @@ gcc/GNU Linux platforms.
 
 ChangeLog:
 
-2017-02-23	gsw-3.05.0-3 Bug fix in gsw_geo_strf_dyn_height_pc.
-2016-08-19	gsw-3.05.0-3 upstream changes and minor infrastructure fixes.
-2015-08-26	gsw-3.05.1 added gsw_geo_strf_dyn_height,
-		gsw_geo_strf_dyn_height_pc and support functions.
-2015-08-08	gsw-3.05 many new additions and code reorganization.
+2017-02-23:     gsw-3.05.0-3 Bug fix in gsw_geo_strf_dyn_height_pc.
+2016-08-19:     gsw-3.05.0-3 upstream changes and minor infrastructure fixes.
+2015-08-26:     gsw-3.05.1 added gsw_geo_strf_dyn_height,
+                    gsw_geo_strf_dyn_height_pc and support functions.
+2015-08-08:     gsw-3.05 many new additions and code reorganization.
 2015-04-13:     gsw-3.03 new additions: gsw_spiciness functions.
 2015-01-07:     gsw-3.03 Bug fixes, new additions.
 2014-06-13:     gsw-3.03 Bug fixes, new additions.
