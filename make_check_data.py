@@ -288,7 +288,9 @@ vars = [
     ['melting_seaice_into_seawater_CT_final', ""],
     ['seaice_fraction_to_freeze_seawater_SA_freeze', ""],
     ['seaice_fraction_to_freeze_seawater_CT_freeze', ""],
-    ['seaice_fraction_to_freeze_seawater_w_Ih', ""]
+    ['seaice_fraction_to_freeze_seawater_w_Ih', ""],
+    ['O2sol', ""],
+    ['O2sol_SP_pt', ""],
 ]
 rootgrp = Dataset(nc_filename, 'r')
 v=rootgrp.variables

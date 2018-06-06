@@ -508,6 +508,11 @@ main(int argc, char **argv)
             val2, seaice_fraction_to_freeze_seawater_ct_freeze,
             val3, seaice_fraction_to_freeze_seawater_w_ih);
 
+        section_title("Dissolved Gasses");
+
+        test_func(o2sol, (sa[i],ct[i],p[i],lon[i],lat[i]), value, o2sol);
+        test_func(o2sol_sp_pt, (sp[i],pt[i]), value, o2sol_sp_pt);
+
         if (gsw_error_flag)
             printf("\nYour installation of the Gibbs SeaWater (GSW) "
                 "Oceanographic Toolbox has errors !\n");
