@@ -128,6 +128,7 @@ main(int argc, char **argv)
         test_func(c_from_sp, (sp[i],t[i],p[i]), c,c_from_sp);
         test_func(sp_from_c, (c[i],t[i],p[i]), value,sp_from_c);
         test_func(sp_from_sk, (sk[i]), value,sp_from_sk);
+        test_func(sp_salinometer, (rt[i], t[i]), value,sp_salinometer);
 
         section_title(
           "Absolute Salinity, Preformed Salinity and Conservative Temperature");

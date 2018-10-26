@@ -269,6 +269,7 @@ extern double gsw_sp_from_sa(double sa, double p, double lon, double lat);
 extern double gsw_sp_from_sk(double sk);
 extern double gsw_sp_from_sr(double sr);
 extern double gsw_sp_from_sstar(double sstar, double p,double lon,double lat);
+extern double gsw_sp_salinometer(double rt, double t);
 extern double gsw_spiciness0(double sa, double ct);
 extern double gsw_spiciness1(double sa, double ct);
 extern double gsw_spiciness2(double sa, double ct);
