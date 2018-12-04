@@ -291,6 +291,7 @@ vars = [
     ['seaice_fraction_to_freeze_seawater_w_Ih', ""],
     ['O2sol', ""],
     ['O2sol_SP_pt', ""],
+    ['SP_salinometer', ""],
 ]
 rootgrp = Dataset(nc_filename, 'r')
 v=rootgrp.variables

@@ -9622,6 +9622,66 @@ gsw_sp_from_sstar(double sstar, double p, double lon, double lat)
 }
 /*
 !==========================================================================
+function gsw_sp_salinometer(rt,t)
+!==========================================================================
+!  Calculates Practical Salinity SP from a salinometer, primarily using the 
+!  PSS-78 algorithm.  Note that the PSS-78 algorithm for Practical Salinity
+!  is only valid in the range 2 < SP < 42.  If the PSS-78 algorithm 
+!  produces a Practical Salinity that is less than 2 then the Practical 
+!  Salinity is recalculated with a modified form of the Hill et al. (1986) 
+!  formula.  The modification of the Hill et al. (1986) expression is to 
+!  ensure that it is exactly consistent with PSS-78 at SP = 2. 
+!
+!  A laboratory salinometer has the ratio of conductivities, Rt, as an 
+!  output, and the present function uses this conductivity ratio and the
+!  temperature t of the salinometer bath as the two input variables. 
+!
+!  rt  = C(SP,t_68,0)/C(SP=35,t_68,0)                          [ unitless ]
+!  t   = temperature of the bath of the salinometer,
+!        measured on the ITS-90 scale (ITS-90)                 [ deg C ]
+!
+!  gsw_sp_salinometer = Practical Salinity on the PSS-78 scale [ unitless ]
+*/
+double
+gsw_sp_salinometer(double rt, double t)
+{
+  GSW_SP_COEFFICIENTS;
+  double t68, ft68, rtx, sp, hill_ratio, 
+         x, sqrty, part1, part2, sp_hill_raw;
+
+  if (rt < 0){
+    return NAN;
+  }
+
+  t68 = t*1.00024;
+  ft68 = (t68 - 15)/(1 + k*(t68 - 15));
+
+  rtx = sqrt(rt);
+
+  sp = a0 + (a1 + (a2 + (a3 + (a4 + a5 * rtx) * rtx) * rtx) * rtx) * rtx
+    + ft68 * (b0 + (b1 + (b2+ (b3 + (b4 + b5 * rtx) * rtx) * rtx) * rtx) * rtx);
+
+    /*
+     ! The following section of the code is designed for SP < 2 based on the
+     ! Hill et al. (1986) algorithm.  This algorithm is adjusted so that it is
+     ! exactly equal to the PSS-78 algorithm at SP = 2.
+    */
+
+   if (sp < 2) {
+       hill_ratio  = gsw_hill_ratio_at_sp2(t);
+       x           = 400e0*rt;
+       sqrty       = 10e0*rtx;
+       part1       = 1e0 + x*(1.5e0 + x);
+       part2       = 1e0 + sqrty*(1e0 + sqrty*(1e0 + sqrty));
+       sp_hill_raw = sp - a0/part1 - b0*ft68/part2;
+       sp          = hill_ratio*sp_hill_raw;
+   }
+
+  return sp;
+
+}
+/*
+!==========================================================================
 function gsw_specvol(sa,ct,p)
 !==========================================================================
 !
