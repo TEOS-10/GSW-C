@@ -6510,13 +6510,13 @@ function gsw_p_from_z(z,lat, geo_strf_dyn_height, sea_surface_geopotential)
 ! geo_strf_dyn_height : dynamic height anomaly             [m^2/s^2]
 !    Note that the reference pressure, p_ref, of geo_strf_dyn_height must
 !     be zero (0) dbar.
-! sea_surface_geopotental : geopotential at zero sea pressure  [m^2/s^2]
+! sea_surface_geopotential : geopotential at zero sea pressure  [m^2/s^2]
 !
 ! gsw_p_from_z : pressure                                  [dbar]
 */
 double
 gsw_p_from_z(double z, double lat, double geo_strf_dyn_height,
-             double sea_surface_geopotental)
+             double sea_surface_geopotential)
 {
     GSW_TEOS10_CONSTANTS;
     double sinlat, sin2, gs, c1, p, df_dp, f, p_old, p_mid;
@@ -6535,7 +6535,7 @@ gsw_p_from_z(double z, double lat, double geo_strf_dyn_height,
     df_dp = db2pa*gsw_specvol_sso_0(p); /* initial value of the derivative of f */
 
     f = gsw_enthalpy_sso_0(p) + gs*(z - 0.5*gamma*(z*z))
-        - (geo_strf_dyn_height + sea_surface_geopotental);
+        - (geo_strf_dyn_height + sea_surface_geopotential);
     p_old = p;
     p = p_old - f/df_dp;
     p_mid = 0.5*(p + p_old);
@@ -11385,7 +11385,7 @@ gsw_util_xinterp1(double *x, double *y, int n, double x0)
 }
 /*
 !==========================================================================
-function gsw_z_from_p(p,lat,geo_strf_dyn_height,sea_surface_geopotental)
+function gsw_z_from_p(p,lat,geo_strf_dyn_height,sea_surface_geopotential)
 !==========================================================================
 
 ! Calculates the height z from pressure p
@@ -11395,13 +11395,13 @@ function gsw_z_from_p(p,lat,geo_strf_dyn_height,sea_surface_geopotental)
 ! geo_strf_dyn_height : dynamic height anomaly             [m^2/s^2]
 !    Note that the reference pressure, p_ref, of geo_strf_dyn_height must
 !     be zero (0) dbar.
-! sea_surface_geopotental : geopotential at zero sea pressure  [m^2/s^2]
+! sea_surface_geopotential : geopotential at zero sea pressure  [m^2/s^2]
 !
 ! gsw_z_from_p : height                                    [m]
 */
 double
 gsw_z_from_p(double p, double lat, double geo_strf_dyn_height,
-                double sea_surface_geopotental)
+                double sea_surface_geopotential)
 {
         GSW_TEOS10_CONSTANTS;
         double  x, sin2, b, c, a;
@@ -11411,7 +11411,7 @@ gsw_z_from_p(double p, double lat, double geo_strf_dyn_height,
         b       = 9.780327*(1.0 + (5.2792e-3 + (2.32e-5*sin2))*sin2);
         a       = -0.5*gamma*b;
         c       = gsw_enthalpy_sso_0(p)
-                  - (geo_strf_dyn_height + sea_surface_geopotental);
+                  - (geo_strf_dyn_height + sea_surface_geopotential);
 
         return (-2.0*c/(b + sqrt(b*b - 4.0*a*c)));
 }
