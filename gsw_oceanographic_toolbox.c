@@ -5061,7 +5061,7 @@ gsw_grav(double lat, double p)
         sin2    = x*x;
         gs      = 9.780327*(1.0 + (5.2792e-3 + (2.32e-5*sin2))*sin2);
 
-        z       = gsw_z_from_p(p,lat);
+        z       = gsw_z_from_p(p,lat, 0, 0);
 
         return (gs*(1.0 - gamma*z));    /* z is the height corresponding to p.
                                            Note. In the ocean z is negative. */
@@ -6395,12 +6395,12 @@ function gsw_o2sol(sa, ct, p, lon, lat)
 !==========================================================================
 !
 ! Calculates the oxygen concentration expected at equilibrium with air at
-! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including 
+! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including
 ! saturated water vapor.  This function uses the solubility coefficients
 ! derived from the data of Benson and Krause (1984), as fitted by Garcia
 ! and Gordon (1992, 1993).
 !
-! Note that this algorithm has not been approved by IOC and is not work 
+! Note that this algorithm has not been approved by IOC and is not work
 ! from SCOR/IAPSO Working Group 127. It is included in the GSW
 ! Oceanographic Toolbox as it seems to be oceanographic best practice.
 !
@@ -6452,12 +6452,12 @@ function gsw_o2sol_sp_pt(sp, pt)
 !==========================================================================
 !
 ! Calculates the oxygen concentration expected at equilibrium with air at
-! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including 
+! an Absolute Pressure of 101325 Pa (sea pressure of 0 dbar) including
 ! saturated water vapor.  This function uses the solubility coefficients
 ! derived from the data of Benson and Krause (1984), as fitted by Garcia
 ! and Gordon (1992, 1993).
 !
-! Note that this algorithm has not been approved by IOC and is not work 
+! Note that this algorithm has not been approved by IOC and is not work
 ! from SCOR/IAPSO Working Group 127. It is included in the GSW
 ! Oceanographic Toolbox as it seems to be oceanographic best practice.
 !
@@ -6500,18 +6500,23 @@ gsw_o2sol_sp_pt(double sp, double pt)
 }
 /*
 !==========================================================================
-function gsw_p_from_z(z,lat)
+function gsw_p_from_z(z,lat, geo_strf_dyn_height, sea_surface_geopotential)
 !==========================================================================
 
 ! Calculates the pressure p from height z
 !
 ! z      : height                                          [m]
 ! lat    : latitude                                        [deg]
+! geo_strf_dyn_height : dynamic height anomaly             [m^2/s^2]
+!    Note that the reference pressure, p_ref, of geo_strf_dyn_height must
+!     be zero (0) dbar.
+! sea_surface_geopotential : geopotential at zero sea pressure  [m^2/s^2]
 !
 ! gsw_p_from_z : pressure                                  [dbar]
 */
 double
-gsw_p_from_z(double z, double lat)
+gsw_p_from_z(double z, double lat, double geo_strf_dyn_height,
+             double sea_surface_geopotential)
 {
     GSW_TEOS10_CONSTANTS;
     double sinlat, sin2, gs, c1, p, df_dp, f, p_old, p_mid;
@@ -6529,8 +6534,8 @@ gsw_p_from_z(double z, double lat)
 
     df_dp = db2pa*gsw_specvol_sso_0(p); /* initial value of the derivative of f */
 
-    f = gsw_enthalpy_sso_0(p) + gs*(z - 0.5*gamma*(z*z));
-             /*   - (geo_strf_dyn_height + sea_surface_geopotental); */
+    f = gsw_enthalpy_sso_0(p) + gs*(z - 0.5*gamma*(z*z))
+        - (geo_strf_dyn_height + sea_surface_geopotential);
     p_old = p;
     p = p_old - f/df_dp;
     p_mid = 0.5*(p + p_old);
@@ -9624,17 +9629,17 @@ gsw_sp_from_sstar(double sstar, double p, double lon, double lat)
 !==========================================================================
 function gsw_sp_salinometer(rt,t)
 !==========================================================================
-!  Calculates Practical Salinity SP from a salinometer, primarily using the 
+!  Calculates Practical Salinity SP from a salinometer, primarily using the
 !  PSS-78 algorithm.  Note that the PSS-78 algorithm for Practical Salinity
-!  is only valid in the range 2 < SP < 42.  If the PSS-78 algorithm 
-!  produces a Practical Salinity that is less than 2 then the Practical 
-!  Salinity is recalculated with a modified form of the Hill et al. (1986) 
-!  formula.  The modification of the Hill et al. (1986) expression is to 
-!  ensure that it is exactly consistent with PSS-78 at SP = 2. 
+!  is only valid in the range 2 < SP < 42.  If the PSS-78 algorithm
+!  produces a Practical Salinity that is less than 2 then the Practical
+!  Salinity is recalculated with a modified form of the Hill et al. (1986)
+!  formula.  The modification of the Hill et al. (1986) expression is to
+!  ensure that it is exactly consistent with PSS-78 at SP = 2.
 !
-!  A laboratory salinometer has the ratio of conductivities, Rt, as an 
+!  A laboratory salinometer has the ratio of conductivities, Rt, as an
 !  output, and the present function uses this conductivity ratio and the
-!  temperature t of the salinometer bath as the two input variables. 
+!  temperature t of the salinometer bath as the two input variables.
 !
 !  rt  = C(SP,t_68,0)/C(SP=35,t_68,0)                          [ unitless ]
 !  t   = temperature of the bath of the salinometer,
@@ -9646,7 +9651,7 @@ double
 gsw_sp_salinometer(double rt, double t)
 {
   GSW_SP_COEFFICIENTS;
-  double t68, ft68, rtx, sp, hill_ratio, 
+  double t68, ft68, rtx, sp, hill_ratio,
          x, sqrty, part1, part2, sp_hill_raw;
 
   if (rt < 0){
@@ -11380,18 +11385,23 @@ gsw_util_xinterp1(double *x, double *y, int n, double x0)
 }
 /*
 !==========================================================================
-function gsw_z_from_p(p,lat)
+function gsw_z_from_p(p,lat,geo_strf_dyn_height,sea_surface_geopotential)
 !==========================================================================
 
 ! Calculates the height z from pressure p
 !
 ! p      : sea pressure                                    [dbar]
 ! lat    : latitude                                        [deg]
+! geo_strf_dyn_height : dynamic height anomaly             [m^2/s^2]
+!    Note that the reference pressure, p_ref, of geo_strf_dyn_height must
+!     be zero (0) dbar.
+! sea_surface_geopotential : geopotential at zero sea pressure  [m^2/s^2]
 !
 ! gsw_z_from_p : height                                    [m]
 */
 double
-gsw_z_from_p(double p, double lat)
+gsw_z_from_p(double p, double lat, double geo_strf_dyn_height,
+                double sea_surface_geopotential)
 {
         GSW_TEOS10_CONSTANTS;
         double  x, sin2, b, c, a;
@@ -11400,7 +11410,8 @@ gsw_z_from_p(double p, double lat)
         sin2    = x*x;
         b       = 9.780327*(1.0 + (5.2792e-3 + (2.32e-5*sin2))*sin2);
         a       = -0.5*gamma*b;
-        c       = gsw_enthalpy_sso_0(p);
+        c       = gsw_enthalpy_sso_0(p)
+                  - (geo_strf_dyn_height + sea_surface_geopotential);
 
         return (-2.0*c/(b + sqrt(b*b - 4.0*a*c)));
 }
