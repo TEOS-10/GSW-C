@@ -1,24 +1,54 @@
 #!/usr/bin/env python
 #  $Id$
 """
-Make gsw_check_data.c from the current gsw_data_v3_0.mat.  This is a developer
-utility and not a part of the public distribution, but its end-product is.
-Note that it generates gsw_check_data.c but will not overwrite it if it exists.
-General concept: we don't want end-users of this distribution to require having
-netcdf installed, nor do we want to incur the I/O overhead every time this
-library is used.  So we simply generate static data from the netcdf file that
-the C-gsw library uses directly.
+Make gsw_check_data.c and gsw_saar_data.c from the current gsw_data_v3_0.mat,
+v3_06_11. Existing versions will be overwritten.
+
+Version recording in the mat files is completely unreliable, so we override it.
+
+One function, geo_strf_dyn_height, is in a state of flux; until it is
+completely rewritten to match the matlab v3_06_12 version, and this file
+is rerun with the corresponding matfile, the test will fail.  Using the
+pchip-based version here, the error is:
+
+  Max difference = 0.0030712207345846565, limit = 4.5372335222282345e-07
+  Max diff (rel) = 0.027299449064902257, limit = 4.0330535034756395e-06
+
+With the original algorithm, the mismatch relative to v3_06_11 is larger:
+
+  Max difference = 0.014465517624415725, limit = 4.5372335222282345e-07
+  Max diff (rel) = 0.088538110572418685, limit = 2.7770736845661537e-06
+
+
+This is a developer utility and not a part of the public distribution, but its
+end-product is.
+
 """
 import math, os, sys
 import textwrap
+import numpy as np
 from scipy.io import loadmat
 
-import numpy as np
+
+# Edit the mat_filename as needed, but make sure there is enough path
+# info to show the matlab "version" it comes from.
+mat_filename = '../../gsw_matlab_v3_06_11/library/gsw_data_v3_0.mat'
+check_fname = 'gsw_check_data.c'
+saar_fname = 'gsw_saar_data.c'
+
 
 gsw_nan = 9e90
 maxlen = 79
 
-mat_filename = 'gsw_data_v3_0.mat'
+# # Temporary: get the original values.
+# def get_strf_dyn_height_from_nc():
+#     from netCDF4 import Dataset
+#     d = Dataset('gsw_data_v3_0.nc')
+#     var = d.variables['geo_strf_dyn_height']
+#     dh = var[:]
+#     ca = var.computation_accuracy
+#     return dh, ca
+
 
 def write_variable_ca(out, var_name, val):
     if math.isnan(val):
@@ -28,7 +58,8 @@ def write_variable_ca(out, var_name, val):
 
 
 def write_variable(out, var_name, v):
-    v = np.array(v, dtype=float)
+    v = np.array(v, dtype=float).transpose()
+    # Mat file has (nz, ny, nx); we want (nx, ny, nz).
     arr = np.ma.masked_invalid(v).filled(gsw_nan)
     length = arr.size
     out.write("static UNUSED double	%s[%d] = {\n" % (var_name, length))
@@ -36,7 +67,6 @@ def write_variable(out, var_name, v):
     vals = ', '.join(["%.17g" % x for x in arr.flat])
     out.write(textwrap.fill(vals, maxlen))
     out.write("\n};\n\n")
-
 
 
 work_vars = [
@@ -66,6 +96,7 @@ work_vars = [
     ["h_bulk", "h_bulk"],
     ["pref", "pr"]
 ]
+
 func_vars = [
     ['C_from_SP', ""],
     ['SP_from_C', ""],
@@ -290,23 +321,26 @@ mat = loadmat(mat_filename, squeeze_me=True)
 
 version_date = mat['version_date']
 version_number = mat['version_number']
+mat_zip_version = "3_06_11"
 
-v = dict()
+cv = dict()
 for name in mat['gsw_cv'].dtype.names:
-    v[name] = mat['gsw_cv'][name].item()
+    cv[name] = mat['gsw_cv'][name].item()
+    # if name == 'geo_strf_dyn_height':
+    #     geo_strf, geo_strf_ca = get_strf_dyn_height_from_nc()
+    #     print("replacing ", name, cv[name].shape, geo_strf.shape)
+    #     cv[name] = geo_strf.T  # Transposed to match matlab
+    #     cv[name + '_ca'] = geo_strf_ca
 
-fname = "gsw_check_data_mat.c"
-# if os.path.exists(fname):
-#     print("Will not overwrite existing gsw_check_data.c. Exiting.")
-#     sys.exit(1)
 
-out = open(fname, "w")
+out = open(check_fname, "w")
 out.write(f"""
 /*
 **  $Id$
 **  Extracted from {mat_filename}
 **  version_date: {version_date}
 **  version_number: {version_number}
+**  mat_zip_version: {mat_zip_version}
 */
 
 /*
@@ -321,19 +355,10 @@ out.write(f"""
 
 """)
 
-# work_dims = [
-#     ["cast_m", "test_cast_length"],
-#     ["cast_n", "test_cast_number"],
-#     ["cast_ice_m", "Arctic_test_cast_length"],
-#     ["cast_ice_n", "Arctic_test_cast_number"],
-#     ["cast_mpres_m", "test_cast_midpressure_length"],
-#     ["cast_mpres_n", "test_cast_midpressure_number"]
-# ]
-
 work_dims = dict()
-work_dims["cast_m"], work_dims["cast_n"] = v['p_chck_cast'].shape
-work_dims["cast_ice_m"], work_dims["cast_ice_n"] = v["p_Arctic"].shape
-work_dims["cast_mpres_m"], work_dims["cast_mpres_n"] = v["p_mid_n2"].shape
+work_dims["cast_m"], work_dims["cast_n"] = cv['p_chck_cast'].shape
+work_dims["cast_ice_m"], work_dims["cast_ice_n"] = cv["p_Arctic"].shape
+work_dims["cast_mpres_m"], work_dims["cast_mpres_n"] = cv["p_mid_n2"].shape
 
 for key, val in work_dims.items():
     out.write("#define\t%s\t%d\n" % (key, val))
@@ -342,19 +367,17 @@ out.write("\n")
 for var_label, var_name in work_vars:
     if not var_name:
         var_name = var_label
-    write_variable(out, var_label.lower(), v[var_name])
-    # if 'long' in var_name:
-    #     print("--> ", var_label, var_name, v[var_name])
-    #     write_variable(sys.stdout, var_label.lower(), v[var_name])
+    write_variable(out, var_label.lower(), cv[var_name])
 
 for var_label, var_name in func_vars:
     if not var_name:
         var_name = var_label
-    write_variable(out, var_label.lower(), v[var_name])
-    write_variable_ca(out, var_label.lower(), v[var_name + '_ca'])
+    write_variable(out, var_label.lower(), cv[var_name])
+    write_variable_ca(out, var_label.lower(), cv[var_name + '_ca'])
 
 out.close()
-os.chmod(fname, 0o644)
+os.chmod(check_fname, 0o644)
+
 
 #############   SAAR   ############
 
@@ -364,8 +387,6 @@ saar_vars = [["p_ref", "", [nz]], ["lats_ref", "", [ny]], ["longs_ref", "", [nx]
         ["saar_ref", "SAAR_ref", [nx,ny,nz]],
         ["delta_sa_ref", "deltaSA_ref", [nx,ny,nz]],["ndepth_ref", "", [nx,ny]]]
 
-
-saar_fname = "gsw_saar_data_mat.c"
 
 with open(saar_fname, "w") as out:
     out.write("/*\n**  $Id$\n**  Extracted from %s\n*/\n" % mat_filename)
@@ -383,6 +404,6 @@ with open(saar_fname, "w") as out:
             var_name = var_label
         write_variable(out, var_label, mat[var_name])
 
-os.chmod(fname, 0o644)
+os.chmod(saar_fname, 0o644)
 
 
