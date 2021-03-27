@@ -1701,18 +1701,23 @@ gsw_ct_second_derivatives(double sa, double pt, double *ct_sa_sa,
         double *ct_sa_pt, double *ct_pt_pt)
 {
         double  ct_pt_l, ct_pt_u, ct_sa_l, ct_sa_u, pt_l, pt_u, sa_l, sa_u,
-                dsa = 1e-3, dpt = 1e-2;
+                delta, dsa = 1e-3, dpt = 1e-2;
 
         if ((ct_sa_sa != NULL)) {
 
-            if ((sa_l = sa - dsa) < 0.0)
-                sa_l = 0.0;
             sa_u = sa + dsa;
+            sa_l = sa - dsa;
+            if (sa_l < 0.0) {
+                sa_l = 0.0;
+                delta = sa_u;
+            } else {
+                delta = 2 * dsa;
+            }
 
             gsw_ct_first_derivatives(sa_l,pt,&ct_sa_l,NULL);
             gsw_ct_first_derivatives(sa_u,pt,&ct_sa_u,NULL);
 
-            *ct_sa_sa = (ct_sa_u - ct_sa_l)/(sa_u - sa_l);
+            *ct_sa_sa = (ct_sa_u - ct_sa_l)/delta;
 
         }
 
@@ -1720,28 +1725,29 @@ gsw_ct_second_derivatives(double sa, double pt, double *ct_sa_sa,
 
             pt_l = pt - dpt;
             pt_u = pt + dpt;
+            delta = 2 * dpt;
 
             if ((ct_sa_pt != NULL) && (ct_pt_pt != NULL)) {
 
                 gsw_ct_first_derivatives(sa,pt_l,&ct_sa_l,&ct_pt_l);
                 gsw_ct_first_derivatives(sa,pt_u,&ct_sa_u,&ct_pt_u);
 
-                *ct_sa_pt = (ct_sa_u - ct_sa_l)/(pt_u - pt_l);
-                *ct_pt_pt = (ct_pt_u - ct_pt_l)/(pt_u - pt_l);
+                *ct_sa_pt = (ct_sa_u - ct_sa_l)/delta;
+                *ct_pt_pt = (ct_pt_u - ct_pt_l)/delta;
 
             } else if ((ct_sa_pt != NULL) && (ct_pt_pt == NULL)) {
 
                 gsw_ct_first_derivatives(sa,pt_l,&ct_sa_l,NULL);
                 gsw_ct_first_derivatives(sa,pt_u,&ct_sa_u,NULL);
 
-                *ct_sa_pt = (ct_sa_u - ct_sa_l)/(pt_u - pt_l);
+                *ct_sa_pt = (ct_sa_u - ct_sa_l)/delta;
 
             } else if ((ct_sa_pt == NULL) && (ct_pt_pt != NULL)) {
 
                 gsw_ct_first_derivatives(sa,pt_l,NULL,&ct_pt_l);
                 gsw_ct_first_derivatives(sa,pt_u,NULL,&ct_pt_u);
 
-                *ct_pt_pt = (ct_pt_u - ct_pt_l)/(pt_u - pt_l);
+                *ct_pt_pt = (ct_pt_u - ct_pt_l)/delta;
 
             }
         }
@@ -3678,7 +3684,7 @@ static void p_sequence(double p1,double p2,double max_dp_i,double *pseq,
         int *nps);      /* forward reference */
 
 double  *       /* Returns NULL on error, dyn_height if okay */
-gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
+gsw_geo_strf_dyn_heightRR(double *sa, double *ct, double *p, double p_ref,
         int n_levels, double *dyn_height)
 {
         GSW_TEOS10_CONSTANTS;
@@ -4277,6 +4283,26 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
 
     return 0;
 }
+
+/* Until additional major coding is done, we can get closer to the v3_06_11
+   check values by using the pchip option in the alternative calculation
+   above, which is also the version we presently use in GSW-Python.
+*/
+ /* returns NULL on error, dyn_height if OK */
+double *
+gsw_geo_strf_dyn_height(double *sa, double *ct, double *p, double p_ref,
+    int nz, double *dyn_height)
+{
+    int err;
+    err = gsw_geo_strf_dyn_height_1(sa, ct, p, p_ref, nz, dyn_height, 1.0, 2);
+    if (err == 0) {
+        return dyn_height;
+    }
+    return NULL;
+
+}
+
+
 /*
 !==========================================================================
 pure subroutine gsw_geo_strf_dyn_height_pc (sa, ct, delta_p, &
@@ -7680,18 +7706,23 @@ gsw_pt_second_derivatives (double sa, double ct, double *pt_sa_sa,
         double *pt_sa_ct, double *pt_ct_ct)
 {
         double  ct_l, ct_u, pt_ct_l, pt_ct_u, pt_sa_l, pt_sa_u, sa_l, sa_u,
-                dct = 1e-2, dsa = 1e-3;
+                delta, dct = 1e-2, dsa = 1e-3;
 
         if (pt_sa_sa != NULL) {
 
-            if ((sa_l = sa - dsa) < 0.0)
-                 sa_l = 0.0;
             sa_u = sa + dsa;
+            sa_l = sa - dsa;
+            if (sa_l < 0.0) {
+                sa_l = 0.0;
+                delta = sa_u;
+            } else {
+                delta = 2 * dsa;
+            }
 
             gsw_pt_first_derivatives(sa_l,ct,&pt_sa_l,NULL);
             gsw_pt_first_derivatives(sa_u,ct,&pt_sa_u,NULL);
 
-            *pt_sa_sa = (pt_sa_u - pt_sa_l)/(sa_u - sa_l);
+            *pt_sa_sa = (pt_sa_u - pt_sa_l)/delta;
 
         }
 
@@ -7699,28 +7730,29 @@ gsw_pt_second_derivatives (double sa, double ct, double *pt_sa_sa,
 
             ct_l = ct - dct;
             ct_u = ct + dct;
+            delta = 2 * dct;
 
             if ((pt_sa_ct != NULL) && (pt_ct_ct != NULL)) {
 
                 gsw_pt_first_derivatives(sa,ct_l,&pt_sa_l,&pt_ct_l);
                 gsw_pt_first_derivatives(sa,ct_u,&pt_sa_u,&pt_ct_u);
 
-                *pt_sa_ct = (pt_sa_u - pt_sa_l)/(ct_u - ct_l);
-                *pt_ct_ct = (pt_ct_u - pt_ct_l)/(ct_u - ct_l);
+                *pt_sa_ct = (pt_sa_u - pt_sa_l)/delta;
+                *pt_ct_ct = (pt_ct_u - pt_ct_l)/delta;
 
             } else if ((pt_sa_ct != NULL) && (pt_ct_ct == NULL)) {
 
                 gsw_pt_first_derivatives(sa,ct_l,&pt_sa_l,NULL);
                 gsw_pt_first_derivatives(sa,ct_u,&pt_sa_u,NULL);
 
-                *pt_sa_ct = (pt_sa_u - pt_sa_l)/(ct_u - ct_l);
+                *pt_sa_ct = (pt_sa_u - pt_sa_l)/delta;
 
             } else if ((pt_sa_ct == NULL) && (pt_ct_ct != NULL)) {
 
                 gsw_pt_first_derivatives(sa,ct_l,NULL,&pt_ct_l);
                 gsw_pt_first_derivatives(sa,ct_u,NULL,&pt_ct_u);
 
-                *pt_ct_ct = (pt_ct_u - pt_ct_l)/(ct_u - ct_l);
+                *pt_ct_ct = (pt_ct_u - pt_ct_l)/delta;
             }
         }
 }
