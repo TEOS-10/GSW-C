@@ -38,9 +38,15 @@ gsw_data_v3_0.nc        -- A redundant and hopefully current version of
                             using the supplied utilities
                             make_check_data.py and make_saar_data.py.
 make_check_data.py      -- Utility to generate gsw_check_data.c from
-                            gsw_data_v3_0.nc.
+                            gsw_data_v3_0.nc.  **Do not use**
 make_saar_data.py       -- Utility to generate gsw_saar_data.c from
-                            gsw_data_v3_0.nc.
+                            gsw_data_v3_0.nc.  **Do not use**
+make_data_from_mat.py   -- Utility to generate check data and SAAR data from
+                            gsw_matlab_v3_06_11/library/gsw_data_v3_0.mat.
+                            You need to edit the file to supply the correct
+                            path.  The geostrophic streamfunction values are
+                            patched in from geo_strf_dyn_height.npy to match
+                            the pchip-based version being used here.
 libgswteos-10.spec.proto
                         -- template used to create libgswteos-10.spec,
                             the configuration file for rpmbuild on RedHat

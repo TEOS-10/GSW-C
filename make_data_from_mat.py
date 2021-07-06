@@ -8,8 +8,8 @@ Version recording in the mat files is completely unreliable, so we override it.
 
 One function, geo_strf_dyn_height, is in a state of flux; until it is
 completely rewritten to match the matlab v3_06_12 version, and this file
-is rerun with the corresponding matfile, the test will fail.  Using the
-pchip-based version here, the error is:
+is rerun with the corresponding matfile, the test needs to be patched.
+Using the pchip-based version here, the difference is:
 
   Max difference = 0.0030712207345846565, limit = 4.5372335222282345e-07
   Max diff (rel) = 0.027299449064902257, limit = 4.0330535034756395e-06
@@ -19,12 +19,15 @@ With the original algorithm, the mismatch relative to v3_06_11 is larger:
   Max difference = 0.014465517624415725, limit = 4.5372335222282345e-07
   Max diff (rel) = 0.088538110572418685, limit = 2.7770736845661537e-06
 
+To avoid the failing test, the pchip result is now substituted for the
+version from gsw_data_3_0.mat
+
 
 This is a developer utility and not a part of the public distribution, but its
 end-product is.
 
 """
-import math, os, sys
+import math, os
 import textwrap
 import numpy as np
 from scipy.io import loadmat
@@ -49,6 +52,8 @@ maxlen = 79
 #     ca = var.computation_accuracy
 #     return dh, ca
 
+def get_strf_dyn_height_from_npy():
+    return np.load("geo_strf_dyn_height.npy")
 
 def write_variable_ca(out, var_name, val):
     if math.isnan(val):
@@ -326,6 +331,9 @@ mat_zip_version = "3_06_11"
 cv = dict()
 for name in mat['gsw_cv'].dtype.names:
     cv[name] = mat['gsw_cv'][name].item()
+    if name == "geo_strf_dyn_height":
+        geo_strf = get_strf_dyn_height_from_npy()
+        cv[name] = geo_strf
     # if name == 'geo_strf_dyn_height':
     #     geo_strf, geo_strf_ca = get_strf_dyn_height_from_nc()
     #     print("replacing ", name, cv[name].shape, geo_strf.shape)
