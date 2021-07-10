@@ -2,14 +2,13 @@ cmake_minimum_required(VERSION 3.12)
 project(GSW-C)
 
 add_library(gswteos-10 SHARED gsw_oceanographic_toolbox.c gsw_saar.c)
-add_library(gswteos-10-static STATIC gsw_oceanographic_toolbox.c gsw_saar.c)
-add_executable(gsw_check gsw_check_functions.c gsw_oceanographic_toolbox.c gsw_saar.c)
-
+add_executable(gsw_check gsw_check_functions.c)
 if (UNIX)
     target_link_libraries(gswteos-10 m)
     target_link_libraries(gswteos-10-static m)
     target_link_libraries(gsw_check m)
 endif (UNIX)
+target_link_libraries(gsw_check gswteos-10)
 
 # Clean data files
 if (WIN32)
