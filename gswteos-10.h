@@ -26,7 +26,7 @@ extern "C" {
 
 #include <errno.h>
 
-#define GSW_INVALID_VALUE       9e15    /* error return from GSWTEOS10_SHARED_EXPORTS gsw_saar et al. */
+#define GSW_INVALID_VALUE       9e15    /* error return from gsw_saar et al. */
 #define GSW_ERROR_LIMIT         1e10
 
 #define INTERP_METHOD_LINEAR 1
