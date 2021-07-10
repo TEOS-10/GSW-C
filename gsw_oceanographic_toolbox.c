@@ -47,17 +47,61 @@
 ==========================================================================
 */
 #include "gswteos-10.h"
+#include "gsw_internal_const.h"
 
 #ifdef __cplusplus
 #       define DCOMPLEX std::complex<double>
 #else
+#ifndef _WIN32
 #   define DCOMPLEX double complex
-#       define real(x) creal(x)
-#       define log(x) clog(x)
+#       define mul_complex(x,y) ((x)*(y))
+#       define scale_complex(c,x) ((c)*(x))
+#       define add_ccomplex(c,x) ((c)+(x))
+#       define add_complex(x,y) ((x)+(y))
+#       define div_ccomplex(c,x) ((c)/(x))
+#       define div_complex(x,y) ((x)/(y))
+#       define sub_complex(x,y) ((x)-(y))
+#       define sub_ccomplex(c,x) ((c)-(x))
+#       define to_complex(x,y) ((x)+(y*I))
+#else
+#   define DCOMPLEX _Dcomplex
+#       define mul_complex(x,y) _Cmulcc(x,y)
+#       define scale_complex(c,x) _Cmulcr(x,c)
+        inline _Dcomplex add_ccomplex(double c, _Dcomplex x){
+            _Dcomplex out = {c+x._Val[0], x._Val[1]};
+            return out;
+        };
+        inline _Dcomplex add_complex(_Dcomplex x, _Dcomplex y){
+            _Dcomplex out = {x._Val[0]+y._Val[0], x._Val[1]+y._Val[1]};
+            return out;
+            };
+        inline _Dcomplex div_ccomplex(double c, _Dcomplex x){
+            _Dcomplex scale = scale_complex(c, conj(x));
+            double div = mul_complex(x,conj(x))._Val[0];
+            _Dcomplex out = {scale._Val[0]/div, scale._Val[1]/div};
+            return out;
+        };
+        inline _Dcomplex div_complex(_Dcomplex x, _Dcomplex y){
+            _Dcomplex up = mul_complex(x, conj(y));
+            _Dcomplex down = mul_complex(y, conj(y));
+            _Dcomplex out = {up._Val[0]/down._Val[0], up._Val[1]/down._Val[0]};
+            return out;
+        };
+        inline _Dcomplex sub_complex(_Dcomplex x, _Dcomplex y){
+            _Dcomplex out = {x._Val[0]-y._Val[0], x._Val[1]-y._Val[1]};
+            return out;
+        };
+        inline _Dcomplex sub_ccomplex(double c, _Dcomplex x){
+            _Dcomplex out = {c-x._Val[0], -x._Val[1]};
+            return out;
+        };
+        inline _Dcomplex to_complex(double x, double y){
+            _Dcomplex out = {x,y};
+            return out;
+        }
 #endif
-
-#include "gsw_internal_const.h"
-
+#       define real(x) creal(x)
+#endif
 
 /*
 !==========================================================================
@@ -2205,13 +2249,15 @@ gsw_enthalpy_ice(double t, double p)
 
         g0 = g00 + dzi*(g01 + dzi*(g02 + dzi*(g03 + g04*dzi)));
 
-        r2 = r20 + dzi*(r21 + r22*dzi);
+        r2 = add_complex(r20 , scale_complex(dzi, add_complex(r21 , scale_complex(dzi, r22))));
 
-        sqtau_t1 = (tau*tau)/(t1*t1);
-        sqtau_t2 = (tau*tau)/(t2*t2);
+        sqtau_t1 = div_ccomplex(tau*tau, mul_complex(t1,t1));
+        sqtau_t2 = div_ccomplex(tau*tau, mul_complex(t2,t2));
 
-        g = r1*t1*(log(1.0 - sqtau_t1) + sqtau_t1)
-            + r2*t2*(log(1.0 - sqtau_t2) + sqtau_t2);
+        g = add_complex(
+            mul_complex(mul_complex(r1, t1), add_complex(clog(sub_ccomplex(1.0, sqtau_t1)), sqtau_t1)),
+            mul_complex(mul_complex(r2, t2), add_complex(clog(sub_ccomplex(1.0, sqtau_t2)), sqtau_t2))
+            );
 
         return (g0 + tt*real(g));
 }
@@ -4843,70 +4889,160 @@ gsw_gibbs_ice (int nt, int np, double t, double p)
                         tau_t1, tau_t2;
         double  s0 = -3.32733756492168e3;
 
-        tau = (t + gsw_t0)*rec_tt;
-
+        tau = to_complex((t + gsw_t0)*rec_tt,0);
+        
         dzi = db2pa*p*rec_pt;
 
         if (nt == 0 && np == 0) {
 
-            tau_t1 = tau/t1;
-            sqtau_t1 = tau_t1*tau_t1;
-            tau_t2 = tau/t2;
-            sqtau_t2 = tau_t2*tau_t2;
+            tau_t1 = div_complex(tau,t1);
+            sqtau_t1 = mul_complex(tau_t1, tau_t1);
+            tau_t2 = div_complex(tau,t2);
+            sqtau_t2 = mul_complex(tau_t2, tau_t2);
 
             g0 = g00 + dzi*(g01 + dzi*(g02 + dzi*(g03 + g04*dzi)));
 
-            r2 = r20 + dzi*(r21 + r22*dzi);
+            r2 = add_complex(r20 , scale_complex(dzi, add_complex(r21 , scale_complex(dzi, r22))));
 
-            g = r1*(tau*log((1.0 + tau_t1)/(1.0 - tau_t1))
-                + t1*(log(1.0 - sqtau_t1) - sqtau_t1))
-                + r2*(tau*log((1.0 + tau_t2)/(1.0 - tau_t2))
-                + t2*(log(1.0 - sqtau_t2) - sqtau_t2));
+            DCOMPLEX g1 = mul_complex(
+                r1,
+                add_complex(
+                    mul_complex(
+                        tau,
+                        clog(div_complex(add_ccomplex(1.0, tau_t1), sub_ccomplex(1.0, tau_t1)))
+                    ),
+                    mul_complex(
+                        t1,
+                        sub_complex(clog(sub_ccomplex(1.0, sqtau_t1)), sqtau_t1)
+                    )
+                )
+            );
+            DCOMPLEX g2 = mul_complex(
+                r2,
+                add_complex(
+                    mul_complex(
+                        tau,
+                        clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2)))
+                    ),
+                    mul_complex(
+                        t2,
+                        sub_complex(clog(sub_ccomplex(1.0, sqtau_t2)), sqtau_t2)
+                    )
+                )
+            );
+            g = add_complex(g1,g2);
 
-            return real(g0 - tt*(s0*tau - real(g)));  // EF: bug in original.
-
+            return real(
+                add_ccomplex(
+                    g0,
+                    add_ccomplex(
+                        tt*real(g),
+                        scale_complex(
+                            -tt*s0,
+                            tau
+                        )
+                    )
+                )
+            );
         } else if (nt == 1 && np == 0) {
 
-            tau_t1 = tau/t1;
-            tau_t2 = tau/t2;
+            tau_t1 = div_complex(tau,t1);
+            tau_t2 = div_complex(tau,t2);
 
-            r2 = r20 + dzi*(r21 + r22*dzi);
+            r2 = add_complex(r20 , scale_complex(dzi, add_complex(r21 , scale_complex(dzi, r22))));
 
-            g = r1*(log((1.0 + tau_t1)/(1.0 - tau_t1)) - 2.0*tau_t1)
-                + r2*(log((1.0 + tau_t2)/(1.0 - tau_t2)) - 2.0*tau_t2);
+            DCOMPLEX g1 = mul_complex(
+                r1, 
+                sub_complex(
+                    clog(div_complex(add_ccomplex(1.0, tau_t1), sub_ccomplex(1.0, tau_t1))),
+                    scale_complex(2.0, tau_t1)
+                    )
+                );
+            DCOMPLEX g2 = mul_complex(
+                r2, 
+                sub_complex(
+                    clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2))),
+                    scale_complex(2.0, tau_t2)
+                    )
+                );
+            g = add_complex(g1,g2);
 
             return (-s0 + real(g));
 
         } else if (nt == 0 && np == 1) {
 
-            tau_t2 = tau/t2;
-            sqtau_t2 = tau_t2*tau_t2;
+            tau_t2 = div_complex(tau,t2);
+            sqtau_t2 = mul_complex(tau_t2, tau_t2);
 
             g0p = rec_pt*(g01 + dzi*(2.0*g02 + dzi*(3.0*g03 + 4.0*g04*dzi)));
 
-            r2p = rec_pt*(r21 + 2.0*r22*dzi);
+            r2p = scale_complex(rec_pt, add_complex(r21, scale_complex(2.0*dzi, r22)));
 
-            g = r2p*(tau*log((1.0 + tau_t2)/(1.0 - tau_t2))
-                + t2*(log(1.0 - sqtau_t2) - sqtau_t2));
+            g = mul_complex(
+                r2p,
+                add_complex(
+                    mul_complex(
+                        tau,
+                        clog(
+                            div_complex(
+                                add_ccomplex(1.0, tau_t2), 
+                                sub_ccomplex(1.0, tau_t2)
+                                )
+                            )
+                    ),
+                    mul_complex(
+                        t2,
+                        sub_complex(
+                            clog(sub_ccomplex(1.0, sqtau_t2)),
+                            sqtau_t2
+                        )
+                    )
+                )
+            );
 
             return (g0p + tt*real(g));
 
         } else if (nt == 1 && np == 1) {
 
-            tau_t2 = tau/t2;
+            tau_t2 = div_complex(tau,t2);
 
-            r2p = rec_pt*(r21 + 2.0*r22*dzi) ;
+            r2p = scale_complex(rec_pt, add_complex(r21, scale_complex(2.0*dzi, r22)));
 
-            g = r2p*(log((1.0 + tau_t2)/(1.0 - tau_t2)) - 2.0*tau_t2);
+            g = mul_complex(
+                r2p, 
+                sub_complex(
+                    clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2))),
+                    scale_complex(2.0, tau_t2)
+                    )
+                );
 
             return (real(g));
 
         } else if (nt == 2 && np == 0) {
 
-            r2 = r20 + dzi*(r21 + r22*dzi);
+            r2 = add_complex(r20 , scale_complex(dzi, add_complex(r21 , scale_complex(dzi, r22))));
 
-            g = r1*(1.0/(t1 - tau) + 1.0/(t1 + tau) - 2.0/t1)
-                + r2*(1.0/(t2 - tau) + 1.0/(t2 + tau) - 2.0/t2);
+            DCOMPLEX g1 = mul_complex(
+                r1,
+                add_complex(
+                    div_ccomplex(1.0, sub_complex(t1, tau)),
+                    sub_complex(
+                        div_ccomplex(1.0, add_complex(t1, tau)),
+                        div_ccomplex(2.0, t1)
+                    )
+                )
+            );
+            DCOMPLEX g2 = mul_complex(
+                r2,
+                add_complex(
+                    div_ccomplex(1.0, sub_complex(t2, tau)),
+                    sub_complex(
+                        div_ccomplex(1.0, add_complex(t2, tau)),
+                        div_ccomplex(2.0, t2)
+                    )
+                )
+            );
+            g = add_complex(g1, g2);
 
             return (rec_tt*real(g));
 
@@ -4914,18 +5050,31 @@ gsw_gibbs_ice (int nt, int np, double t, double p)
 
             sqrec_pt = rec_pt*rec_pt;
 
-            tau_t2 = tau/t2;
-            sqtau_t2 = tau_t2*tau_t2;
+            tau_t2 = div_complex(tau,t2);
+            sqtau_t2 = mul_complex(tau_t2, tau_t2);
 
             g0pp = sqrec_pt*(2.0*g02 + dzi*(6.0*g03 + 12.0*g04*dzi));
 
-            r2pp = 2.0*r22*sqrec_pt;
+            r2pp = scale_complex(2.0*sqrec_pt, r22);
 
-            g = r2pp*(tau*log((1.0 + tau_t2)/(1.0 - tau_t2))
-                + t2*(log(1.0 - sqtau_t2) - sqtau_t2));
+            g = mul_complex(
+                r2pp,
+                add_complex(
+                    mul_complex(
+                        tau,
+                        clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2)))
+                    ),
+                    mul_complex(
+                        t2,
+                        sub_complex(
+                            clog(sub_ccomplex(1.0, sqtau_t2)),
+                            sqtau_t2
+                        )
+                    )
+                )
+            );
 
-           return (g0pp + tt*real(g));
-
+            return (g0pp + tt*real(g));
         } else
            return (GSW_INVALID_VALUE);
 }
@@ -4955,13 +5104,26 @@ gsw_gibbs_ice_part_t(double t, double p)
 
         dzi = db2pa*p*rec_pt;
 
-        tau_t1 = tau/t1;
-        tau_t2 = tau/t2;
+        tau_t1 = div_ccomplex(tau,t1);
+        tau_t2 = div_ccomplex(tau,t2);
 
-        r2 = r20 + dzi*(r21 + r22*dzi);
+        r2 = add_complex(r20 , scale_complex(dzi, add_complex(r21 , scale_complex(dzi, r22))));
 
-        g = r1*(log((1.0 + tau_t1)/(1.0 - tau_t1)) - 2.0*tau_t1)
-            + r2*(log((1.0 + tau_t2)/(1.0 - tau_t2)) - 2.0*tau_t2);
+        DCOMPLEX g1 = mul_complex(
+            r1, 
+            sub_complex(
+                clog(div_complex(add_ccomplex(1.0, tau_t1), sub_ccomplex(1.0, tau_t1))),
+                scale_complex(2.0, tau_t1)
+                )
+            );
+        DCOMPLEX g2 = mul_complex(
+            r2, 
+            sub_complex(
+                clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2))),
+                scale_complex(2.0, tau_t2)
+                )
+            );
+        g = add_complex(g1,g2);
 
         return (real(g));
 }
@@ -4989,11 +5151,24 @@ gsw_gibbs_ice_pt0(double pt0)
 
         tau = (pt0 + gsw_t0)*rec_tt;
 
-        tau_t1 = tau/t1;
-        tau_t2 = tau/t2;
+        tau_t1 = div_ccomplex(tau,t1);
+        tau_t2 = div_ccomplex(tau,t2);
 
-        g = r1*(log((1.0 + tau_t1)/(1.0 - tau_t1)) - 2.0*tau_t1)
-            + r20*(log((1.0 + tau_t2)/(1.0 - tau_t2)) - 2.0*tau_t2);
+        DCOMPLEX g1 = mul_complex(
+            r1, 
+            sub_complex(
+                clog(div_complex(add_ccomplex(1.0, tau_t1), sub_ccomplex(1.0, tau_t1))),
+                scale_complex(2.0, tau_t1)
+                )
+            );
+        DCOMPLEX g2 = mul_complex(
+            r20, 
+            sub_complex(
+                clog(div_complex(add_ccomplex(1.0, tau_t2), sub_ccomplex(1.0, tau_t2))),
+                scale_complex(2.0, tau_t2)
+                )
+            );
+        g = add_complex(g1,g2);
 
         return (real(g));
 }
@@ -5017,13 +5192,31 @@ gsw_gibbs_ice_pt0_pt0(double pt0)
 {
         GSW_TEOS10_CONSTANTS;
         GSW_GIBBS_ICE_COEFFICIENTS;
-        double  tau;
-        DCOMPLEX        g;
+        DCOMPLEX        g, tau;
 
-        tau = (pt0 + gsw_t0)*rec_tt;
+        tau = to_complex((pt0 + gsw_t0)*rec_tt, 0);
 
-        g = r1*(1.0/(t1 - tau) + 1.0/(t1 + tau) - 2.0/t1)
-            + r20*(1.0/(t2 - tau) + 1.0/(t2 + tau) - 2.0/t2);
+        DCOMPLEX g1 = mul_complex(
+            r1,
+            add_complex(
+                div_ccomplex(1.0, sub_complex(t1, tau)),
+                sub_complex(
+                    div_ccomplex(1.0, add_complex(t1, tau)),
+                    div_ccomplex(2.0, t1)
+                )
+            )
+        );
+        DCOMPLEX g2 = mul_complex(
+            r20,
+            add_complex(
+                div_ccomplex(1.0, sub_complex(t2, tau)),
+                sub_complex(
+                    div_ccomplex(1.0, add_complex(t2, tau)),
+                    div_ccomplex(2.0, t2)
+                )
+            )
+        );
+        g = add_complex(g1, g2);
 
         return (rec_tt*real(g));
 }
@@ -6593,11 +6786,30 @@ gsw_pot_enthalpy_from_pt_ice(double pt0_ice)
 
         tau = (pt0_ice + gsw_t0)*rec_tt;
 
-        sqtau_t1 = (tau/t1)*(tau/t1);
-        sqtau_t2 = (tau/t2)*(tau/t2);
+        sqtau_t1 = mul_complex(div_ccomplex(tau,t1), div_ccomplex(tau,t1));
+        sqtau_t2 = mul_complex(div_ccomplex(tau,t2), div_ccomplex(tau,t2));
 
-        h0_part = r1*t1*(log(1.0 - sqtau_t1) + sqtau_t1)
-                  + r20*t2*(log(1.0 - sqtau_t2) + sqtau_t2);
+        h0_part = add_complex(
+            mul_complex(
+                r1, 
+                mul_complex(
+                    t1, add_complex(
+                        clog(sub_ccomplex(1.0, sqtau_t1)), 
+                        sqtau_t1
+                        )
+                )
+            ),
+            mul_complex(
+                r20,
+                mul_complex(
+                    t2,
+                    add_complex(
+                        clog(sub_ccomplex(1.0, sqtau_t2)),
+                        sqtau_t2
+                    )
+                )
+            )
+        );
 
         return (g00 + tt*real(h0_part));
 }
