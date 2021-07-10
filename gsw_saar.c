@@ -27,7 +27,9 @@ gsw_sum(double *x, int n)
         return (val);
 }
 
+#ifndef _WIN32
 #define max(a,b)        (((a)>(b))?(a):(b))
+#endif
 #define sum(x)          gsw_sum(x, sizeof (x)/sizeof (double))
 
 /*

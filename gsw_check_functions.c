@@ -98,9 +98,9 @@ int
 main(int argc, char **argv)
 {
         int     count = cast_m*cast_n, i, j, k, l, n;
-        double  saturation_fraction, value[count], lat[count],
-                lon[count], val1[count], val2[count], val3[count],
-                val4[count], val5[count];
+        double  saturation_fraction, value[cast_m*cast_n], lat[cast_m*cast_n],
+                lon[cast_m*cast_n], val1[cast_m*cast_n], val2[cast_m*cast_n], val3[cast_m*cast_n],
+                val4[cast_m*cast_n], val5[cast_m*cast_n];
 
         if (argc==2 && !strcmp(argv[1],"-debug"))
             debug       = 1;

@@ -16,68 +16,73 @@
 #define UNUSED
 #endif
 
+#ifndef M_PI
+#define M_PI 3.141592653589793
+#endif
 
 #define GSW_TEOS10_CONSTANTS \
-UNUSED double  db2pa = 1.0e4, \
-        rec_db2pa = 1.0e-4, \
-        pa2db = 1.0e-4, \
-        rec_pa2db = 1.0e4, \
-        pi = 3.141592653589793, \
-        deg2rad = pi/180.0, \
-        rad2deg = 180.0/pi, \
-        gamma = 2.26e-7, \
+UNUSED double  \
+        db2pa           = 1.0e4, \
+        rec_db2pa       = 1.0e-4, \
+        pa2db           = 1.0e-4, \
+        rec_pa2db       = 1.0e4, \
+        pi              = M_PI, \
+        deg2rad         = M_PI/180.0, \
+        rad2deg         = 180.0/M_PI, \
+        gamma           = 2.26e-7, \
 /*\
 !  cp0  =  The "specific heat" for use                         [ J/(kg K) ]\
 !          with Conservative Temperature   \
 */\
-        gsw_cp0 = 3991.86795711963, \
+        gsw_cp0         = 3991.86795711963, \
 /*\
 !  T0  =  the Celsius zero point.                                     [ K ]\
 */\
-        gsw_t0 = 273.15, \
+        gsw_t0          = 273.15, \
 /*\
 !  P0  =  Absolute Pressure of one standard atmosphere.              [ Pa ]\
 */\
-        gsw_p0 = 101325.0, \
+        gsw_p0          = 101325.0, \
 /*\
 !  SSO  =  Standard Ocean Reference Salinity.                      [ g/kg ]\
 */\
-        gsw_sso = 35.16504, \
-        gsw_sqrtsso = 5.930011804372737, \
+        gsw_sso         = 35.16504, \
+        gsw_sqrtsso     = 5.930011804372737, \
 /*\
 !  uPS  =  unit conversion factor for salinities                   [ g/kg ]\
 */\
-        gsw_ups = gsw_sso/35.0, \
+        gsw_ups         = gsw_sso/35.0, \
 /*\
 !  sfac  =  1/(40*gsw_ups)\
 */\
-        gsw_sfac = 0.0248826675584615, \
+        gsw_sfac        = 0.0248826675584615, \
 /*\
 !  deltaS = 24, offset = deltaS*gsw_sfac\
 */\
-        offset = 5.971840214030754e-1, \
+        offset          = 5.971840214030754e-1, \
 /*\
 !  C3515  =  Conductivity at (SP=35, t_68=15, p=0)                [ mS/cm ]\
 */\
-        gsw_c3515 = 42.9140, \
+        gsw_c3515       = 42.9140, \
 /*\
 !  SonCl  =  SP to Chlorinity ratio                           [ (g/kg)^-1 ]\
 */\
-        gsw_soncl = 1.80655, \
+        gsw_soncl       = 1.80655, \
 /*\
 !  valence_factor  =  valence factor of sea salt of Reference Composition\
 !                                                              [ unitless ]\
 */\
-        gsw_valence_factor = 1.2452898, \
+        gsw_valence_factor      = 1.2452898, \
 /*\
 !  atomic_weight = mole-weighted atomic weight of sea salt of Reference \
 !                  Composition                                    [ g/mol ]\
 */\
-        gsw_atomic_weight = 31.4038218
+        gsw_atomic_weight       = 31.4038218
 
 
 #define GSW_SPECVOL_COEFFICIENTS \
-UNUSED double  a000 = -1.56497346750e-5, \
+UNUSED double \
+        a000 = -1.56497346750e-5, \
         a001 =  1.85057654290e-5, \
         a002 = -1.17363867310e-6, \
         a003 = -3.65270065530e-7, \
@@ -376,7 +381,8 @@ UNUSED double  a000 = -1.56497346750e-5, \
         v600 =  2.0543094268e-7
 
 #define GSW_SP_COEFFICIENTS \
-UNUSED double  a0 =  0.0080, \
+UNUSED double \
+        a0 =  0.0080, \
         a1 = -0.1692, \
         a2 = 25.3851, \
         a3 = 14.0941, \
@@ -405,11 +411,12 @@ UNUSED double  a0 =  0.0080, \
 #define GSW_SAAR_DATA \
 UNUSED int      deli[4] = {0,1,1,0}, delj[4] = {0,0,1,1}, npan = 6; \
 UNUSED double   longs_pan[6] = {260.00, 272.59, 276.50, 278.65, 280.73, 292.0},\
-        lats_pan[6] = { 19.55,  13.97,   9.60,   8.10,   9.33,   3.4}
+                lats_pan[6] = { 19.55,  13.97,   9.60,   8.10,   9.33,   3.4}
 
 #ifdef __cplusplus
 #define GSW_GIBBS_ICE_COEFFICIENTS \
-UNUSED std::complex<double> t1 ( 3.68017112855051e-2, 5.10878114959572e-2), \
+UNUSED std::complex<double> 
+        t1 ( 3.68017112855051e-2, 5.10878114959572e-2), \
         t2 ( 3.37315741065416e-1, 3.35449415919309e-1), \
         r1 ( 4.47050716285388e1,  6.56876847463481e1), \
         r20 (-7.25974574329220e1, -7.81008427112870e1), \
@@ -418,38 +425,65 @@ UNUSED std::complex<double> t1 ( 3.68017112855051e-2, 5.10878114959572e-2), \
 /*\
 ! 1./Pt, where Pt = 611.657;  Experimental triple-point pressure in Pa.\
 */\
-UNUSED double  rec_pt = 1.634903221903779e-3, \
-        tt = 273.16, /*Triple-point temperature, kelvin (K).*/ \
-        rec_tt = 3.660858105139845e-3,   /*= 1/tt */ \
-        g00 = -6.32020233335886e5, \
-        g01 =  6.55022213658955e-1, \
-        g02 = -1.89369929326131e-8, \
-        g03 =  3.3974612327105304e-15, \
-        g04 = -5.564648690589909e-22
+UNUSED double \
+        rec_pt  =   1.634903221903779e-3, \
+        tt      = 273.16, /*Triple-point temperature, kelvin (K).*/ \
+        rec_tt  =   3.660858105139845e-3,   /*= 1/tt */ \
+        g00     =  -6.32020233335886e5, \
+        g01     =   6.55022213658955e-1, \
+        g02     =  -1.89369929326131e-8, \
+        g03     =   3.3974612327105304e-15, \
+        g04     =  -5.564648690589909e-22
 #else
+#ifndef _WIN32
 #define GSW_GIBBS_ICE_COEFFICIENTS \
-UNUSED double complex t1 =( 3.68017112855051e-2+ 5.10878114959572e-2*I), \
-        t2 =( 3.37315741065416e-1+ 3.35449415919309e-1*I), \
-        r1 =( 4.47050716285388e1+  6.56876847463481e1*I), \
-        r20 =(-7.25974574329220e1+ -7.81008427112870e1*I), \
-        r21 =(-5.57107698030123e-5+ 4.64578634580806e-5*I), \
-        r22 =(2.34801409215913e-11+-2.85651142904972e-11*I); \
+UNUSED double complex \
+        t1 = ( 3.68017112855051e-2+      5.10878114959572e-2*I), \
+        t2 = ( 3.37315741065416e-1+      3.35449415919309e-1*I), \
+        r1 = ( 4.47050716285388e1+       6.56876847463481e1*I), \
+        r20 =(-7.25974574329220e1+      -7.81008427112870e1*I), \
+        r21 =(-5.57107698030123e-5+      4.64578634580806e-5*I), \
+        r22 =( 2.34801409215913e-11+    -2.85651142904972e-11*I); \
 /*\
 ! 1./Pt, where Pt = 611.657;  Experimental triple-point pressure in Pa.\
 */\
-UNUSED double  rec_pt = 1.634903221903779e-3, \
-        tt = 273.16, /*Triple-point temperature, kelvin (K).*/ \
-        rec_tt = 3.660858105139845e-3,   /*= 1/tt */ \
-        g00 = -6.32020233335886e5, \
-        g01 =  6.55022213658955e-1, \
-        g02 = -1.89369929326131e-8, \
-        g03 =  3.3974612327105304e-15, \
-        g04 = -5.564648690589909e-22
+UNUSED double \
+        rec_pt  =   1.634903221903779e-3, \
+        tt      = 273.16, /*Triple-point temperature, kelvin (K).*/ \
+        rec_tt  =   3.660858105139845e-3,   /*= 1/tt */ \
+        g00     =  -6.32020233335886e5, \
+        g01     =   6.55022213658955e-1, \
+        g02     =  -1.89369929326131e-8, \
+        g03     =   3.3974612327105304e-15, \
+        g04     =  -5.564648690589909e-22
+#else
+#define GSW_GIBBS_ICE_COEFFICIENTS \
+UNUSED _Dcomplex \
+        t1 = { 3.68017112855051e-2,       5.10878114959572e-2    }, \
+        t2 = { 3.37315741065416e-1,       3.35449415919309e-1    }, \
+        r1 = { 4.47050716285388e1,        6.56876847463481e1     }, \
+        r20 ={-7.25974574329220e1,       -7.81008427112870e1     }, \
+        r21 ={-5.57107698030123e-5,       4.64578634580806e-5    }, \
+        r22 ={ 2.34801409215913e-11,     -2.85651142904972e-11   }; \
+/*\
+! 1./Pt, where Pt = 611.657;  Experimental triple-point pressure in Pa.\
+*/\
+UNUSED double \
+        rec_pt  =   1.634903221903779e-3, \
+        tt      = 273.16, /*Triple-point temperature, kelvin (K).*/ \
+        rec_tt  =   3.660858105139845e-3,   /*= 1/tt */ \
+        g00     =  -6.32020233335886e5, \
+        g01     =   6.55022213658955e-1, \
+        g02     =  -1.89369929326131e-8, \
+        g03     =   3.3974612327105304e-15, \
+        g04     =  -5.564648690589909e-22
+#endif
 #endif
 
 
 #define GSW_FREEZING_POLY_COEFFICIENTS \
-UNUSED double   c0  =  0.017947064327968736, \
+UNUSED double \
+        c0  =  0.017947064327968736, \
         c1 =  -6.076099099929818, \
         c2 =   4.883198653547851, \
         c3 =  -11.88081601230542, \
@@ -475,18 +509,18 @@ UNUSED double   c0  =  0.017947064327968736, \
 /* \
 ! Note that a = 0.502500117621,/gsw_sso \
 */ \
-        a = 0.014289763856964, \
-        b = 0.057000649899720, \
-        t0 = 0.002519, \
-        t1 = -5.946302841607319, \
-        t2 =  4.136051661346983, \
-        t3 = -1.115150523403847e1, \
-        t4 =  1.476878746184548e1, \
-        t5 = -1.088873263630961e1, \
-        t6 =  2.961018839640730, \
-        t7 = -7.433320943962606, \
-        t8 = -1.561578562479883, \
-        t9 =  4.073774363480365e-2, \
+        a =    0.014289763856964, \
+        b =    0.057000649899720, \
+        t0 =   0.002519, \
+        t1 =  -5.946302841607319, \
+        t2 =   4.136051661346983, \
+        t3 =  -1.115150523403847e1, \
+        t4 =   1.476878746184548e1, \
+        t5 =  -1.088873263630961e1, \
+        t6 =   2.961018839640730, \
+        t7 =  -7.433320943962606, \
+        t8 =  -1.561578562479883, \
+        t9 =   4.073774363480365e-2, \
         t10 =  1.158414435887717e-2, \
         t11 = -4.122639292422863e-1, \
         t12 = -1.123186915628260e-1, \
@@ -506,10 +540,11 @@ UNUSED double   c0  =  0.017947064327968736, \
 /*\
 ! Coordinate data for the Baltic Sea\
 */\
-UNUSED double   xb_left[3]={12.6,  7.0, 26.0},\
-        yb_left[3]={50.0, 59.0, 69.0},\
-        xb_right[2]={45.0, 26.0},\
-        yb_right[2]={50.0, 69.0}
+UNUSED double \
+        xb_left[3]      ={12.6,  7.0, 26.0},\
+        yb_left[3]      ={50.0, 59.0, 69.0},\
+        xb_right[2]     ={45.0, 26.0},\
+        yb_right[2]     ={50.0, 69.0}
 
 #ifndef max
 #define max(a,b)        (((a)>(b))?(a):(b))
