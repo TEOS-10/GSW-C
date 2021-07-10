@@ -5,12 +5,16 @@
 #  define GSWTEOS10_SHARED_EXPORTS
 #else
 #  ifndef GSWTEOS10_SHARED_EXPORTS
-#    ifdef GSWTEOS_10_EXPORTS
-        /* We are building this library */
-#      define GSWTEOS10_SHARED_EXPORTS __declspec(dllexport)
+#    ifdef _WIN32
+#       ifdef GSWTEOS_10_EXPORTS
+            /* We are building this library */
+#           define GSWTEOS10_SHARED_EXPORTS __declspec(dllexport)
+#       else
+            /* We are using this library */
+#           define GSWTEOS10_SHARED_EXPORTS __declspec(dllimport)
+#       endif
 #    else
-        /* We are using this library */
-#      define GSWTEOS10_SHARED_EXPORTS __declspec(dllimport)
+#       define GSWTEOS10_SHARED_EXPORTS
 #    endif
 #  endif
 #endif
