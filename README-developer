@@ -22,6 +22,8 @@ gsw_check_data.c        -- static check data used by gsw_ check functions.c
 gsw_check_functions.c   -- C implementation of the check functions used
                             to validate the correct building of the GSW-C
                             Oceanographic Toolbox.
+TOOLS.ini               -- Variable definitions used by nmake
+TOOLS.gcc               -- Variable definitions used by make
 
 Files for development
 =====================
