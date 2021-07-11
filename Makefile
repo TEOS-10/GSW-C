@@ -18,10 +18,11 @@ all: $(Program) $(Library)
 $(Program):
 		$(CPP) $(CRELEASE) $(PROGRAM_SOURCES) $(LIBS) $(OUT)$(Program)$(X)
 
+library: $(Library)
 $(Library):
 		$(CPP) $(LFLAGS) $(LIBRARY_SRCS) $(LIBS) $(OUT)$(Library)$(SHARED_POSTFIX)
 
 clean:
-		$(RM) *.exe *.o *.obj *.ilk *.pdb *.tmp *.i *~
+		$(RM) *.o *.obj *.ilk *.pdb *.tmp *.i *~
 		$(RM) $(Library)$(SHARED_POSTFIX)
 		$(RM) $(Program)$(X)
