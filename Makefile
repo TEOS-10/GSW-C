@@ -1,28 +1,20 @@
-#
-#  $Id: Makefile,v 1e5e75c749c2 2015/08/08 22:03:51 fdelahoyde $
-#
-               CFLAGS:=	-O3
-            CINCLUDES:=
-              Library:=	libgswteos-10.so
-              Program:=	gsw_check
-      $(Program)_SRCS:=	gsw_check_functions.c \
-			gsw_oceanographic_toolbox.c \
-			gsw_saar.c
-      $(Library)_SRCS:=	gsw_oceanographic_toolbox.c \
-			gsw_saar.c
-      $(Library)_OBJS:=	gsw_oceanographic_toolbox.o \
-			gsw_saar.o
+Library			= 	libgswteos-10
+Program			= 	gsw_check
 
-all:	$(Program)
+PROGRAM_SOURCES = 	gsw_check_functions.c\
+				  	gsw_oceanographic_toolbox.c\
+				  	gsw_saar.c
+LIBRARY_SRCS	= 	gsw_oceanographic_toolbox.c \
+					gsw_saar.c
 
-$(Program):	$($(Program)_SRCS)
-	gcc $(CFLAGS) $(CINCLUDES) -o $(Program) $($(Program)_SRCS) -lm
+all: $(Program) $(Library)
 
-library:	$(Library)
+$(Program):
+	$(CPP) $(CRELEASE) $(PROGRAM_SOURCES) $(OUT)$(Program)$(X)
 
-$(Library):	$($(Library)_SRCS)
-	gcc -fPIC -c $(CFLAGS) $(CINCLUDES) $($(Library)_SRCS)
-	gcc -shared -o $(Library) $($(Library)_OBJS) -lm
+$(Library):
+	$(CPP) $(LFLAGS) $(LIBRARY_SRCS) $(OUT)$(Library)	
 
 clean:
-	rm -f $(Program) $(Library) $($(Library)_OBJS)
+    $(RM) *.exe *.o *.obj *.ilk *.pdb *.tmp *.i *~
+	$(RM) $(Library)$(SHARED_POSTFIX)

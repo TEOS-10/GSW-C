@@ -1,0 +1,15 @@
+LIBS            = -lm
+CDEBUG          = -g
+LDEBUG          =
+CRELEASE        = -O3
+LRELEASE        =
+CFLAGS          = $(CRELEASE)
+LFLAGS          = $(LDEBUG)
+OUT             = -o 
+RM              = rm -f
+CP              = cp
+CC              = gcc
+CPP             = $(CC) -E
+X               =
+O               = .o
+SHARED_POSTFIX  = .so
