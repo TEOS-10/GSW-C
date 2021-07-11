@@ -1,11 +1,11 @@
-Library			= 	libgswteos-10
-Program			= 	gsw_check
+Library         = libgswteos-10
+Program         = gsw_check
 
-PROGRAM_SOURCES = 	gsw_check_functions.c\
-				  	gsw_oceanographic_toolbox.c\
-				  	gsw_saar.c
-LIBRARY_SRCS	= 	gsw_oceanographic_toolbox.c \
-					gsw_saar.c
+PROGRAM_SOURCES = gsw_check_functions.c\
+                  gsw_oceanographic_toolbox.c\
+                  gsw_saar.c
+LIBRARY_SRCS    = gsw_oceanographic_toolbox.c \
+                  gsw_saar.c
 
 # \
 !ifdef 0 #
