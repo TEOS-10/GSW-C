@@ -8,6 +8,8 @@
 *.kdev4
 .project
 .pydevproject
+.vs
+.vscode
 
 # Compiled source #
 ###################
