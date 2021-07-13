@@ -3246,7 +3246,7 @@ elemental subroutine gsw_frazil_properties_potential_poly (sa_bulk, &
 !  Salinity, SA_final, and Conservative Temperature, CT_final, of the
 !  interstitial seawater phase are also returned.  This code assumes that
 !  there is no dissolved air in the seawater (that is, saturation_fraction
-!  is assumed to be zero thorughout the code).
+!  is assumed to be zero throughout the code).
 !
 !  When the mass fraction w_Ih_final is calculated as being a positive
 !  value, the seawater-ice mixture is at thermodynamic equlibrium.
@@ -7559,7 +7559,7 @@ gsw_pt_from_t(double sa, double t, double p, double p_ref)
         dentropy_dt     = gsw_cp0/((gsw_t0 + pt)*(1.0-0.05*(1.0 - sa/gsw_sso)));
         true_entropy_part       = gsw_entropy_part(sa,t,p);
         for (no_iter=1; no_iter <= 2; no_iter++) {
-            pt_old      = pt;temperatur
+            pt_old      = pt;
             dentropy    = gsw_entropy_part(sa,pt_old,p_ref) - true_entropy_part;
             pt          = pt_old - dentropy/dentropy_dt;
             ptm         = 0.5*(pt + pt_old);
