@@ -26,7 +26,7 @@ Provides: libgswteos-10.so
 %endif
 
 %description 
-libgswteos-10 consists of a library of functions implimenting the Gibbs-
+libgswteos-10 consists of a library of functions implementing the Gibbs-
 Seawater Oceanographic Toolbox for the Thermodynamic Equation of
 Seawater 2010.
 
