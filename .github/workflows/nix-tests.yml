@@ -1,0 +1,24 @@
+name: run gsw_check
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Compile ${{ matrix.os }}
+      run: |
+        make
+
+    - name: Tests
+      run: |
+        ./gsw_check
