@@ -515,14 +515,17 @@ main(int argc, char **argv)
         test_func(o2sol_sp_pt, (sp[i],pt[i]), value, o2sol_sp_pt);
 
         if (gsw_error_flag)
+        {
             printf("\nYour installation of the Gibbs SeaWater (GSW) "
                 "Oceanographic Toolbox has errors !\n");
+            return EXIT_FAILURE;
+        }
         else
             printf("\nWell done! The gsw_check_functions confirms that the\n"
                 "Gibbs SeaWater (GSW) Oceanographic Toolbox is "
                 "installed correctly.\n");
 
-        return (0);
+        return EXIT_SUCCESS;
 }
 
 void
