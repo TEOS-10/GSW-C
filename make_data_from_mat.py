@@ -413,5 +413,3 @@ with open(saar_fname, "w") as out:
         write_variable(out, var_label, mat[var_name])
 
 os.chmod(saar_fname, 0o644)
-
-

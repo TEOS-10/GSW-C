@@ -20,12 +20,12 @@ Prefix: /usr
 Exclusiveos: linux
 ExclusiveArch: i386 x86_64
 %ifarch x86_64
-Provides: libgswteos-10.so()(64bit) 
+Provides: libgswteos-10.so()(64bit)
 %else
 Provides: libgswteos-10.so
 %endif
 
-%description 
+%description
 libgswteos-10 consists of a library of functions implementing the Gibbs-
 Seawater Oceanographic Toolbox for the Thermodynamic Equation of
 Seawater 2010.
@@ -42,7 +42,7 @@ rm -rf ${RPM_BUILD_ROOT}
 
 make INSTALL_ROOT=${RPM_BUILD_ROOT} install
 
-%clean 
+%clean
 rm -rf ${RPM_BUILD_ROOT}
 
 %pre
@@ -63,4 +63,3 @@ rm -rf ${RPM_BUILD_ROOT}
 %changelog
 * Sun Mar 31 2013 Frank Delahoyde <fdelahoyde@ucsd.edu> 3.0.1-1
 - Initial packaging.
-
