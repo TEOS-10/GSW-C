@@ -1,4 +1,4 @@
-name: GSW-C Windows
+name: run gsw_check
 
 on:
   pull_request:
@@ -11,6 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
 
     - name: Compile
       run: |
