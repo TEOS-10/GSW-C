@@ -29,8 +29,10 @@ gsw_internal_const.h            -- Common parameters used to compile the C GSW
                                     library.
 Makefile                        -- basic make file to build gsw_check and
                                     libgswteos-10.so
+TOOLS.ini                       -- Variable definitions used by nmake
+TOOLS.gcc                       -- Variable definitions used by make
 
-Usage:
+Usage (Unix):
 ------
 
 The C GSW Oceanographic Toolbox comes with a testing program, gsw_check.  In the
@@ -44,6 +46,20 @@ Note that the Makefile assumes that your C compiler is gcc.
 If gsw_check builds successfully, run it to test the toolbox:
 
     ./gsw_check
+
+Usage (Windows):
+------
+In the directory that the toolbox was unpacked, type:
+
+    nmake
+
+and it will attempt to build gsw_check with a dynamically-linked GSW library.
+Note that Developer Command Prompt for VS should be used or compiler paths
+should be set manually.
+
+If gsw_check builds successfully, run it to test the toolbox:
+
+    gsw_check.exe
 
 Notes:
 ------

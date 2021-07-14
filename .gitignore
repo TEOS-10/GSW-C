@@ -8,6 +8,8 @@
 *.kdev4
 .project
 .pydevproject
+.vs
+.vscode
 
 # Compiled source #
 ###################
@@ -17,6 +19,7 @@
 *.dll
 *.exe
 *.o
+*.obj
 *.py[ocd]
 *.so
 *.so.*

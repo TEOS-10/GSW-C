@@ -1,0 +1,22 @@
+name: run gsw_check
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  run:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Compile windows-latest
+      run: |
+        nmake
+
+    - name: Tests
+      run: |
+        ./gsw_check.exe
