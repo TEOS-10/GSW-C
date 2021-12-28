@@ -137,6 +137,16 @@ main(int argc, char **argv)
         test_func(sstar_from_sp,(sp[i],p[i],lon[i],lat[i]),value,sstar_from_sp);
         test_func(ct_from_t, (sa[i],t[i],p[i]), value,ct_from_t);
 
+        // the baltic sea calculations have a lon range assumption in them
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_sa_from_sp(sp[i],p[i],lon[i]+360.,lat[i]);
+        }
+        check_accuracy("sa_from_sp_lon_wrapped_high",sa_from_sp_ca,"sa_from_sp",count,value,sa_from_sp);
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_sa_from_sp(sp[i],p[i],lon[i]-720.,lat[i]);
+        }
+        check_accuracy("sa_from_sp_lon_wrapped_low",sa_from_sp_ca,"sa_from_sp",count,value,sa_from_sp);
+
         section_title(
           "Other conversions between Temperatures, Salinities, Entropy, "
           "Pressure and Height");
@@ -146,6 +156,17 @@ main(int argc, char **argv)
         test_func(sr_from_sp, (sp[i]), sr,sr_from_sp);
         test_func(sp_from_sr, (sr[i]), value,sp_from_sr);
         test_func(sp_from_sa, (sa[i],p[i],lon[i],lat[i]), value,sp_from_sa);
+
+        // the baltic sea calculations have a lon range assumption in them
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_sp_from_sa(sa[i],p[i],lon[i]+360.,lat[i]);
+        }
+        check_accuracy("ssp_from_sa_lon_wrapped_high",sp_from_sa_ca,"sp_from_sa",count,value,sp_from_sa);
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_sp_from_sa(sa[i],p[i],lon[i]-720.,lat[i]);
+        }
+        check_accuracy("sa_from_sp_lon_wrapped_low",sp_from_sa_ca,"sp_from_sa",count,value,sp_from_sa);
+
         test_func(sstar_from_sa,(sa[i],p[i],lon[i],lat[i]),sstar,sstar_from_sa);
         test_func(sa_from_sstar, (sstar[i],p[i],lon[i],lat[i]), value,
             sa_from_sstar);
@@ -332,6 +353,25 @@ main(int argc, char **argv)
 
         test_func(deltasa_atlas, (p[i],lon[i],lat[i]),value,deltasa_atlas);
         test_func(fdelta, (p[i],lon[i],lat[i]),value,fdelta);
+
+        // wrap the lons a bit to check wrapping
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_deltasa_atlas(p[i],lon[i]+360.,lat[i]);
+        }
+        check_accuracy("deltasa_atlas_lon_wrapped_high",deltasa_atlas_ca,"deltasa_atlas",count,value,deltasa_atlas);
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_deltasa_atlas(p[i],lon[i]-720.,lat[i]);
+        }
+        check_accuracy("deltasa_atlas_lon_wrapped_low",deltasa_atlas_ca,"deltasa_atlas",count,value,deltasa_atlas);
+
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_fdelta(p[i],lon[i]+360.,lat[i]);
+        }
+        check_accuracy("fdelta_lon_wrapped_high",fdelta_ca,"fdelta",count,value,fdelta);
+        for (i = 0; i<count; i++) {
+            value[i] = gsw_fdelta(p[i],lon[i]-720.,lat[i]);
+        }
+        check_accuracy("fdelta_lon_wrapped_low",fdelta_ca,"fdelta",count,value,fdelta);
 
         section_title(
             "Water column properties, based on the 75-term polynomial "
