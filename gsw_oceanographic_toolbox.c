@@ -515,6 +515,15 @@ gsw_c_from_sp(double sp, double t, double p)
                 rtx_old, rt, aa, bb, cc, dd, ee, ra,r, rt_lc, rtxm,
                 sp_hill_raw;
 
+    /*
+     |--------------------------------------------------------------------------
+     | Reinforce applicable range for S_p
+     |--------------------------------------------------------------------------
+    */
+        if ((sp < 0e0) || (sp > 42e0)) {
+            return (GSW_INVALID_VALUE);
+        }
+
         t68     = t*1.00024e0;
         ft68    = (t68 - 15e0)/(1e0 + k*(t68 - 15e0));
 
