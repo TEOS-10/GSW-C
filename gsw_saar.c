@@ -6,7 +6,7 @@
 */
 #include "gswteos-10.h"
 #include "gsw_internal_const.h"
-#include "gsw_saar_data.c"
+#include "gsw_saar_data.h"
 
 #ifdef __cplusplus
 #define ISNAN(x) std::isnan(x)

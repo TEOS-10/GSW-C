@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "gswteos-10.h"
-#include "gsw_check_data.c"
+#include "gsw_check_data.h"
 
 #define test_func(name, arglist, value, var) \
         for (i=0; i<count; i++) { \

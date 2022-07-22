@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #  $Id$
 """
-Make gsw_check_data.c and gsw_saar_data.c from the current gsw_data_v3_0.mat,
+Make gsw_check_data.h and gsw_saar_data.h from the current gsw_data_v3_0.mat,
 v3_06_11. Existing versions will be overwritten.
 
 Version recording in the mat files is completely unreliable, so we override it.
@@ -36,8 +36,8 @@ from scipy.io import loadmat
 # Edit the mat_filename as needed, but make sure there is enough path
 # info to show the matlab "version" it comes from.
 mat_filename = '../../gsw_matlab_v3_06_11/library/gsw_data_v3_0.mat'
-check_fname = 'gsw_check_data.c'
-saar_fname = 'gsw_saar_data.c'
+check_fname = 'gsw_check_data.h'
+saar_fname = 'gsw_saar_data.h'
 
 
 gsw_nan = 9e90
