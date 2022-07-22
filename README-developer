@@ -16,9 +16,9 @@ gsw_oceanographic_toolbox.c
                         -- The distribution source code for the GSW-C
                             library less gsw_saar.
 gsw_saar.c              -- gsw_saar and gsw_deltasa_atlas (modified).
-gsw_saar_data.c         -- static global absolute salinity anomaly data
+gsw_saar_data.h         -- static global absolute salinity anomaly data
                             used by gsw_saar.c
-gsw_check_data.c        -- static check data used by gsw_ check functions.c
+gsw_check_data.h        -- static check data used by gsw_ check functions.c
 gsw_check_functions.c   -- C implementation of the check functions used
                             to validate the correct building of the GSW-C
                             Oceanographic Toolbox.
@@ -35,13 +35,13 @@ GNUmakefile             -- GNU make makefile used to manage the building
                             systems.
 gsw_data_v3_0.nc        -- A redundant and hopefully current version of
                             the netcdf file hosted on github as
-                            TEOS-10/datafile. gsw_check_data.c and
-                            gsw_saar_data.c are generated from this file
+                            TEOS-10/datafile. gsw_check_data.h and
+                            gsw_saar_data.h are generated from this file
                             using the supplied utilities
                             make_check_data.py and make_saar_data.py.
-make_check_data.py      -- Utility to generate gsw_check_data.c from
+make_check_data.py      -- Utility to generate gsw_check_data.h from
                             gsw_data_v3_0.nc.  **Do not use**
-make_saar_data.py       -- Utility to generate gsw_saar_data.c from
+make_saar_data.py       -- Utility to generate gsw_saar_data.h from
                             gsw_data_v3_0.nc.  **Do not use**
 make_data_from_mat.py   -- Utility to generate check data and SAAR data from
                             gsw_matlab_v3_06_11/library/gsw_data_v3_0.mat.
@@ -76,8 +76,8 @@ If additional core GSW functions are added here, they should be consistent
 with their GSW-Matlab versions and with the general style of functions
 presently in the C library.  Pull Requests for new functions should
 include the corresponding tests in gsw_check_functions.c and test data in
-gsw_check_data.c.  The latter should be the result of re-running the
-make_check_data.py utility; gsw_check_data.c should not be hand-edited.
+gsw_check_data.h.  The latter should be the result of re-running the
+make_check_data.py utility; gsw_check_data.h should not be hand-edited.
 
 Code style for C should be generally consistent with the existing code
 with respect to brackets and indentation, with the proviso that new

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 #  $Id$
 """
-Make gsw_check_data.c from the current gsw_data_v3_0.nc.  This is a developer
+Make gsw_check_data.h from the current gsw_data_v3_0.nc.  This is a developer
 utility and not a part of the public distribution, but its end-product is.
-Note that it generates gsw_check_data.c but will not overwrite it if it exists.
+Note that it generates gsw_check_data.h but will not overwrite it if it exists.
 General concept: we don't want end-users of this distribution to require having
 netcdf installed, nor do we want to incur the I/O overhead every time this
 library is used.  So we simply generate static data from the netcdf file that
@@ -299,9 +299,9 @@ d=rootgrp.dimensions
 
 version_date = rootgrp.version_date
 version_number = rootgrp.version_number
-fname = "gsw_check_data.c"
+fname = "gsw_check_data.h"
 if os.path.exists(fname):
-    print("Will not overwrite existing gsw_check_data.c. Exiting.")
+    print("Will not overwrite existing gsw_check_data.h. Exiting.")
     sys.exit(1)
 
 out = open(fname, "w")
