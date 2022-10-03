@@ -10220,7 +10220,7 @@ gsw_specvol_second_derivatives_wrt_enthalpy (double sa, double ct, double p,
 
             if (v_sa_sa != NULL)
                 *v_sa_sa = vct_sa_sa - (h_ct*(vct_sa_ct*h_sa
-                        - v_ct*h_sa_sa) + v_ct*h_sa*h_sa_ct)*rec_h_ct2
+                        + v_ct*h_sa_sa) - v_ct*h_sa*h_sa_ct)*rec_h_ct2
                         - h_sa*v_sa_h_part;
         }
 }
