@@ -10130,7 +10130,7 @@ gsw_specvol_second_derivatives (double sa, double ct, double p,
                 + b122*xs + b032*ys))) + z*(3.0*(b003 + b103*xs + b013*ys)
                 + 4.0*b004*z));
 
-            *v_sa_p = 1e-8*0.5*gsw_sfac*v_sa_p_part;
+            *v_sa_p = 1e-8*0.5*gsw_sfac*v_sa_p_part/xs;
 
         }
 
