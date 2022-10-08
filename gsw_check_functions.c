@@ -66,13 +66,15 @@
 #define VALS5 &val1[i],&val2[i],&val3[i],&val4[i],&val5[i]
 
 typedef struct gsw_error_info {
-        int     ncomp, flags;
+        int     ncomp, flags, index;
 #define GSW_ERROR_LIMIT_FLAG    1
 #define GSW_ERROR_ERROR_FLAG    2
         double  max,
                 rel,
                 limit,
-                rlimit;
+                rlimit,
+                calcval,
+                refval;
 }       gsw_error_info;
 
 void report(char *funcname, char *varname, gsw_error_info *errs);
@@ -608,6 +610,8 @@ report(char *funcname, char *varname, gsw_error_info *errs)
                 errs->max,errs->limit);
             printf("  Max diff (rel) = %.17g, limit = %.17g\n",
                 errs->rel,errs->rlimit);
+            printf("  Max at index %d, calcval= %.17g, refval= %.17g\n",
+                errs->index, errs->calcval, errs->refval);
         } else {
             if (ndots > 0)
                 strncat(message, dots, ndots);
@@ -638,6 +642,9 @@ check_accuracy(char *funcname, double accuracy, char *varname, int count,
                     errs.limit = accuracy;
                     errs.rel = diff*100.0/fabs(calcval[i]);
                     errs.rlimit = accuracy*100.0/fabs(calcval[i]);
+                    errs.index = i;
+                    errs.calcval = calcval[i];
+                    errs.refval = refval[i];
                 }
             }
         }
