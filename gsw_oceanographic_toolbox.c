@@ -479,7 +479,7 @@ gsw_c_from_sp(double sp, double t, double p)
                 q0 = 5.540896868127855e-5,      q1 = 2.015419291097848e-1,
                 q2 = -1.445310045430192e-5,     q3 = -1.567047628411722e-2,
                 q4 = 2.464756294660119e-4,      q5 = -2.575458304732166e-7,
-                q6 = 5.071449842454419e-3,      q7 = 9.081985795339206e-5,
+                q6 = 5.071449842454419e-3,      q7 = -9.081985795339206e-5,
                 q8 = -3.635420818812898e-6,     q9 = 2.249490528450555e-8,
                 q10 = -1.143810377431888e-3,    q11 = 2.066112484281530e-5,
                 q12 = 7.482907137737503e-7,     q13 = 4.019321577844724e-8,
@@ -10130,7 +10130,7 @@ gsw_specvol_second_derivatives (double sa, double ct, double p,
                 + b122*xs + b032*ys))) + z*(3.0*(b003 + b103*xs + b013*ys)
                 + 4.0*b004*z));
 
-            *v_sa_p = 1e-8*0.5*gsw_sfac*v_sa_p_part;
+            *v_sa_p = 1e-8*0.5*gsw_sfac*v_sa_p_part/xs;
 
         }
 
@@ -10220,7 +10220,7 @@ gsw_specvol_second_derivatives_wrt_enthalpy (double sa, double ct, double p,
 
             if (v_sa_sa != NULL)
                 *v_sa_sa = vct_sa_sa - (h_ct*(vct_sa_ct*h_sa
-                        - v_ct*h_sa_sa) + v_ct*h_sa*h_sa_ct)*rec_h_ct2
+                        + v_ct*h_sa_sa) - v_ct*h_sa*h_sa_ct)*rec_h_ct2
                         - h_sa*v_sa_h_part;
         }
 }
