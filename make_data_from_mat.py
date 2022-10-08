@@ -2,12 +2,12 @@
 #  $Id$
 """
 Make gsw_check_data.h and gsw_saar_data.h from the current gsw_data_v3_0.mat,
-v3_06_11. Existing versions will be overwritten.
+v3_06_16. Existing versions will be overwritten.
 
 Version recording in the mat files is completely unreliable, so we override it.
 
 One function, geo_strf_dyn_height, is in a state of flux; until it is
-completely rewritten to match the matlab v3_06_12 version, and this file
+completely rewritten to match the matlab v3_06_16 version, and this file
 is rerun with the corresponding matfile, the test needs to be patched.
 Using the pchip-based version here, the difference is:
 
@@ -35,7 +35,8 @@ from scipy.io import loadmat
 
 # Edit the mat_filename as needed, but make sure there is enough path
 # info to show the matlab "version" it comes from.
-mat_filename = '../../gsw_matlab_v3_06_11/library/gsw_data_v3_0.mat'
+mat_zip_ver_string = "3_06_16"
+mat_filename = f'../../gsw_matlab_v{mat_zip_ver_string}/library/gsw_data_v3_0.mat'
 check_fname = 'gsw_check_data.h'
 saar_fname = 'gsw_saar_data.h'
 
@@ -326,7 +327,7 @@ mat = loadmat(mat_filename, squeeze_me=True)
 
 version_date = mat['version_date']
 version_number = mat['version_number']
-mat_zip_version = "3_06_11"
+mat_zip_version = mat_zip_ver_string
 
 cv = dict()
 for name in mat['gsw_cv'].dtype.names:
