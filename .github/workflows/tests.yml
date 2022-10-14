@@ -22,7 +22,7 @@ jobs:
       shell: bash
       run: |
          if [ "$RUNNER_OS" != "Windows" ]; then
-              nmake && ./gsw_check.exe
-         elif [ "$RUNNER_OS" == "Windows" ]; then
               make && ./gsw_check
+         elif [ "$RUNNER_OS" == "Windows" ]; then
+              nmake && ./gsw_check.exe
          fi
