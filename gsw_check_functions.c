@@ -8,6 +8,8 @@
 #include "gswteos-10.h"
 #include "gsw_check_data.h"
 
+#include <stdio.h>
+
 #define test_func(name, arglist, value, var) \
         for (i=0; i<count; i++) { \
             value[i] = gsw_ ## name arglist; \
@@ -96,6 +98,32 @@ double          tf_poly[cast_m*cast_n];
 double          h[cast_m*cast_n];
 double          z[cast_m*cast_n];
 
+int assert_equal(int actual, int expected, const char *test_name) {
+    if (actual == expected) {
+        printf("%s: ............................... passed\n", test_name);
+    } else {
+        printf("%s: Failed (Expected: %d, Actual: %d)\n", test_name, expected, actual);
+        return gsw_error_flag=1;
+    }
+}
+
+
+void test_infunnel() {
+    // Inside the funnel.
+    int result1 = gsw_infunnel(35.0, 5.0, 400);
+    assert_equal(result1, 1, "gsw_infunnel -> inside funnel");
+
+    int result2 = gsw_infunnel(20.0, 7.0, 2000);
+    assert_equal(result2, 1, "gsw_infunnel -> inside funnel");
+
+    // Outside the funnel
+    int result3 = gsw_infunnel(10.0, 0.0, 9000);
+    assert_equal(result3, 0, "gsw_infunnel -> invalid pressure");
+
+    int result4 = gsw_infunnel(45.0, 10.0, 400);
+    assert_equal(result4, 0, "gsw_infunnel -> invalid salinity");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -124,7 +152,6 @@ main(int argc, char **argv)
 " of TEOS-10 (version 3.05).\n");
 
         check_count = 1;
-
         section_title("Practical Salinity, PSS-78");
 
         test_func(c_from_sp, (sp[i],t[i],p[i]), c,c_from_sp);
@@ -555,6 +582,8 @@ main(int argc, char **argv)
 
         test_func(o2sol, (sa[i],ct[i],p[i],lon[i],lat[i]), value, o2sol);
         test_func(o2sol_sp_pt, (sp[i],pt[i]), value, o2sol_sp_pt);
+
+        test_infunnel();
 
         if (gsw_error_flag)
         {

@@ -37,6 +37,7 @@ extern void   gsw_add_barrier(double *input_data, double lon, double lat,
                 double long_grid, double lat_grid, double dlong_grid,
                 double dlat_grid, double *output_data);
 extern void   gsw_add_mean(double *data_in, double *data_out);
+extern int gsw_infunnel(double sa, double ct, double p);
 extern double gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p);
 extern double gsw_adiabatic_lapse_rate_ice(double t, double p);
 extern double gsw_alpha(double sa, double ct, double p);
