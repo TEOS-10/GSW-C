@@ -127,6 +127,7 @@ extern int gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p,
 extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct,
                 double *delta_p, int n_levels, double *geo_strf_dyn_height_pc,
                 double *p_mid);
+extern double gsw_gibbs (int ns, int nt, int np, double sa, double t, double p);
 extern double gsw_gibbs_ice (int nt, int np, double t, double p);
 extern double gsw_gibbs_ice_part_t(double t, double p);
 extern double gsw_gibbs_ice_pt0(double pt0);
