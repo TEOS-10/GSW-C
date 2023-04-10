@@ -189,12 +189,12 @@ function gsw_infunnel(sa,ct,p)
 ! ct     : Conservative Temperature                          [deg C]
 ! p      : sea pressure                                      [dbar]
 !
-! gsw_infunnel : 0, if SA, CT and p are outside the "funnel" 
+! gsw_infunnel : 0, if SA, CT and p are outside the "funnel"
 !                1, if SA, CT and p are inside the "funnel"
 !
 !  Note. The term "funnel" (McDougall et al., 2003) describes the range of
 !    SA, CT and p over which the error in the fit of the computationally
-!    efficient 75-term expression for specific volume in terms of SA, CT 
+!    efficient 75-term expression for specific volume in terms of SA, CT
 !    and p was calculated (Roquet et al., 2015).
 */
 double
