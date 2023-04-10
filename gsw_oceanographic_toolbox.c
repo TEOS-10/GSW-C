@@ -180,6 +180,46 @@ gsw_add_mean(double *data_in, double *data_out)
 }
 /*
 !==========================================================================
+function gsw_infunnel(sa,ct,p)
+!==========================================================================
+
+! "oceanographic funnel" check for the 75-term equation
+!
+! sa     : Absolute Salinity                                 [g/kg]
+! ct     : Conservative Temperature                          [deg C]
+! p      : sea pressure                                      [dbar]
+!
+! gsw_infunnel : 0, if SA, CT and p are outside the "funnel"
+!                1, if SA, CT and p are inside the "funnel"
+!
+!  Note. The term "funnel" (McDougall et al., 2003) describes the range of
+!    SA, CT and p over which the error in the fit of the computationally
+!    efficient 75-term expression for specific volume in terms of SA, CT
+!    and p was calculated (Roquet et al., 2015).
+*/
+double
+gsw_infunnel(double sa, double ct, double p)
+{
+    int in_funnel;
+
+    if (
+        p > 8000 || sa < 0 || sa > 42 ||
+        (p < 500 && ct < gsw_ct_freezing(sa, p, 0)) ||
+        (p >= 500 && p < 6500 && sa < p * 5e-3 - 2.5) ||
+        (p > 500 && p < 6500 && ct > (31.66666666666667 - p * 3.333333333333334e-3)) ||
+        (p >= 500 && ct < gsw_ct_freezing(sa, 500, 0)) ||
+        (p >= 6500 && sa < 30) || (p >= 6500 && ct > 10.0)
+    ) {
+        in_funnel = 0;
+    } else {
+        in_funnel = 1;
+    }
+
+    return (in_funnel);
+
+}
+/*
+!==========================================================================
 function gsw_adiabatic_lapse_rate_from_ct(sa,ct,p)
 !==========================================================================
 

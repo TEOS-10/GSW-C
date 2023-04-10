@@ -37,6 +37,7 @@ extern void   gsw_add_barrier(double *input_data, double lon, double lat,
                 double long_grid, double lat_grid, double dlong_grid,
                 double dlat_grid, double *output_data);
 extern void   gsw_add_mean(double *data_in, double *data_out);
+extern double gsw_infunnel(double sa, double ct, double p);
 extern double gsw_adiabatic_lapse_rate_from_ct(double sa, double ct, double p);
 extern double gsw_adiabatic_lapse_rate_ice(double t, double p);
 extern double gsw_alpha(double sa, double ct, double p);
@@ -127,6 +128,7 @@ extern int gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p,
 extern double *gsw_geo_strf_dyn_height_pc(double *sa, double *ct,
                 double *delta_p, int n_levels, double *geo_strf_dyn_height_pc,
                 double *p_mid);
+extern double gsw_gibbs (int ns, int nt, int np, double sa, double t, double p);
 extern double gsw_gibbs_ice (int nt, int np, double t, double p);
 extern double gsw_gibbs_ice_part_t(double t, double p);
 extern double gsw_gibbs_ice_pt0(double pt0);
