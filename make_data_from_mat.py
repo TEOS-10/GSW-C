@@ -35,8 +35,6 @@ from netCDF4 import Dataset
 import numpy as np
 from scipy.io import loadmat
 
-from parse_ncdump import arraydims
-
 
 # Edit the mat_filename as needed, but make sure there is enough path
 # info to show the matlab "version" it comes from.
