@@ -27,8 +27,11 @@ This is a developer utility and not a part of the public distribution, but its
 end-product is.
 
 """
+import datetime
 import math, os
+import re
 import textwrap
+from netCDF4 import Dataset
 import numpy as np
 from scipy.io import loadmat
 
@@ -38,25 +41,22 @@ from scipy.io import loadmat
 mat_zip_ver_string = "3_06_16"
 mat_filename = f'../../gsw_matlab_v{mat_zip_ver_string}/library/gsw_data_v3_0.mat'
 check_fname = 'gsw_check_data.h'
+check_ncname = 'gsw_check_data.nc'
 saar_fname = 'gsw_saar_data.h'
+timestamp = str(datetime.datetime.now())
 
 
 gsw_nan = 9e90
 maxlen = 79
 
-# # Temporary: get the original values.
-# def get_strf_dyn_height_from_nc():
-#     from netCDF4 import Dataset
-#     d = Dataset('gsw_data_v3_0.nc')
-#     var = d.variables['geo_strf_dyn_height']
-#     dh = var[:]
-#     ca = var.computation_accuracy
-#     return dh, ca
 
 def get_strf_dyn_height_from_npy():
+    "Get the check values for algorithm used here."
     return np.load("geo_strf_dyn_height.npy")
 
+
 def write_variable_ca(out, var_name, val):
+    "Write a check value accuracy line for the header file."
     if math.isnan(val):
         val = gsw_nan
     out.write("#define\t%s\t%.17g\n\n" %
@@ -64,6 +64,7 @@ def write_variable_ca(out, var_name, val):
 
 
 def write_variable(out, var_name, v):
+    " Write out an array variable for the header file."
     v = np.array(v, dtype=float).transpose()
     # Mat file has (nz, ny, nx); we want (nx, ny, nz).
     arr = np.ma.masked_invalid(v).filled(gsw_nan)
@@ -74,6 +75,19 @@ def write_variable(out, var_name, v):
     out.write(textwrap.fill(vals, maxlen))
     out.write("\n};\n\n")
 
+def get_arraydims():
+    "Return a dictionary mapping arrays to dimensions, for netcdf output."
+    with open("gsw_data_ncdump.txt") as f:
+        lines = f.readlines()
+
+    testlines = [line.strip() for line in lines if line.startswith("\tdouble") and "test" in line]
+
+    pat = "double (\S+)\((.*)\)"
+    arraydims = {}
+    for line in testlines:
+        arrayname, dims = re.match(pat, line).groups()
+        arraydims[arrayname] = tuple(dims.split(', '))
+    return arraydims
 
 work_vars = [
     ["ct", "CT_chck_cast"],
@@ -329,19 +343,16 @@ version_date = mat['version_date']
 version_number = mat['version_number']
 mat_zip_version = mat_zip_ver_string
 
+# Get check values from "gsw_cv" variable in the matfile.
 cv = dict()
 for name in mat['gsw_cv'].dtype.names:
     cv[name] = mat['gsw_cv'][name].item()
+    # override one value; we use a different interpolation algorithm
     if name == "geo_strf_dyn_height":
-        geo_strf = get_strf_dyn_height_from_npy()
-        cv[name] = geo_strf
-    # if name == 'geo_strf_dyn_height':
-    #     geo_strf, geo_strf_ca = get_strf_dyn_height_from_nc()
-    #     print("replacing ", name, cv[name].shape, geo_strf.shape)
-    #     cv[name] = geo_strf.T  # Transposed to match matlab
-    #     cv[name + '_ca'] = geo_strf_ca
+        cv[name] = get_strf_dyn_height_from_npy()
 
 
+# Write the check-value header file.
 out = open(check_fname, "w")
 out.write(f"""
 /*
@@ -350,6 +361,7 @@ out.write(f"""
 **  version_date: {version_date}
 **  version_number: {version_number}
 **  mat_zip_version: {mat_zip_version}
+**  This file created on: {timestamp}
 */
 
 /*
@@ -387,6 +399,47 @@ for var_label, var_name in func_vars:
 out.close()
 os.chmod(check_fname, 0o644)
 
+# Dimension names from Paul Barker's old nc file:
+dim_dict = dict(
+    test_cast_length = 45,
+    test_cast_number = 3,
+    Arctic_test_cast_length = 36,
+    Arctic_test_cast_number = 3,
+    value_test_cast = 1,
+    test_cast_midpressure_length = 44,
+    test_cast_midpressure_number = 3,
+    test_cast_midlocation_length = 45,
+    test_cast_midlocation_number = 2,
+)
+arraydims = get_arraydims()
+
+nc = Dataset(check_ncname, "w", format="NETCDF3_CLASSIC")
+nc.date_created = timestamp
+nc.mat_filename = mat_filename
+nc.version_number = version_number
+nc.mat_zip_version = mat_zip_version
+
+for name, size in dim_dict.items():
+    nc.createDimension(name, size)
+
+for var_label, var_name in work_vars:
+    if not var_name:
+        var_name = var_label
+    var = nc.createVariable(var_name, datatype=np.float64, dimensions=arraydims[var_name])
+    try:
+        var[:] = cv[var_name].transpose()
+    except AttributeError:
+        var[:] = cv[var_name]
+
+for var_label, var_name in func_vars:
+    if not var_name:
+        var_name = var_label
+    var = nc.createVariable(var_name, datatype=np.float64, dimensions=arraydims[var_name])
+    var[:] = cv[var_name].transpose()
+    var = nc.createVariable(var_name + '_ca', datatype=np.float64)
+    var[:] = cv[var_name + '_ca']
+
+nc.close()
 
 #############   SAAR   ############
 
