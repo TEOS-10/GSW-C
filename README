@@ -2,7 +2,7 @@
 TEOS-10 V3.05 GSW Oceanographic Toolbox in C
 ============================================
 
-This is a translation of the original Fortran-90 source code into C.  Unlike
+This began as a translation of the original Fortran-90 source code into C.  Unlike
 the Fortran-90 and Matlab versions of the toolbox, functions in the C version
 are primarily scalar.  You should download the documentation from
 http://teos-10.org, but should look at gswteos-10.h for the C API.
@@ -89,3 +89,6 @@ ChangeLog:
 2011-09-23:     gsw-3.0 Initial creation.
 
 Frank Delahoyde <fmdelahoyde@gmail.com>
+
+For more recent changes, see the repo on Github:
+https://github.com/TEOS-10/GSW-C
