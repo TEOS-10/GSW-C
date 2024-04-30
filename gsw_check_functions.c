@@ -8,7 +8,6 @@
 #include "gswteos-10.h"
 #include "gsw_check_data.h"
 
-#include <stdio.h>
 
 #define test_func(name, arglist, value, var) \
         for (i=0; i<count; i++) { \
@@ -109,19 +108,20 @@ int assert_equal(int actual, int expected, const char *test_name) {
 
 
 void test_infunnel() {
+    int result;
     // Inside the funnel.
-    int result1 = gsw_infunnel(35.0, 5.0, 400);
-    assert_equal(result1, 1, "gsw_infunnel -> inside funnel");
+    result = gsw_infunnel(35.0, 5.0, 400);
+    assert_equal(result, 1, "gsw_infunnel -> inside funnel");
 
-    int result2 = gsw_infunnel(20.0, 7.0, 2000);
-    assert_equal(result2, 1, "gsw_infunnel -> inside funnel");
+    result = gsw_infunnel(20.0, 7.0, 2000);
+    assert_equal(result, 1, "gsw_infunnel -> inside funnel");
 
     // Outside the funnel
-    int result3 = gsw_infunnel(10.0, 0.0, 9000);
-    assert_equal(result3, 0, "gsw_infunnel -> invalid pressure");
+    result = gsw_infunnel(10.0, 0.0, 9000);
+    assert_equal(result, 0, "gsw_infunnel -> invalid pressure");
 
-    int result4 = gsw_infunnel(45.0, 10.0, 400);
-    assert_equal(result4, 0, "gsw_infunnel -> invalid salinity");
+    result = gsw_infunnel(45.0, 10.0, 400);
+    assert_equal(result, 0, "gsw_infunnel -> invalid salinity");
 }
 
 int
