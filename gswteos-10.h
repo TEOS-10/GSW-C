@@ -221,6 +221,9 @@ extern double gsw_rho_t_exact(double sa, double t, double p);
 extern void   gsw_rr68_interp_sa_ct(double *sa, double *ct, double *p, int mp,
                 double *p_i, int mp_i, double *sa_i, double *ct_i);
 extern double gsw_saar(double p, double lon, double lat);
+extern void   gsw_sa_ct_interp(double *sa, double *ct, int m, int n, double *p,
+                int mp, int np, double *p_i, int mp_i, int np_i, double *sa_i,
+                double *ct_i);
 extern double gsw_sa_freezing_estimate(double p, double saturation_fraction,
                 double *ct, double *t);
 extern double gsw_sa_freezing_from_ct(double ct, double p,
@@ -295,6 +298,7 @@ extern void   gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
 extern int    gsw_util_indx(double *x, int n, double z);
 extern double *gsw_util_interp1q_int(int nx, double *x, int *iy, int nxi,
                 double *x_i, double *y_i);
+extern int    gsw_util_intersect(double *x, int nx, double *y, int ny, int *ix, int *iy);
 extern double *gsw_util_linear_interp(int nx, double *x, int ny, double *y,
                 int nxi, double *x_i, double *y_i);
 extern void   gsw_util_sort_real(double *rarray, int nx, int *iarray);

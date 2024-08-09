@@ -3,9 +3,11 @@ Program         = gsw_check
 
 PROGRAM_SOURCES = gsw_check_functions.c\
                   gsw_oceanographic_toolbox.c\
-                  gsw_saar.c
+                  gsw_saar.c\
+				  gsw_sa_ct_interp.c
 LIBRARY_SRCS    = gsw_oceanographic_toolbox.c \
-                  gsw_saar.c
+                  gsw_saar.c \
+                  gsw_sa_ct_interp.c
 
 # \
 !ifdef 0 #
