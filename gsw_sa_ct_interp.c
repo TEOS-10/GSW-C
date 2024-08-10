@@ -342,7 +342,7 @@ gsw_sa_ct_interp(double *sa, double *ct, int m, int n, double *p, int mp,
             min_p_obs = p_obs[0];
             max_p_obs = p_obs[0];
             for (i=1; i<prof_len; ++i) {
-                if (min_p_obs < p_obs[i]) {
+                if (p_obs[i] < min_p_obs) {
                     i_min_p_obs = i;
                     min_p_obs = p_obs[i];
                 }
@@ -389,10 +389,10 @@ gsw_sa_ct_interp(double *sa, double *ct, int m, int n, double *p, int mp,
                 scaled_sa_obs[i] = factor * sa_obs[i];
             }
 
-            gsw_util_pchip_interp(ct_obs, independent_variable, prof_len,
-                                  ct_i_obs_plus_interp, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
-            gsw_util_pchip_interp(scaled_sa_obs, independent_variable, prof_len,
-                                  q_i, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
+            gsw_util_pchip_interp(independent_variable, ct_obs, prof_len,
+                                  independent_variable_obs_plus_interp, ct_i_obs_plus_interp, i_obs_plus_interp_len);
+            gsw_util_pchip_interp(independent_variable, scaled_sa_obs, prof_len,
+                                  independent_variable_obs_plus_interp, q_i, i_obs_plus_interp_len);
 
             for(i=0; i<i_obs_plus_interp_len; ++i) {
                 sa_i_obs_plus_interp[i] = rec_factor * q_i[i];
@@ -401,15 +401,15 @@ gsw_sa_ct_interp(double *sa, double *ct, int m, int n, double *p, int mp,
             for(k=0; k<7; ++k) {
                 for(i=0; i<prof_len; ++i) {
                     v_tmp[i] = scaled_sa_obs[i] * sin_kpi_on_16[k] + ct_obs[i] * cos_kpi_on_16[k];
-                    q_tmp[i] = scaled_sa_obs[i] * cos_kpi_on_16[k] + ct_obs[i] * sin_kpi_on_16[k];
+                    q_tmp[i] = scaled_sa_obs[i] * cos_kpi_on_16[k] - ct_obs[i] * sin_kpi_on_16[k];
                 }
-                gsw_util_pchip_interp(v_tmp, independent_variable, prof_len,
-                                      v_i, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
-                gsw_util_pchip_interp(q_tmp, independent_variable, prof_len,
-                                      q_i, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
+                gsw_util_pchip_interp(independent_variable, v_tmp, prof_len,
+                                      independent_variable_obs_plus_interp, v_i, i_obs_plus_interp_len);
+                gsw_util_pchip_interp(independent_variable, q_tmp, prof_len,
+                                      independent_variable_obs_plus_interp, q_i, i_obs_plus_interp_len);
                 for(i=0; i<i_obs_plus_interp_len; ++i) {
                     ct_i_obs_plus_interp[i] += -q_i[i] * sin_kpi_on_16[k] + v_i[i] * cos_kpi_on_16[k];
-                    sa_i_obs_plus_interp[i] += rec_factor * (q_i[i] * cos_kpi_on_16[k] + v_i[i] * sin_kpi_on_16[i]);
+                    sa_i_obs_plus_interp[i] += rec_factor * (q_i[i] * cos_kpi_on_16[k] + v_i[i] * sin_kpi_on_16[k]);
                 }
             }
 
