@@ -3,26 +3,26 @@
 
 /*
 !==========================================================================
-subroutine gsw_tracer_CT_interp (sa,ct,p,p_i)
+subroutine gsw_tracer_CT_interp (tracer,ct,p,p_i)
 !==========================================================================
 !
-! SA and CT interpolation to p_i on a cast
+!  Tracer and CT interpolation to p_i on a cast
 !
 !  tracer   =  tracer                                                 [ ? ]
 !  CT   =  Conservative Temperature (ITS-90)                      [ deg C ]
 !  p    =  sea pressure                                            [ dbar ]
 !           ( i.e. absolute pressure - 10.1325 dbar )
-!  p_i  =  specific query points at which the interpolated tracer_i and CT_i
-!            are required                                          [ dbar ]
+!  p_i  =  specific query points at which the interpolated tracer_i
+!          and CT_i are required                                   [ dbar ]
 
 !
-!  tracer_i  =  interpolated SA values at pressures p_i                [ g/kg ]
+!  tracer_i  =  interpolated tracer values at pressures p_i        [ g/kg ]
 !  CT_i  =  interpolated CT values at pressures p_i               [ deg C ]
 !
 !--------------------------------------------------------------------------
 */
 void
-gsw_tracer_ct_interp(double *sa, double *ct, double *p, int m,
+gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
         double *p_i, int m_i, double factor, double *tracer_i, double *ct_i)
 {
         double  rec_factor  = 1./factor,
@@ -88,9 +88,9 @@ gsw_tracer_ct_interp(double *sa, double *ct, double *p, int m,
         // Find NaNs in profile
         prof_len = 0;
         for (i=0; i<m; ++i) {
-            d = sa[i] + ct[i] + p[i];
+            d = tracer[i] + ct[i] + p[i];
             if (!isnan(d)) {
-                tracer_obs[prof_len] = sa[i];
+                tracer_obs[prof_len] = tracer[i];
                 ct_obs[prof_len] = ct[i];
 
                 p_obs[prof_len] = 1e-3 * round(1e3 * p[i]);
@@ -109,7 +109,7 @@ gsw_tracer_ct_interp(double *sa, double *ct, double *p, int m,
         }
 
         // Check if profile pressure values are monotonic
-        // If they are not, then sort pressure values along with SA and CT
+        // If they are not, then sort pressure values along with tracer and CT
         not_monotonic = 0;
         for (i=0; i<prof_len-1; ++i) {
             d = p_obs[i+1] - p_obs[i];
@@ -127,7 +127,7 @@ gsw_tracer_ct_interp(double *sa, double *ct, double *p, int m,
             }
 
             // Once sorted, only save unique pressure values.
-            // SA and CT observations with the same pressure
+            // tracer and CT observations with the same pressure
             // will be averaged.
             new_len = 0;
             unique_count = 1;
@@ -157,7 +157,7 @@ gsw_tracer_ct_interp(double *sa, double *ct, double *p, int m,
             prof_len = new_len;
         }
 
-        // Combine pressure values of observed and interpolated SA and CT
+        // Combine pressure values of observed and interpolated tracer and CT
         p_all_len = prof_len + m_i;
 
         p_all = (double *) malloc(p_all_len*sizeof (double));
