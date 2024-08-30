@@ -11490,6 +11490,96 @@ gsw_z_from_p(double p, double lat, double geo_strf_dyn_height,
 }
 
 /*
+!==========================================================================
+subroutine gsw_util_intersect (x, nx, y, ny, ix, iy)
+!==========================================================================
+!
+! Find unique values common to both x and y arrays.
+!
+!  x      :  x array of values
+!  nx     :  length of x array
+!  y      :  y array of values
+!  ny     :  length of y array
+!  xi     :  indexes of x of values common to y
+!  yi     :  indexes of y of values common to x
+!
+!  ni     :  length of ix and iy
+!
+*/
+int
+gsw_util_intersect(double *x, int nx, double *y, int ny, int *ix, int *iy)
+{
+        int *sort_ix, *sort_iy, *unique_ix, *unique_iy;
+        int i, uix, uiy, nxs, nys, itx, ity, ni;
+
+        double xx, yy;
+
+        if (nx <= 0 || ny <= 0) {
+            return 0;
+        }
+
+        sort_ix = malloc(nx * sizeof(int));
+        sort_iy = malloc(ny * sizeof(int));
+        unique_ix = malloc(nx * sizeof(int));
+        unique_iy = malloc(ny * sizeof(int));
+
+        gsw_util_sort_real(x, nx, sort_ix);
+        gsw_util_sort_real(y, ny, sort_iy);
+
+        nxs = 0;
+        uix = sort_ix[0];
+        for (i=1; i<nx; ++i) {
+            if (x[uix] != x[sort_ix[i]]) {
+                unique_ix[nxs] = uix;
+                ++nxs;
+                uix = sort_ix[i];
+            } else if (sort_ix[i] < uix) {
+                uix = sort_ix[i];
+            }
+        }
+        unique_ix[nxs] = uix;
+        ++nxs;
+
+        nys = 0;
+        uiy = sort_iy[0];
+        for (i=1; i<ny; ++i) {
+            if (y[uiy] != y[sort_iy[i]]) {
+                unique_iy[nys] = uiy;
+                ++nys;
+                uiy = sort_iy[i];
+            } else if (sort_iy[i] < uiy) {
+                uiy = sort_iy[i];
+            }
+        }
+        unique_iy[nys] = uiy;
+        ++nys;
+
+        itx = ity = ni = 0;
+        while(itx < nxs && ity < nys) {
+            xx = x[unique_ix[itx]];
+            yy = y[unique_iy[ity]];
+            if (xx < yy) {
+                ++itx;
+            } else if (xx > yy) {
+                ++ity;
+            } else {
+                ix[ni] = unique_ix[itx];
+                iy[ni] = unique_iy[ity];
+                ++itx;
+                ++ity;
+                ++ni;
+            }
+        }
+
+        free(sort_ix);
+        free(sort_iy);
+        free(unique_ix);
+        free(unique_iy);
+
+        return ni;
+}
+
+/*
 **  The End
 **!==========================================================================
 */
