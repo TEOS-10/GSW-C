@@ -171,6 +171,11 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                 return;
             }
         }
+
+        for (i=0; i<m_i; i++) {
+            sa_i[i] = NAN;
+            ct_i[i] = NAN;
+        }
         
         // Find NaNs in profile
         prof_len = 0;
@@ -194,10 +199,6 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
         }
 
         if (prof_len < 2) {
-            for (i=0; i<m_i; i++) {
-                sa_i[i] = NAN;
-                ct_i[i] = NAN;
-            }
             return;
         }
 
