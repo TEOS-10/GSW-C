@@ -49,7 +49,7 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
         int i, j, k, prof_len, 
             not_monotonic, unique_count, new_len, p_all_len,
             i_min_p_obs, i_obs_plus_interp_len, i_surf_and_obs_plus_interp_len,
-            i_out_len, i_2_len, i_frozen, i_shallower, i_above, i_above_i, i_below_i;
+            i_out_len, i_2_len;
         int *p_idx, *p_all_idx, *i_obs_plus_interp, *i_surf_and_obs_plus_interp,
             *i_out, *i_1, *i_2, *i_3;
         double d, ct_f, unique_p, ct_sum, tracer_sum, min_p_obs, max_p_obs;
