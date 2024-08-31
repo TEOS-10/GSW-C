@@ -3,7 +3,7 @@
 
 /*
 !==========================================================================
-subroutine gsw_tracer_CT_interp (tracer,ct,p,p_i)
+subroutine gsw_tracer_CT_interp (tracer,ct,p,p_i,factor)
 !==========================================================================
 !
 !  Tracer and CT interpolation to p_i on a cast
@@ -14,6 +14,8 @@ subroutine gsw_tracer_CT_interp (tracer,ct,p,p_i)
 !           ( i.e. absolute pressure - 10.1325 dbar )
 !  p_i  =  specific query points at which the interpolated tracer_i
 !          and CT_i are required                                   [ dbar ]
+!  factor  =  ratio between the ranges of Conservative Temperature 
+!             and tracer in the world ocean.                          [ ? ]
 
 !
 !  tracer_i  =  interpolated tracer values at pressures p_i        [ g/kg ]
