@@ -307,13 +307,15 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                 break;
             }
 
-            for (i=0; i < i_obs_plus_interp_len && (i_3[i] - i_frozen) <= 0; ++i) {
-                i_shallower = i;
+            for (i=0; i < i_2_len; ++i) {
+                if ((i_3[i] - i_frozen) <= 0) {
+                    i_shallower = i;
+                }
             }
             i_above = i_2[i_shallower];
             i_above_i = i_3[i_shallower];
-            if ((i_above + 1) > i_3[i_shallower]) {
-                i_below_i = i_3[i_shallower];
+            if ((i_above + 1) > i_3[i_2_len - 1]) {
+                i_below_i = i_3[i_2_len - 1];
             } else {
                 i_below_i = i_3[i_above + 1];
             }
