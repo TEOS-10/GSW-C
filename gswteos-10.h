@@ -230,8 +230,6 @@ DECLSPEC extern void   gsw_rr68_interp_sa_ct(double *sa, double *ct, double *p, 
 DECLSPEC extern double gsw_saar(double p, double lon, double lat);
 DECLSPEC extern void   gsw_sa_ct_interp(double *sa, double *ct, double *p,
                 int m, double *p_i, int m_i, double *sa_i, double *ct_i);
-DECLSPEC extern void   gsw_tracer_ct_interp(double *sa, double *ct, double *p,
-                int m, double *p_i, int m_i, double factor, double *sa_i, double *ct_i);
 DECLSPEC extern double gsw_sa_freezing_estimate(double p, double saturation_fraction,
                 double *ct, double *t);
 DECLSPEC extern double gsw_sa_freezing_from_ct(double ct, double p,
@@ -301,6 +299,8 @@ DECLSPEC extern double gsw_t_freezing_poly(double sa, double p,
 DECLSPEC extern double gsw_t_from_ct(double sa, double ct, double p);
 DECLSPEC extern double gsw_t_from_pt0_ice(double pt0_ice, double p);
 DECLSPEC extern double gsw_thermobaric(double sa, double ct, double p);
+DECLSPEC extern void   gsw_tracer_ct_interp(double *sa, double *ct, double *p,
+                int m, double *p_i, int m_i, double factor, double *sa_i, double *ct_i);
 DECLSPEC extern void   gsw_turner_rsubrho(double *sa, double *ct, double *p, int nz,
                 double *tu, double *rsubrho, double *p_mid);
 DECLSPEC extern int    gsw_util_indx(double *x, int n, double z);
