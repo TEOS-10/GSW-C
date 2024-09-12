@@ -15,6 +15,8 @@ dimensions:
 	test_cast_midpressure_number = 3 ;
 	test_cast_midlocation_length = 45 ;
 	test_cast_midlocation_number = 2 ;
+    test_interp_length = 51 ;
+    test_interp_number = 3 ;
 variables:
 	double p_ref(nz) ;
 		p_ref:standard_name = "pressure_reference_atlas" ;
@@ -85,6 +87,7 @@ variables:
 	double SP_chck_cast(test_cast_number, test_cast_length) ;
 	double t_chck_cast(test_cast_number, test_cast_length) ;
 	double p_chck_cast(test_cast_number, test_cast_length) ;
+	double p_i(test_interp_length) ;
 	double lat_chck_cast(test_cast_number) ;
 	double long_chck_cast(test_cast_number) ;
 	double pr(value_test_cast) ;
@@ -320,6 +323,14 @@ variables:
 		Tu:computation_accuracy = 2.19097096021414e-08 ;
 	double Rsubrho(test_cast_number, test_cast_midpressure_length) ;
 		Rsubrho:computation_accuracy = 1.70965819279445e-08 ;
+	double SAi_SACTinterp(test_interp_number, test_interp_length) ;
+		SAi_SACTinterp:computation_accuracy = 1.300151097893831e-10 ;
+	double CTi_SACTinterp(test_interp_number, test_interp_length) ;
+		CTi_SACTinterp:computation_accuracy = 6.261124951834063e-10 ;
+	double traceri_tracerCTinterp(test_interp_number, test_interp_length) ;
+		traceri_tracerCTinterp:computation_accuracy = 1.300151097893831e-10 ;
+	double CTi_tracerCTinterp(test_interp_number, test_interp_length) ;
+		CTi_tracerCTinterp:computation_accuracy = 6.261124951834063e-10 ;
 	double p_mid_TuRsr(test_cast_number, test_cast_midpressure_length) ;
 		p_mid_TuRsr:computation_accuracy = 2.30002115131356e-08 ;
 	double n2(test_cast_number, test_cast_midpressure_length) ;
