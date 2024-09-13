@@ -8665,11 +8665,23 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
             ct_i[i] = NAN;
         }
 
-        sa_obs = (double *) malloc(m*sizeof (double));
-        ct_obs = (double *) malloc(m*sizeof (double));
-        p_obs = (double *) malloc(m*sizeof (double));
-
         // Find NaNs in profile
+        prof_len = 0;
+        for (i=0; i<m; ++i) {
+            d = sa[i] + ct[i] + p[i];
+            if (!isnan(d)) {
+                ++prof_len;
+            }
+        }
+
+        if (prof_len < 2) {
+            return 1;
+        }
+
+        sa_obs = (double *) malloc(prof_len*sizeof (double));
+        ct_obs = (double *) malloc(prof_len*sizeof (double));
+        p_obs = (double *) malloc(prof_len*sizeof (double));
+
         prof_len = 0;
         for (i=0; i<m; ++i) {
             d = sa[i] + ct[i] + p[i];
@@ -8688,13 +8700,6 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
 
                 ++prof_len;
             }
-        }
-
-        if (prof_len < 2) {
-            free(sa_obs);
-            free(ct_obs);
-            free(p_obs);
-            return 1;
         }
 
         p_i_tmp = (double *) malloc(m_i*sizeof (double));
