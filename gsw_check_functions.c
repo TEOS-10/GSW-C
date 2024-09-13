@@ -97,12 +97,12 @@ double          tf_poly[cast_m*cast_n];
 double          h[cast_m*cast_n];
 double          z[cast_m*cast_n];
 
-int assert_equal(int actual, int expected, const char *test_name) {
+void assert_equal(int actual, int expected, const char *test_name) {
     if (actual == expected) {
         printf("%s: ............................... passed\n", test_name);
     } else {
         printf("%s: Failed (Expected: %d, Actual: %d)\n", test_name, expected, actual);
-        return gsw_error_flag=1;
+        gsw_error_flag=1;
     }
 }
 
