@@ -8649,14 +8649,6 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                *sa_i_limiting_obs_plus_interp, *ct_i_limiting_obs_plus_interp,
                *ctf_i_tointerp, *sa_i_tooutput, *ct_i_tooutput;
 
-        sa_obs = (double *) malloc(m*sizeof (double));
-        ct_obs = (double *) malloc(m*sizeof (double));
-        p_obs = (double *) malloc(m*sizeof (double));
-        p_idx = (int *) malloc(m*sizeof (int));
-        p_sort = (double *) malloc(m*sizeof (double));
-        sa_sort = (double *) malloc(m*sizeof (double));
-        ct_sort = (double *) malloc(m*sizeof (double));
-
         if (m < 4)
             return 1; // There must be at least 4 bottles'
 
@@ -8672,7 +8664,11 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
             sa_i[i] = NAN;
             ct_i[i] = NAN;
         }
-        
+
+        sa_obs = (double *) malloc(m*sizeof (double));
+        ct_obs = (double *) malloc(m*sizeof (double));
+        p_obs = (double *) malloc(m*sizeof (double));
+
         // Find NaNs in profile
         prof_len = 0;
         for (i=0; i<m; ++i) {
@@ -8695,6 +8691,9 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
         }
 
         if (prof_len < 2) {
+            free(sa_obs);
+            free(ct_obs);
+            free(p_obs);
             return 1;
         }
 
@@ -8712,6 +8711,11 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                 ++not_monotonic;
             }
         }
+
+        p_idx = (int *) malloc(prof_len*sizeof (int));
+        p_sort = (double *) malloc(prof_len*sizeof (double));
+        sa_sort = (double *) malloc(prof_len*sizeof (double));
+        ct_sort = (double *) malloc(prof_len*sizeof (double));
 
         if (not_monotonic > 0) {
             gsw_util_sort_real(p_obs, prof_len, p_idx);
