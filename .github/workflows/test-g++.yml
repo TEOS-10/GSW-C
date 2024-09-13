@@ -1,4 +1,4 @@
-name: run gsw_check (c++ all - files)
+name: run gsw_check (g++)
 
 on:
   pull_request:
