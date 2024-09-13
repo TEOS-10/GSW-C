@@ -1,0 +1,24 @@
+name: run gsw_check (c++ all - files)
+
+on:
+  pull_request:
+  push:
+    #branches: [master]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Tests
+      shell: bash
+      run: |
+        make -f Makefile-g++ && ./gsw_check
