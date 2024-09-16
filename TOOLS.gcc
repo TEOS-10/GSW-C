@@ -13,3 +13,6 @@ CPP             = gcc
 X               =
 O               = .o
 SHARED_POSTFIX  = .so
+
+# Optionally set the compiler using the environment variable COMPILER
+COMPILER ?= $(CPP)

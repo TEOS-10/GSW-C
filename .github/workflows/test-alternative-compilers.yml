@@ -1,0 +1,70 @@
+name: run gsw_check (alternative compilers)
+
+on:
+  pull_request:
+  push:
+    #branches: [master]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+            - name: windows / clang-cl (c++)
+              os: windows-latest
+              compiler: 'clang-cl /TP'
+              make_tool: "nmake"
+            - name: linux / g++ (c++)
+              os: ubuntu-latest
+              compiler: 'g++ -x c++'
+              make_tool: "make"
+            - name: linux / clang (c)
+              os: ubuntu-latest
+              compiler: 'clang'
+              make_tool: "make"
+            - name: linux / clang (c++)
+              os: ubuntu-latest
+              compiler: 'clang -x c++'
+              make_tool: "make"
+            - name: macos / g++ (c++)
+              os: macos-latest
+              compiler: 'g++ -x c++'
+              make_tool: "make"
+            - name: macos / clang (c)
+              os: macos-latest
+              compiler: 'clang'
+              make_tool: "make"
+            - name: macos / clang (c++)
+              os: macos-latest
+              compiler: 'clang -x c++'
+              make_tool: "make"
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Check COMPILER variable
+      shell: bash
+      env:
+        COMPILER: ${{ matrix.compiler }}
+      run: |
+        output=$(${{ matrix.make_tool }} name_compiler)
+        echo "$output"
+        if [[ "$output" != *"${{ matrix.compiler }}"* ]]; then
+          echo "COMPILER '${{ matrix.compiler }}'' variable not used by the make file!"
+          #exit 1
+        fi
+
+    - name: Compile
+      shell: bash
+      env:
+        COMPILER: ${{ matrix.compiler }}
+      run: ${{ matrix.make_tool }}
+
+    - name: Tests
+      shell: bash
+      run: |
+        ./gsw_check
