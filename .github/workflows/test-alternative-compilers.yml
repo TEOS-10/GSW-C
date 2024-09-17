@@ -1,0 +1,81 @@
+name: run gsw_check (alternative compilers)
+
+on:
+  pull_request:
+  push:
+    #branches: [master]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+            - name: windows / clang-cl (c++)
+              os: windows-latest
+              compiler: 'clang-cl' # /TP forces the file to be compiled as C++
+              make_command: 'nmake CC=$CC'
+            - name: linux / g++ (c++)
+              os: ubuntu-latest
+              compiler: 'g++'
+              extra_flags: "-x c++"
+              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
+            - name: linux / clang (c)
+              os: ubuntu-latest
+              compiler: 'clang'
+              make_command: 'make CC=$CC'
+            - name: linux / clang (c++)
+              os: ubuntu-latest
+              compiler: 'clang'
+              extra_flags: "-x c++"
+              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
+            - name: macos / g++ (c++)
+              os: macos-latest
+              compiler: 'g++'
+              extra_flags: "-x c++"
+              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
+            - name: macos / clang (c)
+              os: macos-latest
+              compiler: 'clang'
+              make_command: 'make CC=$CC'
+            - name: macos / clang (c++)
+              os: macos-latest
+              compiler: 'clang'
+              extra_flags: "-x c++"
+              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
+      fail-fast: false
+
+    env:
+      CC: ${{ matrix.compiler }}
+      EXTRA_FLAGS: ${{ matrix.extra_flags }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Check CC variable
+      shell: bash
+      run: |
+        compiler=$(${{ matrix.make_command }} name_compiler)
+        extra_flags=$(${{ matrix.make_command }} name_extra_flags)
+        echo "compile command: $compiler $extra_flags"
+        if [[ "$compiler" != *"${{ matrix.compiler }}"* ]]; then
+          echo "CC '${{ matrix.compiler }}'' variable not used by the make file!"
+          exit 1
+        fi
+        if  [[ "${{ matrix.extra_flags }}" != "" ]]; then
+          if [[ "$extra_flags" != *"${{ matrix.extra_flags }}"* ]]; then
+            echo "CC '${{ matrix.extra_flags }}'' variable not used by the make file!"
+            exit 1
+          fi
+        fi
+
+    - name: Compile
+      shell: bash
+      run: ${{ matrix.make_command }}
+
+    - name: Tests
+      shell: bash
+      run: |
+        ./gsw_check
