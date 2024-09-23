@@ -11378,14 +11378,6 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
                *tracer_i_obs_plus_interp, *ct_i_obs_plus_interp,
                *tracer_i_tooutput, *ct_i_tooutput;
 
-        tracer_obs = (double *) malloc(m*sizeof (double));
-        ct_obs = (double *) malloc(m*sizeof (double));
-        p_obs = (double *) malloc(m*sizeof (double));
-        p_idx = (int *) malloc(m*sizeof (int));
-        p_sort = (double *) malloc(m*sizeof (double));
-        tracer_sort = (double *) malloc(m*sizeof (double));
-        ct_sort = (double *) malloc(m*sizeof (double));
-
         if (m < 4)
             return 1; // There must be at least 4 bottles'
 
@@ -11407,6 +11399,22 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
         for (i=0; i<m; ++i) {
             d = tracer[i] + ct[i] + p[i];
             if (!isnan(d)) {
+                ++prof_len;
+            }
+        }
+
+        if (prof_len < 2) {
+            return 1;
+        }
+
+        tracer_obs = (double *) malloc(prof_len*sizeof (double));
+        ct_obs = (double *) malloc(prof_len*sizeof (double));
+        p_obs = (double *) malloc(prof_len*sizeof (double));
+        
+        prof_len = 0;
+        for (i=0; i<m; ++i) {
+            d = tracer[i] + ct[i] + p[i];
+            if (!isnan(d)) {
                 tracer_obs[prof_len] = tracer[i];
                 ct_obs[prof_len] = ct[i];
 
@@ -11414,10 +11422,6 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
 
                 ++prof_len;
             }
-        }
-
-        if (prof_len < 2) {
-            return 1;
         }
 
         p_i_tmp = (double *) malloc(m_i*sizeof (double));
@@ -11434,6 +11438,11 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
                 ++not_monotonic;
             }
         }
+
+        p_idx = (int *) malloc(prof_len*sizeof (int));
+        p_sort = (double *) malloc(prof_len*sizeof (double));
+        tracer_sort = (double *) malloc(prof_len*sizeof (double));
+        ct_sort = (double *) malloc(prof_len*sizeof (double));
 
         if (not_monotonic > 0) {
             gsw_util_sort_real(p_obs, prof_len, p_idx);
