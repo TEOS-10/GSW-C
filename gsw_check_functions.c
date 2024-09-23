@@ -609,7 +609,7 @@ main(int argc, char **argv)
                     break;
             if (gsw_tracer_ct_interp(&sa[k],&ct[k],&p[k],n,
                 p_i,interp_m,9.,&val6[l],&val7[l]) == 1)
-                printf("gsw_sa_ct_interp returned error.\n");
+                printf("gsw_tracer_ct_interp returned error.\n");
         }
         check_accuracy("gsw_tracer_ct_interp",traceri_tracerctinterp_ca,
                 "traceri_tracerctinterp",interp_n*interp_m, val6, traceri_tracerctinterp);
