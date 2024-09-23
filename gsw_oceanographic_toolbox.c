@@ -8832,7 +8832,7 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
         }
         gsw_util_pchip_interp(p_obs, independent_variable, prof_len,
                                 p_obs_plus_interp, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
-        
+
         scaled_sa_obs = (double *) malloc(prof_len*sizeof (double));
         v_tmp = (double *) malloc(prof_len*sizeof (double));
         q_tmp = (double *) malloc(prof_len*sizeof (double));
