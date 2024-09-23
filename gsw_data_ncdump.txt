@@ -15,8 +15,8 @@ dimensions:
 	test_cast_midpressure_number = 3 ;
 	test_cast_midlocation_length = 45 ;
 	test_cast_midlocation_number = 2 ;
-    test_interp_length = 51 ;
-    test_interp_number = 3 ;
+	test_interp_length = 51 ;
+	test_interp_number = 3 ;
 variables:
 	double p_ref(nz) ;
 		p_ref:standard_name = "pressure_reference_atlas" ;
