@@ -8633,7 +8633,7 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                     1.950903220161283e-1
                 };
 
-        int i, j, k, prof_len, 
+        int i, j, k, prof_len,
             not_monotonic, unique_count, new_len, p_all_len,
             i_min_p_obs, i_obs_plus_interp_len, i_surf_and_obs_plus_interp_len,
             i_out_len, i_2_len, i_frozen, i_shallower, i_above, i_above_i, i_below_i;
@@ -8692,7 +8692,7 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                 p_obs[prof_len] = 1e-3 * round(1e3 * p[i]);
 
                 ct_f = gsw_ct_freezing_poly(sa_obs[prof_len],
-                                            p_obs[prof_len], 
+                                            p_obs[prof_len],
                                             0.);
                 if (ct_obs[prof_len] < (ct_f - 0.1)) {
                     ct_obs[prof_len] = ct_f;
@@ -11329,7 +11329,7 @@ subroutine gsw_tracer_CT_interp (tracer,ct,p,p_i,factor)
 !           ( i.e. absolute pressure - 10.1325 dbar )
 !  p_i  =  specific query points at which the interpolated tracer_i
 !          and CT_i are required                                   [ dbar ]
-!  factor  =  ratio between the ranges of Conservative Temperature 
+!  factor  =  ratio between the ranges of Conservative Temperature
 !             and tracer in the world ocean.                          [ ? ]
 
 !
@@ -11363,7 +11363,7 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
                     1.950903220161283e-1
                 };
 
-        int i, j, k, prof_len, 
+        int i, j, k, prof_len,
             not_monotonic, unique_count, new_len, p_all_len,
             i_min_p_obs, i_obs_plus_interp_len, i_surf_and_obs_plus_interp_len,
             i_out_len, i_2_len;
@@ -11393,7 +11393,7 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
             tracer_i[i] = NAN;
             ct_i[i] = NAN;
         }
-        
+
         // Find NaNs in profile
         prof_len = 0;
         for (i=0; i<m; ++i) {
@@ -11410,7 +11410,7 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
         tracer_obs = (double *) malloc(prof_len*sizeof (double));
         ct_obs = (double *) malloc(prof_len*sizeof (double));
         p_obs = (double *) malloc(prof_len*sizeof (double));
-        
+
         prof_len = 0;
         for (i=0; i<m; ++i) {
             d = tracer[i] + ct[i] + p[i];
@@ -11554,7 +11554,7 @@ gsw_tracer_ct_interp(double *tracer, double *ct, double *p, int m,
         }
         gsw_util_pchip_interp(p_obs, independent_variable, prof_len,
                                 p_obs_plus_interp, independent_variable_obs_plus_interp, i_obs_plus_interp_len);
-        
+
         scaled_tracer_obs = (double *) malloc(prof_len*sizeof (double));
         v_tmp = (double *) malloc(prof_len*sizeof (double));
         q_tmp = (double *) malloc(prof_len*sizeof (double));
