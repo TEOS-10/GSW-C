@@ -130,7 +130,8 @@ main(int argc, char **argv)
         int     count = cast_m*cast_n, i, j, k, l, n;
         double  saturation_fraction, value[cast_m*cast_n], lat[cast_m*cast_n],
                 lon[cast_m*cast_n], val1[cast_m*cast_n], val2[cast_m*cast_n], val3[cast_m*cast_n],
-                val4[cast_m*cast_n], val5[cast_m*cast_n];
+                val4[cast_m*cast_n], val5[cast_m*cast_n], val6[interp_m*interp_n],
+                val7[interp_m*interp_n];
 
         if (argc==2 && !strcmp(argv[1],"-debug"))
             debug       = 1;
@@ -582,6 +583,38 @@ main(int argc, char **argv)
 
         test_func(o2sol, (sa[i],ct[i],p[i],lon[i],lat[i]), value, o2sol);
         test_func(o2sol_sp_pt, (sp[i],pt[i]), value, o2sol_sp_pt);
+
+        section_title("Vertical Interpolation");
+
+        for (j = 0; j<cast_n; j++) {
+            k = j*cast_m;
+            l = j*interp_m;
+            for (n=0; n<cast_m; n++)
+                if (isnan(sa[k+n]) || fabs(sa[k+n]) >= GSW_ERROR_LIMIT)
+                    break;
+            if (gsw_sa_ct_interp(&sa[k],&ct[k],&p[k],n,
+                p_i,interp_m,&val6[l],&val7[l]) == 1)
+                printf("gsw_sa_ct_interp returned error.\n");
+        }
+        check_accuracy("gsw_sa_ct_interp",sai_sactinterp_ca,
+                "sai_sactinterp",interp_n*interp_m, val6, sai_sactinterp);
+        check_accuracy("gsw_sa_ct_interp",cti_sactinterp_ca,
+                "cti_sactinterp",interp_n*interp_m, val7, cti_sactinterp);
+
+        for (j = 0; j<cast_n; j++) {
+            k = j*cast_m;
+            l = j*interp_m;
+            for (n=0; n<cast_m; n++)
+                if (isnan(sa[k+n]) || fabs(sa[k+n]) >= GSW_ERROR_LIMIT)
+                    break;
+            if (gsw_tracer_ct_interp(&sa[k],&ct[k],&p[k],n,
+                p_i,interp_m,9.,&val6[l],&val7[l]) == 1)
+                printf("gsw_sa_ct_interp returned error.\n");
+        }
+        check_accuracy("gsw_tracer_ct_interp",traceri_tracerctinterp_ca,
+                "traceri_tracerctinterp",interp_n*interp_m, val6, traceri_tracerctinterp);
+        check_accuracy("gsw_tracer_ct_interp",cti_tracerctinterp_ca,
+                "cti_tracerctinterp",interp_n*interp_m, val7, cti_tracerctinterp);
 
         test_infunnel();
 
