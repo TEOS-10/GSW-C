@@ -12260,10 +12260,10 @@ gsw_util_intersect(double *x, int nx, double *y, int ny, int *ix, int *iy)
             return 0;
         }
 
-        sort_ix = malloc(nx * sizeof(int));
-        sort_iy = malloc(ny * sizeof(int));
-        unique_ix = malloc(nx * sizeof(int));
-        unique_iy = malloc(ny * sizeof(int));
+        sort_ix = (int *) malloc(nx * sizeof(int));
+        sort_iy = (int *) malloc(ny * sizeof(int));
+        unique_ix = (int *) malloc(nx * sizeof(int));
+        unique_iy = (int *) malloc(ny * sizeof(int));
 
         gsw_util_sort_real(x, nx, sort_ix);
         gsw_util_sort_real(y, ny, sort_iy);
