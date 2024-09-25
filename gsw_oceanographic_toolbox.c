@@ -4269,8 +4269,13 @@ gsw_geo_strf_dyn_height_1(double *sa, double *ct, double *p, double p_ref,
         err = err || gsw_util_pchip_interp(p, ct, nz, p_i, ct_i, n_i);
         if (err) err = 6;
     }
+    else if (interp_method == INTERP_METHOD_MRST) {
+        err = gsw_sa_ct_interp(sa, ct, p, nz,
+                               p_i, n_i, sa_i, ct_i);
+        if (err) err = 7;
+    }
     else {
-        err = 7;
+        err = 8;
     }
     if (err) {
         free(p_i);
