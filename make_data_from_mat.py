@@ -97,6 +97,7 @@ work_vars = [
     ["sp", "SP_chck_cast"],
     ["t", "t_chck_cast"],
     ["p", "p_chck_cast"],
+    ["p_i", "p_i"],
     ["delta_p", "delta_p_chck_cast"],
     ["p_shallow", "p_chck_cast_shallow"],
     ["p_deep", "p_chck_cast_deep"],
@@ -271,6 +272,10 @@ func_vars = [
     ['p_mid_n2', ""],
     ['Tu', ""],
     ['Rsubrho', ""],
+    ['SAi_SACTinterp', ""],
+    ['CTi_SACTinterp', ""],
+    ['traceri_tracerCTinterp', ""],
+    ['CTi_tracerCTinterp', ""],
     ['p_mid_TuRsr', ""],
     ['IPVfN2', ""],
     ['p_mid_IPVfN2', ""],
@@ -380,6 +385,7 @@ work_dims = dict()
 work_dims["cast_m"], work_dims["cast_n"] = cv['p_chck_cast'].shape
 work_dims["cast_ice_m"], work_dims["cast_ice_n"] = cv["p_Arctic"].shape
 work_dims["cast_mpres_m"], work_dims["cast_mpres_n"] = cv["p_mid_n2"].shape
+work_dims["interp_m"], work_dims["interp_n"] = cv['SAi_SACTinterp'].shape
 
 for key, val in work_dims.items():
     out.write("#define\t%s\t%d\n" % (key, val))
@@ -410,6 +416,8 @@ dim_dict = dict(
     test_cast_midpressure_number = 3,
     test_cast_midlocation_length = 45,
     test_cast_midlocation_number = 2,
+    test_interp_length = 51,
+    test_interp_number = 3
 )
 arraydims = get_arraydims()
 
