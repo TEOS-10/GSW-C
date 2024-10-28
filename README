@@ -1,5 +1,7 @@
+Original README
+###############
 
-TEOS-10 V3.05 GSW Oceanographic Toolbox in C
+TEOS-10 V3.06 GSW Oceanographic Toolbox in C
 ============================================
 
 This began as a translation of the original Fortran-90 source code into C.  Unlike
@@ -32,8 +34,8 @@ Makefile                        -- basic make file to build gsw_check and
 TOOLS.ini                       -- Variable definitions used by nmake
 TOOLS.gcc                       -- Variable definitions used by make
 
-Usage (Unix):
-------
+Usage (Unix / make):
+--------------------
 
 The C GSW Oceanographic Toolbox comes with a testing program, gsw_check.  In the
 directory that the toolbox was unpacked, type:
@@ -47,8 +49,8 @@ If gsw_check builds successfully, run it to test the toolbox:
 
     ./gsw_check
 
-Usage (Windows):
-------
+Usage (Windows / nmake):
+------------------------
 In the directory that the toolbox was unpacked, type:
 
     nmake
@@ -60,6 +62,29 @@ should be set manually.
 If gsw_check builds successfully, run it to test the toolbox:
 
     gsw_check.exe
+
+Usage (meson build system):
+---------------------------
+
+We provide a meson.build file (https://mesonbuild.com/) for GSW-C that works
+on Linux, Mac, and Windows.
+To setup a build directory and install the library and headers:
+
+    meson setup builddir
+    meson install -C builddir
+
+This will install gswteos-10.h, a shared library libgswteos-10 and a package
+config file gswteos-10.pc.
+
+Meson can be configured with options like prefix, default_library etc.:
+
+    meson setup builddir -Dprefix=/usr/local -Ddefault_library=static -Dbuildtype=release
+    meson install -C builddir
+
+For more options see mesonbuild.com. To run the tests use:
+
+    meson test -C builddir -v
+
 
 Notes:
 ------

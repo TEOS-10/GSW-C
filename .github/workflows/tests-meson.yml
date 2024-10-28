@@ -1,0 +1,58 @@
+name: test meson wrapper
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  run:
+    name: lib${{ matrix.library }} ${{ matrix.compiler }} ${{ matrix.os }} ${{ matrix.force_cpp }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        library: ["static", "shared"]
+        compiler: ["gcc", "clang", "cl", "clang-cl"]
+        force_cpp: [-Dforce-cpp=enabled, ""]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        exclude:
+          - os: windows-latest
+            compiler: "clang"
+          - os: windows-latest
+            compiler: "gcc"
+          - os: windows-latest
+            force_cpp: "-Dforce-cpp=enabled"
+          - os: ubuntu-latest
+            compiler: "cl"
+          - os: ubuntu-latest
+            compiler: "clang-cl"
+          - os: macos-latest
+            compiler: "cl"
+          - os: macos-latest
+            compiler: "clang-cl"
+
+      fail-fast: false
+
+    env:
+      CC: ${{matrix.compiler}}
+      CXX: ${{matrix.compiler}}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: install dependencies
+        run: python -m pip install meson ninja
+
+      - name: Compile
+        run: |
+          meson setup builddir -Ddefault_library=${{matrix.library}} ${{matrix.force_cpp}}
+          meson compile -C builddir
+
+      - name: Test
+        run: |
+          meson test -C builddir --print-errorlogs -v
