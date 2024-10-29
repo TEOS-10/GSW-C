@@ -11,7 +11,7 @@
 # Define project meta data
 project(
   'gswteos-10',
-  ['c', 'cpp'], #appears to be c on linux/mac and cpp on windows
+  ['c', 'cpp'], #language is c on linux/mac and cpp on windows
   license: 'BSD-3-Clause',
 
   version: 'v3.06.16-0',
