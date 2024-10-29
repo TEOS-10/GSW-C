@@ -33,6 +33,10 @@ Makefile                        -- basic make file to build gsw_check and
                                     libgswteos-10.so
 TOOLS.ini                       -- Variable definitions used by nmake
 TOOLS.gcc                       -- Variable definitions used by make
+meson.build                     -- Meson build file (alternative build system to build
+                                    libgswteos-10 library and gsw_check tests)
+meson.options                   -- Meson build options file (defines additional options
+                                   for the Meson build system)
 
 Usage (Unix / make):
 --------------------

@@ -24,6 +24,10 @@ gsw_check_functions.c   -- C implementation of the check functions used
                             Oceanographic Toolbox.
 TOOLS.ini               -- Variable definitions used by nmake
 TOOLS.gcc               -- Variable definitions used by make
+meson.build             -- Meson build file (alternative build system to build
+                            libgswteos-10 library and gsw_check tests)
+meson.options           -- Meson build options file (defines additional options
+                            for the Meson build system)
 
 Files for development
 =====================
@@ -48,6 +52,8 @@ gsw_data_ncdump.txt     -- Edited text from the "ncdump -h" of a netcdf file
                             an earlier version of gsw_data_v3_0.mat.  It is
                             used by make_data_from_mat.py to find the array
                             dimensions when generating gsw_check_data.nc.
+meson.options           -- Meson build options file. Use this to define more
+                            options for the Meson build system. (e.g. force-cpp)
 
 Notes for contributors
 ======================
