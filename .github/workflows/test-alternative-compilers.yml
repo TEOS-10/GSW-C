@@ -3,7 +3,7 @@ name: run gsw_check (alternative compilers)
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
