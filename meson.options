@@ -1,0 +1,1 @@
+option('force-cpp', type: 'feature', value: 'disabled', description: 'If enabled, C files will be compiled as C++')
