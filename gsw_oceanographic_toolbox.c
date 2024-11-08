@@ -8908,9 +8908,9 @@ gsw_sa_ct_interp(double *sa, double *ct, double *p, int m,
                 break;
             }
 
-            for (i=0; i < i_2_len; ++i) {
-                if ((i_3[i] - i_frozen) <= 0) {
-                    i_shallower = i;
+            for (i_shallower=i_2_len-1; i_shallower>=0; --i_shallower) {
+                if ((i_3[i_shallower] - i_frozen) <= 0) {
+                    break;
                 }
             }
             i_above = i_2[i_shallower];
