@@ -78,10 +78,10 @@ typedef struct gsw_error_info {
                 refval;
 }       gsw_error_info;
 
-void report(char *funcname, char *varname, gsw_error_info *errs);
-void check_accuracy(char *funcname, double accuracy, char *varname,
+void report(const char *funcname, const char *varname, gsw_error_info *errs);
+void check_accuracy(const char *funcname, double accuracy, const char *varname,
                         int count, double *calcval, double *refval);
-void section_title(char *title);
+void section_title(const char *title);
 
 int             debug=0, check_count, gsw_error_flag=0;
 double          c[cast_m*cast_n];
@@ -155,7 +155,7 @@ main(int argc, char **argv)
         check_count = 1;
         section_title("Practical Salinity, PSS-78");
 
-        test_func(c_from_sp, (sp[i],t[i],p[i]), c,c_from_sp);
+        test_func(c_from_sp, (sp[i],t[i],p[i]), c, c_from_sp);
         test_func(sp_from_c, (c[i],t[i],p[i]), value,sp_from_c);
         test_func(sp_from_sk, (sk[i]), value,sp_from_sk);
         test_func(sp_salinometer, (rt[i], t[i]), value,sp_salinometer);
@@ -633,20 +633,20 @@ main(int argc, char **argv)
 }
 
 void
-section_title(char *title)
+section_title(const char *title)
 {
         printf("\n------------------------------------------------"
                "----------------------------\n%s\n\n",title);
 }
 
 void
-report(char *funcname, char *varname, gsw_error_info *errs)
+report(const char *funcname, const char *varname, gsw_error_info *errs)
 {
         int     msglen = strlen(funcname)+((varname==NULL)?0:strlen(varname)),
                 k, ndots;
-        char    message[81], *dots, infoflg[8];
+        char    message[81], infoflg[8];
 
-        dots ="...............................................................";
+        const char* dots ="...............................................................";
         strcpy(message, funcname);
         if (strcmp(funcname, varname)) {
             msglen += 5;
@@ -682,8 +682,8 @@ report(char *funcname, char *varname, gsw_error_info *errs)
 }
 
 void
-check_accuracy(char *funcname, double accuracy, char *varname, int count,
-        double *calcval, double *refval)
+check_accuracy(const char *funcname, double accuracy,const char *varname,
+        int count, double *calcval, double *refval)
 {
         int             i;
         double          diff;
