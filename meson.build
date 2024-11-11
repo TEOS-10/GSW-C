@@ -15,8 +15,8 @@ project(
   license: 'BSD-3-Clause',
 
   version: 'v3.06.16-0',
-  default_options: ['warning_level=2', 'buildtype=release'],
-  meson_version: '>=1.5.1' #latest tested version,,,,
+  default_options: ['warning_level=0', 'buildtype=release'],
+  meson_version: '>=1.5.1' #latest tested version
 )
 
 project_name = 'gswteos-10'
