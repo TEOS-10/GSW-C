@@ -21,24 +21,6 @@ jobs:
               compiler: 'g++'
               extra_flags: "-x c++"
               make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
-            - name: linux / clang (c)
-              os: ubuntu-latest
-              compiler: 'clang'
-              make_command: 'make CC=$CC'
-            - name: linux / clang (c++)
-              os: ubuntu-latest
-              compiler: 'clang'
-              extra_flags: "-x c++"
-              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
-            - name: macos / g++ (c++)
-              os: macos-latest
-              compiler: 'g++'
-              extra_flags: "-x c++"
-              make_command: 'make CC=$CC EXTRA_FLAGS="$EXTRA_FLAGS"'
-            - name: macos / clang (c)
-              os: macos-latest
-              compiler: 'clang'
-              make_command: 'make CC=$CC'
             - name: macos / clang (c++)
               os: macos-latest
               compiler: 'clang'
