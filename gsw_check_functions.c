@@ -2,6 +2,14 @@
 **  $Id: gsw_check_functions.c,v 0db1b20bdf1b 2015/08/26 21:39:20 fdelahoyde $
 **  $Version: 3.05.0-1 $
 */
+
+/* This ignores MSVC warnings about "unsafe: functions (strcpy, strncat,
+** strcat) in the gsw_check_functions.c file . While the security advice
+** may be sound in the context of the main library, these functions do not pose
+** a security risk in the context of this test executable.
+*/
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
