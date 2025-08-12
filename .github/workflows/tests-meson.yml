@@ -43,7 +43,7 @@ jobs:
       CXX: ${{matrix.compiler}}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/setup-python@v5
         with:
