@@ -11272,6 +11272,30 @@ gsw_t_from_ct(double sa, double ct, double p)
         pt0     = gsw_pt_from_ct(sa,ct);
         return (gsw_pt_from_t(sa,pt0,p0,p));
 }
+
+/*
+! =========================================================================
+elemental function gsw_t_from_pt0 (sa, pt0, p)
+! =========================================================================
+!
+!  Calculates in-situ temperature from potential temperature
+!  with reference pressure, p_ref, of 0 dbar (the surface), and the
+!  in-situ pressure.
+!
+!  pt0      =  potential temperature with reference pressure of
+!              zero dbar (ITS-90)                                 [ deg C ]
+!  p        =  sea pressure                                        [ dbar ]
+!         ( i.e. absolute pressure - 10.1325 dbar )
+!--------------------------------------------------------------------------
+*/
+double
+gsw_t_from_pt0(double sa, double pt0, double p)
+{
+        double  p0 = 0.0;
+
+        return (gsw_pt_from_t(sa,pt0,p0,p));
+}
+
 /*
 ! =========================================================================
 elemental function gsw_t_from_pt0_ice (pt0_ice, p)
