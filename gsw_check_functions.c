@@ -132,6 +132,35 @@ void test_infunnel() {
     assert_equal(result, 0, "gsw_infunnel -> invalid salinity");
 }
 
+void test_refine_grid_for_dh() {
+    int nz = 4;
+    double p[]  = {4.9000001 ,   5.69999981,  15.80000019, 995.90002441};
+    double p_ref = 995.90002441;
+    double max_dp_i = 1.0;  // grid delta-p; the problem appeared with *exactly* 1.0...
+    double *p_i;
+    int *p_indices;
+    int ni_max;
+    int ipref;
+    int n_i;
+    int result;
+
+    // Chunk taken from gsw_geo_strf_dyn_height_1.
+    ni_max = nz + (int) ceil((p[nz-1] - p[0]) / max_dp_i) + 2;
+    /* Maximum possible size of new grid: Original grid size plus
+       the number of dp intervals plus 1 for the p_ref,
+       plus 1 so that we can know we exited the loop before we hit it.
+    */
+    p_i = (double *) malloc(ni_max * sizeof(double));
+    p_indices = (int *) malloc(nz * sizeof(int));
+
+    n_i = refine_grid_for_dh(p, p_ref, nz, max_dp_i,
+                             p_i, ni_max,
+                             p_indices, &ipref);
+    // End of chunk from gsw_geo_strf_dyn_height_1
+
+    assert_equal(ipref, n_i - 1, "refine_grid_for_dh -> reference pressure index");
+}
+
 int
 main(int argc, char **argv)
 {
@@ -625,6 +654,7 @@ main(int argc, char **argv)
                 "cti_tracerctinterp",interp_n*interp_m, val7, cti_tracerctinterp);
 
         test_infunnel();
+        test_refine_grid_for_dh();
 
         if (gsw_error_flag)
         {
